@@ -17,20 +17,20 @@ public class ProviderAgent extends Agent{
 	 */
 	private static final long serialVersionUID = 1L;
 		// Se usa un catálogo para ordenar el servicio, sus atributos
-		private Hashtable catalogue;
+		private Hashtable<String, Integer> catalogue;
 		// se maneja a través de una GUI, esto se deberá eliminar
 		private ProviderGui myGui;
 
 		// inicializaciones
 		protected void setup() {
 			
-			catalogue = new Hashtable();
+			catalogue = new Hashtable<String, Integer>();
 
 			// GUI
 			myGui = new ProviderGui(this);
 			myGui.showGui();
 
-			// Registrar el servicio
+			// Registrar el servicio en un Directory Facilitator
 			DFAgentDescription dfd = new DFAgentDescription();
 			dfd.setName(getAID());
 			ServiceDescription sd = new ServiceDescription();

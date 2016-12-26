@@ -1,7 +1,11 @@
 package ontologies;
 
+
+import examples.content.ecommerceOntology.Costs;
+import examples.content.ecommerceOntology.Sell;
 import jade.content.onto.*;
 import jade.content.schema.*;
+import jade.core.Service;
 
 public class ServiceTradeOntology extends Ontology{
 	
@@ -43,15 +47,20 @@ public class ServiceTradeOntology extends Ontology{
 			
 			//Estructura de los esquemas
 			
-			ConceptSchema cs = (ConceptSchema) getSchema(ITEM);
+			ConceptSchema cs = (ConceptSchema) getSchema(SERVICE);
 			cs.add(SERVICE_NAME, (PrimitiveSchema) getSchema(BasicOntology.STRING));
-			cs.add(SERVICE_OWNER, (PrimitiveSchema) getSchema(BasicOntology.STRING), 0, ObjectSchema.UNLIMITED);
+			cs.add(SERVICE_OWNER, (PrimitiveSchema) getSchema(BasicOntology.STRING), 0, ObjectSchema.UNLIMITED);			
 			
+			AgentActionSchema as = (AgentActionSchema) getSchema(SELL);
+			as.add(SELL_ITEM, (ConceptSchema)getSchema(SERVICE));
 			
 					
 		}
+		catch (OntologyException oe){
+			oe.printStackTrace();
+		}
 		
-		
+	}
 	
 		
 }
