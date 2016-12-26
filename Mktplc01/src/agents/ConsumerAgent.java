@@ -25,6 +25,8 @@ public class ConsumerAgent extends Agent{
 	private String targetService;
 	// Lista de proveedores
 	private AID[] providerAgents;
+	long time_start;
+	long time_end;
 
 	// Inicialización de los agentes
 	protected void setup() {
@@ -37,10 +39,10 @@ public class ConsumerAgent extends Agent{
 			targetService = (String) args[0];
 			System.out.println("Object is " + targetService);
 
-			// Ticker Beahevior que permitiría revisar cada 60 segundos el servicio buscado
+			// Ticker Beahevior que permitiría revisar cada 6 segundos el servicio buscado
 			// Es necesario revisar más de una vez ?
 			
-			addBehaviour(new TickerBehaviour(this, 60000) {
+			addBehaviour(new TickerBehaviour(this, 30000) {
 				/**
 				 * 
 				 */
@@ -48,7 +50,7 @@ public class ConsumerAgent extends Agent{
 
 				protected void onTick() {
 					System.out.println("Trying to buy " + targetService);
-					
+					time_start = System.currentTimeMillis();
 					// Actualizar la lista de proveedores Sera necesario mas de una vez
 					
 					DFAgentDescription template = new DFAgentDescription();
@@ -83,6 +85,8 @@ public class ConsumerAgent extends Agent{
 	protected void takeDown() {
 		
 		System.out.println("Consumer-agent "+getAID().getName()+" terminating.");
+		time_end = System.currentTimeMillis();
+		System.out.println("The task has taken "+ ( time_end - time_start ) +" milliseconds");
 	}
 
 	/**

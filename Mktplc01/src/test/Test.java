@@ -14,6 +14,7 @@ public abstract class Test {
 
 	public static void main(String[] args) throws StaleProxyException, InterruptedException {
 		
+				
 		//Creo un nodo para transar	
 		Graph graph = new SingleGraph("Graph 1");
 		graph.addNode("A");
@@ -33,16 +34,22 @@ public abstract class Test {
 		
 		// Thread.sleep (600);
 				
-		// AgentController pc2 = cc.createNewAgent("Agent3", "agents.ProviderAgent", null);
-		// pc2.start();
+		AgentController pc2 = cc.createNewAgent("Agent3", "agents.ProviderAgent", null);
+		pc2.start();
+		
+		AgentController pc3 = cc.createNewAgent("Agent4", "agents.ProviderAgent", null);
+		pc3.start();
 		
 		AgentController ac = cc.createNewAgent("Agent1", "agents.ConsumerAgent", args);
 		ac.start();
+		
 		/*
 		if(getCatalogue.isEmpty()){
 			ac.activate();
 		}
 			*/	
+	
+		
 		
 	}
 
