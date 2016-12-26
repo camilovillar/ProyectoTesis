@@ -76,7 +76,7 @@ public class ConsumerAgent extends Agent{
 		else {
 			// Para terminar o eleiminar el agente
 			System.out.println("No target service name specified");
-			doDelete();
+			// doDelete();
 		}
 	}
 

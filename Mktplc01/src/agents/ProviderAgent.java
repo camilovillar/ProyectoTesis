@@ -24,6 +24,8 @@ public class ProviderAgent extends Agent{
 		// inicializaciones
 		protected void setup() {
 			
+			System.out.println("Hello! Provider-agent "+getAID().getName()+" is ready.");
+			
 			catalogue = new Hashtable<String, Integer>();
 
 			// GUI
@@ -81,6 +83,12 @@ public class ProviderAgent extends Agent{
 					System.out.println(name+" inserted into catalogue. Price = "+price);
 				}
 			} );
+		}
+		
+		// Obtener catalogo
+		
+		public Hashtable<String,Integer> getCatalogue(){
+			return catalogue;
 		}
 
 		/**
