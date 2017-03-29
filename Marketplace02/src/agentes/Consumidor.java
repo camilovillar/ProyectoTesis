@@ -93,7 +93,7 @@ public class Consumidor extends Agent{
 		servicios = proceso.getActiv();
 		if (servicios != null && servicios.length > 0) {
 			
-			System.out.println("El consumidor ha generado el proceso.");
+			System.out.println("El consumidor ha generado el proceso " + proceso.getName());
 			// Busco al broker
 			DFAgentDescription dfd = new DFAgentDescription();
             ServiceDescription sd  = new ServiceDescription();
@@ -114,6 +114,7 @@ public class Consumidor extends Agent{
 				e.printStackTrace();
 			}
             System.out.println("Broker encontrado: "+broker);
+            
 			addBehaviour(new enviarRequerimiento());
 			addBehaviour(new recibirPropuesta());
 			
@@ -164,7 +165,7 @@ public class Consumidor extends Agent{
 				if (reply.getPerformative() == ACLMessage.INFORM) {// Broker informa los resultados de la negociación
 					
 					System.out.println(nproceso + " fue negociado exitosamente.");
-					System.out.println("Precio = Agregar variable de precio final total. "); // 
+					//System.out.println("Precio = Agregar variable de precio final total. "); // 
 					myAgent.doDelete();
 				}
 				else {

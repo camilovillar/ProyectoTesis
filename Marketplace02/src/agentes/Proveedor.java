@@ -59,16 +59,11 @@ public class Proveedor extends Agent{
 		System.out.println("Hola! El proveedor "+getAID().getName()+" está listo.");
 		nombreAgente = this.getName().split("@");
 		
-		funcion = new FuncionUtilidad(1);
-		double param[] = funcion.getParametros(); 
-		while(param[8]<0){
-			funcion = new FuncionUtilidad(1);
-			double param2[] = funcion.getParametros();
-			for(int j=0;j<param.length;j++){
-				param[j]=param2[j];
-			}
-		}
-		//
+		
+		
+		//funcion = new FuncionUtilidad(1);
+		double param[] = obtenerFuncionUtilidad(new FuncionUtilidad(1)); 
+		
 		aName[0]="latencia";
 		aName[1]="documentacion";
 		aName[2]="mejPracticas";
@@ -80,6 +75,12 @@ public class Proveedor extends Agent{
 		aName[8]="conformidad";
 		
 		// Leer archivo json del proveedor
+		
+		/*
+		public void obtenerServicios(){
+		
+		}
+		*/
 		int cont = 0;
 		JSONParser parser = new JSONParser();
 		try {
@@ -168,7 +169,19 @@ public class Proveedor extends Agent{
 		
 		
 		
-	}/* Cierra el takeDown
+	}// Cierra el takeDown
+	public double[] obtenerFuncionUtilidad(FuncionUtilidad f){
+		double param[] = f.getParametros();
+		while(param[8]<0){
+			funcion = new FuncionUtilidad(1);
+			double param2[] = funcion.getParametros();
+			for(int j=0;j<param.length;j++){
+				param[j]=param2[j];
+			}
+		}
+		return param;
+	}
+	/*
 	public void updateCatalogue(final String nombre, double precio) {
 		addBehaviour(new OneShotBehaviour() {
 			
