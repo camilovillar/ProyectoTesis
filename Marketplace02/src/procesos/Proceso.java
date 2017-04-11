@@ -374,15 +374,19 @@ public class Proceso extends Agregacion{
 				boolean check = true;
 				while(check){
 					cont2++;
+					cont++;
 					int suma = cont+cont2;
 					if(suma>tipoNodo.length){
 						check = false;
+						cont++;
 					}else{
 						if(suma>=act){
 							check = false;	
+							cont++;
 						}else{
 							 if(tipoNodo[suma]!=3){
 								 check = false;
+								 cont++;
 							 }
 						}
 					}
@@ -397,7 +401,7 @@ public class Proceso extends Agregacion{
 				restricGlobal[6]*=(Math.pow(Double.parseDouble(restric[6][1]), cont2+1));
 				restricGlobal[7]*=(Math.pow(Double.parseDouble(restric[7][1]), cont2+1));
 				restricGlobal[8]*=(Math.pow(Double.parseDouble(restric[8][1]), cont2+1));
-				cont++;
+				
 				break;
 			case 4:
 				restricGlobal[0]+=Double.parseDouble(restric[0][1]);

@@ -52,10 +52,12 @@ public class Proveedor extends Agent{
 	double[][] atrib;
 	double[] precio;
 	Agent myAgent = this;
+	private long tiempo_i;
+	private long tiempo_f;
 	
 	
 	protected void setup(){
-		
+		tiempo_i = System.currentTimeMillis();
 		System.out.println("Hola! El proveedor "+getAID().getName()+" está listo.");
 		nombreAgente = this.getName().split("@");
 		
@@ -76,11 +78,11 @@ public class Proveedor extends Agent{
 		
 		// Leer archivo json del proveedor
 		
-		/*
-		public void obtenerServicios(){
 		
-		}
-		*/
+		
+		
+		//serv = obtenerServicios(nombreAgente[0]);
+		
 		int cont = 0;
 		JSONParser parser = new JSONParser();
 		try {
@@ -115,13 +117,20 @@ public class Proveedor extends Agent{
 				atrib[i][j]= Double.parseDouble(serv[i][j+1]);
 			}
 		}
+		tiempo_f = System.currentTimeMillis();
+		//System.out.println("El "+myAgent.getName()+" leyó sus servicios a los "+ ( tiempo_f - tiempo_i ) +" milisegundos.");
 		
 		// Evalúo cada servicio con los parámetros de la función de utilidad del proveedor
 		precio = new double[nServProv];
 		for(int i = 0; i<nServProv;i++){
-			precio[i]+=param[0]*atrib[i][0]+param[1]*atrib[i][1]+param[2]*atrib[i][2]+param[3]*atrib[i][3]+param[4]*atrib[i][4]+param[5]*atrib[i][5]+param[6]*atrib[i][6]+param[7]*atrib[i][7]+param[8]*atrib[i][8];
+			precio[i]=(-param[0])*atrib[i][0]+param[1]*atrib[i][1]+param[2]*atrib[i][2]+(-param[3])*atrib[i][3]+param[4]*atrib[i][4]+param[5]*atrib[i][5]+param[6]*atrib[i][6]+param[7]*atrib[i][7]+param[8]*atrib[i][8];
+		}
+		if(nServProv == 0){
+			myAgent.doDelete();
 		}
 				
+		tiempo_f = System.currentTimeMillis();
+		//System.out.println("El "+myAgent.getName()+" valoró sus servicios a los "+ ( tiempo_f - tiempo_i ) +" milisegundos.");
 		// Registrar el agente en un Directory Facilitator
 		DFAgentDescription dfd = new DFAgentDescription();
 		dfd.setName(myAgent.getAID());
@@ -131,6 +140,7 @@ public class Proveedor extends Agent{
 		dfd.addServices(sd);
 		sd.setName( getLocalName() );
 		dfd.addServices(sd);
+		
 		// Registro los servicios del agente FALTA PROBAR
 		for(int i = 0;i<nServProv-1;i++){
 			ServiceDescription sd1 = new ServiceDescription();
@@ -147,14 +157,45 @@ public class Proveedor extends Agent{
 		catch (FIPAException fe) {
 			fe.printStackTrace();
 		}
+		tiempo_f = System.currentTimeMillis();
+		//System.out.println("El "+myAgent.getName()+" registró sus servicios a los "+ ( tiempo_f - tiempo_i ) +" milisegundos.");
 		
-		/*for(int i=0; i<nServ; i++){
-			updateCatalogue(serv[i][10], new Double(precio[i]));
-		}*/
 		addBehaviour(new RecibirRequerimiento());
 		
 		addBehaviour(new ConfirmaOrden());
 	}// Cierra setup()
+	public String[][] obtenerServicios(String nombreAgente){
+		int cont = 0;
+		String[][] servc= new String[nServProv][11];
+		JSONParser parser = new JSONParser();
+		try {
+			Object obj = parser.parse(new FileReader("C:\\Users\\Camilo\\Desktop\\Eclipse\\JSON\\Prov\\"+nombreAgente+".json"));
+			JSONObject jsonObject = (JSONObject) obj;
+			long n = (long) jsonObject.get("nServ");
+			nServProv = (int) n;
+	
+			while(cont < nServProv-1){
+				int cont2 = 0;
+				JSONArray servs = (JSONArray) jsonObject.get("servi"+cont);
+				@SuppressWarnings("unchecked")
+				Iterator<String> iterator = servs.iterator();
+				while (iterator.hasNext()) {
+					servc[cont][cont2] = (iterator.next());
+					cont2++;
+				}
+				cont++;				
+			}
+		} catch (FileNotFoundException e) {
+			//manejo de error
+		} catch (IOException e) {
+			//manejo de error
+		} catch (ParseException e) {
+			//manejo de error
+		}
+		return servc;
+
+	}	
+	
 	
 	protected void takeDown(){
 		
@@ -165,8 +206,9 @@ public class Proveedor extends Agent{
 			fe.printStackTrace();
 		}
 		
-		System.out.println("Proveedor "+getAID().getName()+" terminado.");
-		
+		//System.out.println("Proveedor "+getAID().getName()+" terminado.");
+		tiempo_f = System.currentTimeMillis();
+		System.out.println("El "+myAgent.getName()+" trabajó "+ ( tiempo_f - tiempo_i ) +" milisegundos.");
 		
 		
 	}// Cierra el takeDown
@@ -181,19 +223,7 @@ public class Proveedor extends Agent{
 		}
 		return param;
 	}
-	/*
-	public void updateCatalogue(final String nombre, double precio) {
-		addBehaviour(new OneShotBehaviour() {
-			
-			private static final long serialVersionUID = 4641510754095104521L;
 
-			public void action() {
-				catalogue.put(nombre, precio);
-				System.out.println(nombre+" insertado en el catálogo. Precio= "+precio);
-			}
-		} );
-	}
-	*/
 	private class RecibirRequerimiento extends CyclicBehaviour {
 		
 		/**
@@ -207,7 +237,8 @@ public class Proveedor extends Agent{
 			ACLMessage msg = myAgent.receive(mt);
 			if (msg != null) {
 				String requerimiento = msg.getContent();
-				
+				tiempo_f = System.currentTimeMillis();
+				System.out.println("El "+myAgent.getName()+" recibe el req a los "+ ( tiempo_f - tiempo_i ) +" milisegundos.");
 				ACLMessage reply = msg.createReply();
 				broker = msg.getSender();
 				int cont = 0;
@@ -259,13 +290,20 @@ public class Proveedor extends Agent{
 					}
 				}
 				*/
+				tiempo_f = System.currentTimeMillis();
+				//System.out.println("El "+myAgent.getName()+" parsea el req a los "+ ( tiempo_f - tiempo_i ) +" milisegundos.");
 				int cumple[] = cumpleRestr(rLocales); // Arreglo que indica si cumple o no
 				
+				/*if (cumple == null){
+					ACLMessage notify = new ACLMessage(ACLMessage.REFUSE); 
+					notify.addReceiver(broker);
+					send(notify);
+				}*/
 				int mejorOferta[] = elegirMejorOferta(cumple); // Evalúo los servicios que valoro más (es más probable que el consumidor igual los valores)
 				
-				System.out.println(myAgent.getName()+" generó la oferta.");
 				// Genero la oferta y la envío en JSON
-				
+				tiempo_f = System.currentTimeMillis();
+				System.out.println("El "+myAgent.getName()+" generó la oferta a los "+ ( tiempo_f - tiempo_i ) +" milisegundos.");
 				JSONObject obj = new JSONObject(); // se debe agregar name como nombre y act como número de nodos				
 				int contServ = 0;
 				for(int i = 0;i < nServProv;i++){
@@ -297,7 +335,8 @@ public class Proveedor extends Agent{
 				reply.setConversationId("service-trade");
 				reply.setReplyWith("cfp"+System.currentTimeMillis()); 
 				myAgent.send(reply);
-				System.out.println("El "+ myAgent.getName() +" envió su oferta.");
+				tiempo_f = System.currentTimeMillis();
+				System.out.println("El "+myAgent.getName()+" envió su oferta a los "+ ( tiempo_f - tiempo_i ) +" milisegundos.");
 			}
 		}// Cierra action
 		
@@ -320,7 +359,8 @@ public class Proveedor extends Agent{
 				if(confirm.equals("Acepto")){ 
 					reply.setPerformative(ACLMessage.INFORM);
 					reply.setContent("ok");
-					System.out.println("Orden aceptada recibida.");
+					//System.out.println("Orden aceptada recibida.");
+					doDelete();
 				}else {
 					reply.setPerformative(ACLMessage.FAILURE);
 					reply.setContent("No quiero vender");

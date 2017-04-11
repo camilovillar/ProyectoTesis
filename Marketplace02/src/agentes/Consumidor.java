@@ -45,13 +45,20 @@ public class Consumidor extends Agent{
 	private Proceso proceso;
 	private FuncionUtilidad funcion;
 	private String nproceso;
+	private long tiempo_i;
+	private long tiempo_f;
 	
 	protected void setup(){
-		
+		tiempo_i = System.currentTimeMillis();
 		System.out.println("Hola! Consumidor "+getAID().getName()+" está listo.");
+		Object[] args = getArguments();
+		int n=0;
+		if (args != null && args.length > 0) {
+			n = (int) args[0];
+		}
 		
 		funcion = new FuncionUtilidad(1);
-		proceso = new Proceso(4);
+		proceso = new Proceso(n);
 		nproceso = proceso.getName();
 		double param[] = funcion.getParametros(); 
 		if(param[8]<0){
@@ -64,12 +71,43 @@ public class Consumidor extends Agent{
 
 		//Agregar parametros de funcion de utilidad a proceso. http://stackoverflow.com/questions/23724221/java-append-object-to-json
 
-		JSONArray paramet = new JSONArray();
 		
+		
+		/* public void agregarParam(double[] param){
+			JSONArray paramet = new JSONArray();
 		for(int i = 0;i < param.length;i++){
 			paramet.add(param[i]);
 		}
 		
+		// Agregar parámetros de función de utilidad
+		JSONParser parser = new JSONParser();
+		try {
+			Object obj = parser.parse(new FileReader("C:\\Users\\Camilo\\Desktop\\Eclipse\\JSON\\procesos\\"+proceso.getName()+".json"));
+			JSONObject jsonObject = (JSONObject) obj;
+			jsonObject.put("Parametros", paramet);
+			FileWriter file = new FileWriter("C:\\Users\\Camilo\\Desktop\\Eclipse\\JSON\\procesos\\"+proceso.getName()+".json");
+			file.write(jsonObject.toJSONString());
+			file.flush();
+			file.close();
+		} catch (FileNotFoundException e) {
+			//manejo de error
+		} catch (IOException e) {
+			//manejo de error
+		} catch (ParseException e) {
+			//manejo de error
+		}
+		
+		
+		 */
+		
+		
+		
+		JSONArray paramet = new JSONArray();
+		for(int i = 0;i < param.length;i++){
+			paramet.add(param[i]);
+		}
+		
+		// Agregar parámetros de función de utilidad
 		JSONParser parser = new JSONParser();
 		try {
 			Object obj = parser.parse(new FileReader("C:\\Users\\Camilo\\Desktop\\Eclipse\\JSON\\procesos\\"+proceso.getName()+".json"));
@@ -113,7 +151,8 @@ public class Consumidor extends Agent{
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-            System.out.println("Broker encontrado: "+broker);
+			tiempo_f = System.currentTimeMillis();
+            System.out.println("Broker encontrado: "+broker+". a los "+ ( tiempo_f - tiempo_i ) +" milisegundos.");
             
 			addBehaviour(new enviarRequerimiento());
 			addBehaviour(new recibirPropuesta());

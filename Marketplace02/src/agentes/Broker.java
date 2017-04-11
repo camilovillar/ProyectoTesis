@@ -28,6 +28,7 @@ import jade.domain.FIPAAgentManagement.Property;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+import test.Test;
 
 public class Broker extends Agent{
 	
@@ -88,25 +89,29 @@ public class Broker extends Agent{
 					// Aquí obtengo proceso
 					
 					obtenerProceso();
-					
+					tiempo_f = System.currentTimeMillis();
+					System.out.println("El broker obtuvo el proceso a los "+ ( tiempo_f - tiempo_i ) +" milisegundos.");
 					// Busco proveedores
 					buscarProveedores();		
-					
+					tiempo_f = System.currentTimeMillis();
+					System.out.println("El broker encontró "+proveedores.length+" proveedores a los "+ ( tiempo_f - tiempo_i ) +" milisegundos.");
 					// Busco los servicios disponibles
 					
 					
 					String[][] arregloServ = buscarServiciosDisponibles();
-					
+					System.out.println("El broker buscó servicios disponibles a los "+ ( tiempo_f - tiempo_i ) +" milisegundos.");
 					// Debe terminar construyendo un archivo con las restricciones locales y los nodos del proceso.
 					// Numero de nodos, tipos de nodo, restricciones locales, actividades (servicios)
 					
 					
 					//Determino restricciones locales
 					rLocales = generarRestricciones();
-					
-					System.out.println("Se configuraron las restricciones locales.");
+					tiempo_f = System.currentTimeMillis();
+					System.out.println("El broker generó las restricciones a los "+ ( tiempo_f - tiempo_i ) +" milisegundos.");
 					
 					agregarRestrRequerimiento(rLocales);
+					tiempo_f = System.currentTimeMillis();
+					System.out.println("El broker agregó las restricciones al requerimiento a los "+ ( tiempo_f - tiempo_i ) +" milisegundos.");
 					
 					addBehaviour(new RealizaRequerimiento());
 					
@@ -148,7 +153,7 @@ public class Broker extends Agent{
 			JSONArray actividad = (JSONArray) jsonObject.get("Actividad");
 			
 			//Iterator<String> iterator1 = restrObject.iterator();
-			Iterator<String> iterator2 = paramObject.iterator();
+			Iterator iterator2 = paramObject.iterator();
 			Iterator iterator3 = probabObject.iterator();
 			Iterator iterator4 = iterObject.iterator();
 			Iterator iterator5 = tipoObject.iterator();
@@ -161,12 +166,12 @@ public class Broker extends Agent{
 				rGlobales[cont1]=Double.parseDouble(iterator1.next());
 				cont1++;
 			}
-			int cont2 = 0;
+			*/int cont2 = 0;
 			parametros = new double[9];
 			while(iterator2.hasNext()){
-				parametros[cont2]=Double.parseDouble(iterator2.next());
+				parametros[cont2]= (double) iterator2.next();
 				cont2++;
-			}*/
+			}
 			int cont3 = 0;
 			probab = new double[nServ];
 			while(iterator3.hasNext()){
@@ -241,6 +246,7 @@ public class Broker extends Agent{
 			}
 		}
 		System.out.println("Se encontraron "+propServ.size()+" servicios.");
+		
 		String[][] s = new String[propServ.size()][10];
 		return s;
 	}
@@ -311,7 +317,7 @@ public class Broker extends Agent{
 		
 		private static final long serialVersionUID = 4141739597869771816L;
 		private MessageTemplate mt; 
-		private int paso = 0;
+		//private int paso = 0;
 		double[] preciosBajos = new double[nServ];
 		int[] posBajos = new int[nServ];
 		
@@ -328,36 +334,42 @@ public class Broker extends Agent{
 				preciosBajos[i] = 10.0;
 			}
 			
-			//switch (paso) {
-			//case 0:
 				boolean enviado = false;
 				
 				enviado = enviarCFP();
+				tiempo_f = System.currentTimeMillis();
+				System.out.println("El broker envió el requerimiento a los "+ ( tiempo_f - tiempo_i ) +" milisegundos.");
 				
-				paso = 1;
-			//case 1:
+				//paso = 1;
+
 
 				int cont = recibirOferta();
+				tiempo_f = System.currentTimeMillis();
+				System.out.println("El broker recibió y parseó la oferta a los "+ ( tiempo_f - tiempo_i ) +" milisegundos.");
 				
-				for(int i = 0;i < ofertas.length;i++){
+				/*for(int i = 0;i < ofertas.length;i++){
 					System.out.println("Oferta por "+ofertas[i][0]+" tiene precio "+ofertas[i][1]);	
 				}
-				
+				*/
 				if (cont >= proveedores.length) {
-					elegirMejoresOfertas();
+					elegirMejoresOfertas(ofertas);
 				}// Cierra if 
-				
-			//case 2: 
+				tiempo_f = System.currentTimeMillis();
+				System.out.println("El broker eligió las mejores ofertas a los "+ ( tiempo_f - tiempo_i ) +" milisegundos.");
 				// Acepto propuestas de mejores ofertas
-				enviarAccept();
-				
-			//case 3: 
+				enviarAccept(bestProveedores);
+				tiempo_f = System.currentTimeMillis();
+				System.out.println("El broker notificó a los elegidos a los "+ ( tiempo_f - tiempo_i ) +" milisegundos.");
+ 
 				// Recibo confirmación/respuesta
 				reciboAprob();
-				
-			//case 4: 
+				tiempo_f = System.currentTimeMillis();
+				System.out.println("El broker recibió aprobación de los proveedores a los "+ ( tiempo_f - tiempo_i ) +" milisegundos.");
+
 				// Informo al consumidor
-				informoResultados();
+				informoResultados(consumidor);
+				tiempo_f = System.currentTimeMillis();
+				System.out.println("El broker informó resultados a los "+ ( tiempo_f - tiempo_i ) +" milisegundos.");
 				
 		}// Cierra behaviour
 		
@@ -378,9 +390,6 @@ public class Broker extends Agent{
 			cfp.setReplyWith("cfp"+System.currentTimeMillis()); 
 			send(cfp);
 			
-			tiempo_f = System.currentTimeMillis();
-			System.out.println("El requerimiento se ha enviado luego de "+ ( tiempo_f - tiempo_i ) +" milisegundos");
-			
 			return true;
 		}
 		public int recibirOferta(){
@@ -388,50 +397,22 @@ public class Broker extends Agent{
 			while(cont<proveedores.length){
 				ACLMessage reply = myAgent.receive(mt);
 				if (reply != null) {
+					tiempo_f = System.currentTimeMillis();
+					//System.out.println("Se recibe la oferta "+cont+" a los " +(tiempo_f-tiempo_i)+" milisegundos.");
+					
 					if(cont == 0 || !(ofertantes[cont-1].equals(ofertantes[cont]))){
 						String oferta = reply.getContent();
-						System.out.println("El contenido del mensaje es "+oferta);
+						//System.out.println("El contenido del mensaje es "+oferta);
 					//ofertantes.add(reply.getSender());
 						ofertantes[cont] = reply.getSender();
-						System.out.println("Se recibe la oferta de "+ofertantes[cont].getName());
+						//System.out.println("Se recibe la oferta de "+ofertantes[cont].getName());
 				
 					// Son propuestas
 					if (reply.getPerformative() == ACLMessage.PROPOSE) {
-						System.out.println("El mensaje es una propuesta formal.");
-						JSONParser parser = new JSONParser();
-						try {
-							System.out.println("Entra a leer el archivo "+ oferta+".");
-							Object objOferta = parser.parse(new FileReader("C:\\Users\\Camilo\\Desktop\\Eclipse\\JSON\\ofertas\\"+oferta+".json"));
-							JSONObject jsonOferta = (JSONObject) objOferta;
-							int cont2 = 0;
-							ArrayList ofer = new ArrayList();
-							while(cont2<1){ // Una oferta no puede contener más de nServ servicios
-								//Después será necesario incluir un int en la propuesta que indique el número de items ofertados para cortar el while
-								JSONArray ofert = (JSONArray) jsonOferta.get("serv");
-								System.out.println("Obtiene los datos del archivo.");
-								// El orden es: atributos (0 a 8), nombre (9), id (10), precio (11)
-								Iterator<String> iterator = ofert.iterator();
-								while(iterator.hasNext()) {
-									ofer.add(iterator.next()); // Arreglo de cada oferta
-								}
-								System.out.println("Por el servicio "+ofer.get(9)+" se ofrece "+ofer.get(11));
-								//ofertas.add(contador, ofer); // Arreglo de ofertas
-								ofertas[cont][0]=(String) ofer.get(9);
-								System.out.println("Se guarda la oferta "+cont+ " por la act "+ofertas[cont][0]);
-								ofertas[cont][1]= Double.toString( (double) ofer.get(11));
-								System.out.println(cont);
-								cont2++;
-							}
-							System.out.println("Hola4" +ofertas[cont][0]);
 						
-						} catch (FileNotFoundException e) {
-						} catch (IOException e) {
-							//manejo de error
-						} catch (ParseException e) {
-							//manejo de error
-						}
+						parsearOferta(oferta, cont);
 				
-						System.out.println("Oferta por "+ofertas[cont][0]+" tiene precio "+ofertas[cont][1]);
+						//System.out.println("Oferta por "+ofertas[cont][0]+" tiene precio "+ofertas[cont][1]);
 						cont++;
 					} // Contenido mensaje
 				}
@@ -439,7 +420,37 @@ public class Broker extends Agent{
 			}
 			return cont;
 		}
-		public void elegirMejoresOfertas(){
+		public void parsearOferta(String oferta, int cont){
+			JSONParser parser = new JSONParser();
+			try {
+				//System.out.println("Entra a leer el archivo "+ oferta+".");
+				Object objOferta = parser.parse(new FileReader("C:\\Users\\Camilo\\Desktop\\Eclipse\\JSON\\ofertas\\"+oferta+".json"));
+				JSONObject jsonOferta = (JSONObject) objOferta;
+				int cont2 = 0;
+				ArrayList ofer = new ArrayList();
+				while(cont2<1){ // Una oferta no puede contener más de nServ servicios
+					//Después será necesario incluir un int en la propuesta que indique el número de items ofertados para cortar el while
+					JSONArray ofert = (JSONArray) jsonOferta.get("serv");
+					// El orden es: atributos (0 a 8), nombre (9), id (10), precio (11)
+					Iterator<String> iterator = ofert.iterator();
+					while(iterator.hasNext()) {
+						ofer.add(iterator.next()); // Arreglo de cada oferta
+					}
+					//System.out.println("Por el servicio "+ofer.get(9)+" se ofrece "+ofer.get(11));
+					//ofertas.add(contador, ofer); // Arreglo de ofertas
+					ofertas[cont][0]=(String) ofer.get(9);
+					ofertas[cont][1]= Double.toString( (double) ofer.get(11));
+					cont2++;
+				}
+			
+			} catch (FileNotFoundException e) {
+			} catch (IOException e) {
+				//manejo de error
+			} catch (ParseException e) {
+				//manejo de error
+			}
+		}
+		public void elegirMejoresOfertas(String[][] ofertas){
 			for(int j = 0;j < ofertas.length;j++){
 				//ArrayList k = (ArrayList) ofertas.get(j);
 				String s = ofertas[j][0];
@@ -447,7 +458,7 @@ public class Broker extends Agent{
 				// n[1] es el número de servicio
 				int p = Integer.parseInt(n[1]);
 				double aux = Double.parseDouble(ofertas[j][1]);
-				System.out.println("El precio de la oferta "+ j + " para la actividad "+ n[1] +" es "+ aux);
+				//System.out.println("El precio de la oferta "+ j + " para la actividad "+ n[1] +" es "+ aux);
 				if(preciosBajos[p] > aux){
 					posBajos[p] =j;
 					preciosBajos[p]= aux;
@@ -457,13 +468,13 @@ public class Broker extends Agent{
 			if(posBajos[nServ-1] >= 0){
 				for (int i = 0; i < nServ; ++i) {
 					bestProveedores[i] = ofertantes[posBajos[i]];
-					System.out.println("El mejor proveedor para la actividad "+i+" es :");
-					System.out.println(bestProveedores[i].getName());
+					//System.out.println("El mejor proveedor para la actividad "+i+" es :");
+					//System.out.println(bestProveedores[i].getName());
 				}
-				paso = 2;
+				//paso = 2;
 			}
 		}
-		public int enviarAccept(){
+		public boolean enviarAccept(AID[] bestProveedores){
 			ACLMessage order = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
 			order.setContent("Acepto");
 			
@@ -473,21 +484,25 @@ public class Broker extends Agent{
 			}
 			myAgent.send(order);
 			System.out.println("Broker acepta ofertas.");
-			return paso = 3;
+			//return paso = 3;
+			return true;
 		}
 		public void reciboAprob(){
 			ACLMessage reply2 = myAgent.receive(mt);
+			//AID aux = reply2.getSender();
 			if (reply2 != null) {
+				
 				int cont2 = 0;
 				if (reply2.getPerformative() == ACLMessage.INFORM) {
 					cont2++;
 				}
 				if (cont2 >= bestProveedores.length) {
-					paso = 4; 
+					tiempo_f=System.currentTimeMillis();
+					System.out.println("Recibo aprobación de todos a los "+(tiempo_f-tiempo_i)+" milisegundos.");//paso = 4; 
 				}
 			}
 		}
-		public void informoResultados(){
+		public void informoResultados(AID consumidor){
 			ACLMessage confirm = new ACLMessage(ACLMessage.INFORM);
 			confirm.addReceiver(consumidor);
 			System.out.println("Las ofertas aceptadas fueron de:");
