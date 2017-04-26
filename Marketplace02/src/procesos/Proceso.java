@@ -327,7 +327,7 @@ public class Proceso extends Agregacion{
 		return iter;
 	}
 	public double[] restricGlobal(Proceso p){ 
-		int n = p.getN();
+		
 		double[] restricGlobal = new double[9];
 		restricGlobal[1] = 1;
 		restricGlobal[2] = 1;
@@ -336,7 +336,6 @@ public class Proceso extends Agregacion{
 		restricGlobal[7] = 1;
 		restricGlobal[8] = 1;
 		int[] tipoNodo = p.getTipoNodo();
-		double probab[] = p.getProbab();
 		int[] iter = p.getIter();
 		String[][] restric = p.getRestriccion();
 		int cont = 0; 
@@ -404,6 +403,8 @@ public class Proceso extends Agregacion{
 				
 				break;
 			case 4:
+				if(tipoNodo[cont+1] != 4){
+				
 				restricGlobal[0]+=Double.parseDouble(restric[0][1]);
 				restricGlobal[1]*=Double.parseDouble(restric[1][1]);
 				restricGlobal[2]*=Double.parseDouble(restric[2][1]);
@@ -413,6 +414,7 @@ public class Proceso extends Agregacion{
 				restricGlobal[6]*=Double.parseDouble(restric[6][1]);
 				restricGlobal[7]*=Double.parseDouble(restric[7][1]);
 				restricGlobal[8]*=Double.parseDouble(restric[8][1]);
+				}
 				cont++;
 				break;
 			}

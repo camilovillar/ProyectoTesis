@@ -41,9 +41,9 @@ public class NivelesServicio {
 		
 		double[][][] arreglo = new double[nServ][atributos[0].length][niveles]; // numero de servicios x atributos x niveles
 		
-		double maximos[][] = new double[nServ][atributos[0].length];
-		double minimos[][] = new double[nServ][atributos[0].length];
-		double delta[][] = new double[nServ][atributos[0].length];
+		double[][] maximos = new double[nServ][atributos[0].length];
+		double[][] minimos = new double[nServ][atributos[0].length];
+		double[][] delta = new double[nServ][atributos[0].length];
 		
 		for(int i = 0;i < nServ;i++){
 			String act1 = "serv"+(i+1);
