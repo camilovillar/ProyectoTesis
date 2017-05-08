@@ -19,9 +19,12 @@ public class Test {
 
 	public static void main(String[] args) throws StaleProxyException, FileNotFoundException {
 		long ti = System.currentTimeMillis();
-		//for(int i=1;i<21;i++){
-			
-			Marketplace m = new Marketplace(1,100,true); // Actividades, proveedores, debo redistribuir los servicios (true si cambio número de proveedores)
+		//for(int i=5;i<21;i++){
+		FileOutputStream file = new FileOutputStream("C:\\Users\\Camilo\\Desktop\\Eclipse\\resultados\\output"+35+"Act"+100+"Prov"+System.currentTimeMillis()+".txt");
+		PrintStream out = new PrintStream(file);
+		System.setOut(out);
+		
+			Marketplace m = new Marketplace(,100,false); // Actividades, proveedores, debo redistribuir los servicios (true si cambio número de proveedores)
 			System.out.println("Comienza la negociación.");
 			boolean fin = true;
 			while(fin){
@@ -32,8 +35,8 @@ public class Test {
 			
 			long tf = System.currentTimeMillis();
 			System.out.println("Termina la negociación a los "+(tf-ti)+" milisegundos.");
-			PrintStream out = new PrintStream(new FileOutputStream("C:\\Users\\Camilo\\Desktop\\Eclipse\\resultados\\output"+1+"Act"+100+"Prov"+System.currentTimeMillis()+".txt"));
-			System.setOut(out);
+			
+			out.close();
 
 		//}
 	} 

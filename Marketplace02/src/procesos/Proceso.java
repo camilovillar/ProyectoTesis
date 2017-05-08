@@ -403,7 +403,20 @@ public class Proceso extends Agregacion{
 				
 				break;
 			case 4:
-				if(tipoNodo[cont+1] != 4){
+				if(cont+1>=act){
+					restricGlobal[0]+=Double.parseDouble(restric[0][1]);
+					restricGlobal[1]*=Double.parseDouble(restric[1][1]);
+					restricGlobal[2]*=Double.parseDouble(restric[2][1]);
+					restricGlobal[3]+=Double.parseDouble(restric[3][1]);
+					restricGlobal[4]*=Double.parseDouble(restric[4][1]);
+					restricGlobal[5]+=Double.parseDouble(restric[5][1]);
+					restricGlobal[6]*=Double.parseDouble(restric[6][1]);
+					restricGlobal[7]*=Double.parseDouble(restric[7][1]);
+					restricGlobal[8]*=Double.parseDouble(restric[8][1]);
+					cont++;
+					break;
+					
+				}else if(tipoNodo[cont+1] != 4){
 				
 				restricGlobal[0]+=Double.parseDouble(restric[0][1]);
 				restricGlobal[1]*=Double.parseDouble(restric[1][1]);

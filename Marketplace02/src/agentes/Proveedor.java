@@ -150,6 +150,7 @@ public class Proveedor extends Agent{
 				sd1.addProperties(new Property(aName[j],atrib[i][j]));
 			}
 			dfd.addServices(sd1);
+			//System.out.println("Se registró el servicio "+serv[i][10]+" del prov "+ nombreAgente[0] );
 		}
 		try {
 			DFService.register(myAgent, dfd);

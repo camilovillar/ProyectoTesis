@@ -40,6 +40,9 @@ public class GlobalOptFitnessFunction extends FitnessFunction{
 			e.printStackTrace();
 		}
 		
+		double[] restricGlobal = this.calcAgregado(data, tipoNodo);
+		
+		double penalty = this.calPenalty(data, restricGlobal);
 		
 		
 		
@@ -195,20 +198,43 @@ public class GlobalOptFitnessFunction extends FitnessFunction{
 		return g;
 	}
 	
-	protected void chequeaBundling(String[][] valores){
-		ArrayList bundlings = new ArrayList();
-		int n = 0;
+	protected int chequeaBundling(String[][] valores){
+		String[][] bundlings = new String[valores.length][2];
+		int max = -100;
 		for(int i = 0;i < valores.length;i++){
-			if(valores[i][11].indexOf("p") > 0){
-				String bund = valores[i][11];
-				String[] num = bund.split("_");
-				n = Integer.parseInt(num[1]);
-			
+			String bund = valores[i][11];
+			String[] num = bund.split("_");
+			if(Integer.parseInt(num[1]) != 0){
+				bundlings[i][0] = num[0];
+				bundlings[i][1] = num[1];	
+			}
+			if(Integer.parseInt(num[0])>max){
+				max = Integer.parseInt(num[0]);
 			}
 		}
+		int[][] num = new int[max+1][2];
+		for(int j = 0;j < bundlings.length;j++){
+			int a = Integer.parseInt(bundlings[j][0]);
+			int b = Integer.parseInt(bundlings[j][1]);
+			if(b>0){
+				for(int k = 0;k < max;k++){
+					if(a == k){
+						num[k][0]++; // Si 
+						num[k][1]=b;
+					}
+				}	
+			}
+		}
+		int no = 0;
+		for(int l= 0;l < max;l++){
+			if(num[l][0] != num[l][1]){
+				no++;
+			}
+		}
+		return no;
 	}
 	
-	protected void calPenalty(double[] restricGlobal){
+	protected double calPenalty(String[][] valores, double[] restricGlobal){
 		double divndo = 0.0;
 		double divsor = 0.0;
 		
@@ -222,8 +248,12 @@ public class GlobalOptFitnessFunction extends FitnessFunction{
 		divndo += b;
 		divsor += 9;
 		
+		int c = this.chequeaBundling(valores);
 		
+		divndo+=c;
+		divsor+=c;
 		
+		return (divndo/divsor);
 		
 	}
 	

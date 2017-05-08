@@ -16,14 +16,19 @@ public class RestrLocalesFFunction extends FitnessFunction{
 	
 	private int nroGenes;
 	int nServ;
-	private String[][] atrib = new String[2507][10];
+	private String[][] atrib;
 	private double[] param;
 	private double[] restricciones;
+	private double[] util;
 	
 	
-	public RestrLocalesFFunction(int i_nroServ){ // Número de actividades en un proceso por el número de atributos de calidad
+	public RestrLocalesFFunction(int i_nroServ, String[][] atrib, double[] param, double[] util){ // Número de actividades en un proceso por el número de atributos de calidad
 		nServ = i_nroServ;
 		//nroGenes = i_nroServ*9 ; 
+		this.setAtrib(atrib);
+		this.param=param;
+		this.util = util;
+		
 	}
 
 	
@@ -38,15 +43,17 @@ public class RestrLocalesFFunction extends FitnessFunction{
 		
 		for(int i=0; i<gene.length;i++){
 			alelos[i]=(double) gene[i].getAllele();
+			System.out.println("Se rescata el valor del alelo "+ i +" que es " + alelos[i]);
 		}
 		
 		int cont = 0;
 		for(int i = 0;i<opera.length;i++){
 			String act = "serv"+cont;
+			opera[i]= 0;
 			opera[i] = (getNoRestringidos(i, act,alelos[i]));
 			opera[i] /= (getNServ(act));
-			opera[i] *= (getUtilidad(cont));
-			opera[i] /=(getUMax(act));
+			opera[i] *= (getUtilidad(cont, alelos));
+			opera[i] /= (getUMax(act));
 			if((i+1)%9 == 0){
 				cont++;
 			}
@@ -57,6 +64,7 @@ public class RestrLocalesFFunction extends FitnessFunction{
 			resultado*=opera[i];
 		}
 		
+		System.out.println("El ajuste de este cromosoma es de: "+resultado);
 		return resultado;
 		
 		
@@ -69,28 +77,32 @@ public class RestrLocalesFFunction extends FitnessFunction{
 		// Agregar penalidad
 		double penalty = calcPenalty(cromosoma, tipoNodo, iter, prob, restr);
 		resultado -=penalty;
-		
+		System.out.println("La función de ajuste para este cromosoma es de " + resultado);
 		return resultado;
 		
 		
 	}
 	
+	public double getUtilidad(int serv, double[] alelos){
+		double utilidad = 0;
+		for(int i = 0;i< param.length;i++){
+			utilidad += param[i]*alelos[serv*9+i];
+			
+		}
+		System.out.println("La utilidad alelos es :"+utilidad );
+		return utilidad;
+	}
 	public double getUtilidad(int serv){
 		double utilidad = 0;
-		
-		for(int i = 0;i<9;i++){
-			utilidad += param[i]*Double.parseDouble(atrib[serv][i]);
-		}
-		
+		utilidad = util[serv];
+		//System.out.println("La utilidad es :"+utilidad );
 		return utilidad;
 	}
 	
 	public double getUMax(String serv){
 		List utilidades = new ArrayList();
-		for(int i = 0;i<atrib.length;i++){
-			if(atrib[i][9].equals(serv)){
-				utilidades.add(getUtilidad(i));
-			}
+		for(int i = 0;i<util.length;i++){
+			utilidades.add(getUtilidad(i));
 		}
 		double umax = -9999.0;
 		Iterator iUtil = utilidades.iterator();
@@ -100,15 +112,16 @@ public class RestrLocalesFFunction extends FitnessFunction{
 				umax=num;
 			}
 		}
-		
+		System.out.println("La utilidad máxima para el servicio "+serv +" es " +umax);
 		return umax;
 	}
 	
 	public int getNoRestringidos(int pos, String serv, double alelo){ // nro de servicios que cumplen con la restricción.
 		int noRestr = 0;
 		if(pos == 0 || pos == 3){ // latencia y tiempo de ejec
-		for(int i =0;i<atrib.length;i++){
-			if(atrib[i][9].equals(serv) && Double.parseDouble(atrib[i][pos])<alelo){
+		for(int i =0;i<atrib.length;i++){				
+			if(atrib[i][0].equals(serv) && Double.parseDouble(atrib[i][pos+1])<alelo){
+				System.out.println("Se revisa si el "+ atrib[i][0]+" es igual a " +serv+ " y cumple con la restriccion "+ alelo + " para el atributo "+ pos );
 				noRestr++;	
 			}
 		}
@@ -119,15 +132,19 @@ public class RestrLocalesFFunction extends FitnessFunction{
 				}
 			}			
 		}
+		System.out.println("Los servicios no restringidos son :"+noRestr );
+		if(noRestr == 0) noRestr =1;
 		return noRestr;
 	}
 	
 	public int getNServ(String serv){
 		int n = 0;
 		
-		if(atrib[9].equals(serv)){
+		if(atrib[0].equals(serv)){
 			n++;
 		}
+		System.out.println("El número de servicios es :"+n );
+		if(n == 0) n =1;
 		return n;
 	}
 	
@@ -161,6 +178,7 @@ public class RestrLocalesFFunction extends FitnessFunction{
 			valores[j] = (double) genes[j].getAllele();
 		}
 		int neg = chequeaNeg(valores);
+		if(neg == 0) neg =1;
 		divndo += neg;
 		divsor += neg;
 		divsor += 9; // restricciones globales que se deben cumplir
@@ -177,6 +195,7 @@ public class RestrLocalesFFunction extends FitnessFunction{
 				cont++;
 			}
 		}
+		if(cont == 0) cont =1;
 		return cont;
 	}
 	
@@ -307,6 +326,8 @@ public class RestrLocalesFFunction extends FitnessFunction{
 			if(restricGlobal[8]<restr[8]){g++;}
 				
 		}
+		
+		if(g == 0) g =1;
 		return g;
 	}
 

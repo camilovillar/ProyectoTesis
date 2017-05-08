@@ -99,13 +99,17 @@ public class Broker extends Agent{
 					
 					
 					String[][] arregloServ = buscarServiciosDisponibles();
+					
 					System.out.println("El broker buscó servicios disponibles a los "+ ( tiempo_f - tiempo_i ) +" milisegundos.");
 					// Debe terminar construyendo un archivo con las restricciones locales y los nodos del proceso.
 					// Numero de nodos, tipos de nodo, restricciones locales, actividades (servicios)
 					
 					
 					//Determino restricciones locales
-					rLocales = generarRestricciones();
+					rLocales = generarRestricciones(arregloServ);
+					for(int i =0;i<rLocales.length;i++){
+						System.out.println("La restricción "+i +" quedó con el valor "+ rLocales[i]);
+					}
 					tiempo_f = System.currentTimeMillis();
 					System.out.println("El broker generó las restricciones a los "+ ( tiempo_f - tiempo_i ) +" milisegundos.");
 					
@@ -226,51 +230,88 @@ public class Broker extends Agent{
 		}
 	}
 	public String[][] buscarServiciosDisponibles(){
-		
+		//System.out.println("Entro a buscar los servicios");
 		DFAgentDescription template2 = new DFAgentDescription();
-		ArrayList prop = new ArrayList();
-		ArrayList<ArrayList> propServ = new ArrayList<ArrayList>();
-		for(int i = 1;i<=nServ;i++){
+		//System.out.println("Creo un AgentDescription");
+		ArrayList<ArrayList> prop = new ArrayList<ArrayList>();
+		//System.out.println("Creo un ArrayList");
+		//System.out.println("Creo un ArrayList de ArrayLists");
+		//for(int i = 1;i<=nServ;i++){
 			ServiceDescription sd1 = new ServiceDescription();
-			sd1.setType("serv"+i);
+			System.out.println("Creo un ServiceDescription");
+			sd1.setType("proveedor");
+			System.out.println("Seteo el nombre del SD a " + sd1.getName());
 			template2.addServices(sd1);
-			Iterator<ServiceDescription> iterServ = template2.getAllServices();
-			while(iterServ.hasNext()){
-				ServiceDescription aux = iterServ.next();
-				Iterator<Property> iterProp =  aux.getAllProperties();
-				prop.add(aux.getName());
-				while(iterProp.hasNext()){
-					prop.add(iterProp.next());
-				}
-				propServ.add(propServ);
+			System.out.println("Agrego SD a AD");
+			try{
+				 DFAgentDescription[] result = DFService.search(this, template2);
+		         if (result.length>0){
+		             System.out.println("Se encontraron "+result.length+" agentes");
+		         }
+		         for(int j = 0;j < result.length;j++){
+		        	 Iterator<ServiceDescription> iterServices = result[j].getAllServices();
+		        	 while(iterServices.hasNext()){
+		        		 ServiceDescription aux = iterServices.next();
+		        		 //System.out.println("El servicio rescatado es " + aux.getName());
+		        		 Iterator<Property> iterProp = aux.getAllProperties();
+		        		 ArrayList propServ = new ArrayList();
+		        		 propServ.add(aux.getName());
+		        		 while(iterProp.hasNext()){
+		        			 Property aux2 = iterProp.next();
+		        			 propServ.add(aux2.getValue());
+		        			// System.out.println("La propiedad rescatada es " +aux2.getName()+" con el valor de "+aux2.getValue());
+		        		 }
+		        		 if(propServ.size()>9){
+		        			 //System.out.println("Agrego el servicio " + propServ.get(0));
+		        			 prop.add(propServ);
+		        		 }
+		        	 }
+		         }
+		            
+			}catch(FIPAException fe){
+				fe.printStackTrace();
+			}
+		//}
+		System.out.println("Se encontraron "+prop.size()+" servicios.");
+		
+		String[][] s = new String[prop.size()][10];
+		for(int i = 0;i < prop.size();i++){
+			ArrayList aux1 = prop.get(i);
+			//System.out.println("El arreglo de propiedades tiene un largo de "+aux1.size()+".");
+			for(int j = 0;j < aux1.size();j++){
+				//System.out.println("La propiedad a rescatar tiene el valor "+ aux1.get(j) +"." );
+				Object aux = aux1.get(j);
+				
+				s[i][j] = aux.toString();	
 			}
 		}
-		System.out.println("Se encontraron "+propServ.size()+" servicios.");
-		
-		String[][] s = new String[propServ.size()][10];
 		return s;
 	}
-	public double[] generarRestricciones(){
+	public double[] generarRestricciones(String[][] arregloServ){
 		double[] r = new double[nServ*9];
-		for(int i = 0;i < nServ;i++){
+		/*for(int i = 0;i < nServ;i++){
 			r[i*9] = 10000.0;
 			r[(i+1)*9-6] = 10000.0;
-		}
-		return r;
-		/*RestrLocales r = new RestrLocales();
+		}*/
+		
+		RestrLocales re = new RestrLocales(nServ, arregloServ, parametros);
+		//re.setNivelesServicio();
 		try {
-			IChromosome resultado = r.restrOptimas(arregloServ, niveles);
+			IChromosome resultado = re.restrOptimas(niveles);
 			Gene[] genes = new Gene[nServ*9];
 			genes = resultado.getGenes();
-			for(int i = 0;i < (nServ*9);i++){
-				rLocales[i] = (double) genes[i].getAllele();
+			//System.out.println("Se recibe el resultado, el primer gen es "+genes[0].getAllele());
+			for(int i = 0;i < genes.length;i++){
+				//System.out.println("Se recibe el resultado, el primer gen es "+genes[0].getAllele());
+				r[i] = (double) genes[i].getAllele();
+				
 		    }
 			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		*/
+		return r;
 	}
 	public void agregarRestrRequerimiento(double [] rLocales){
 		JSONArray rL = new JSONArray();
