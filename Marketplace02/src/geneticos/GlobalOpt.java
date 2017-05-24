@@ -1,6 +1,7 @@
 package geneticos;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import org.jgap.Chromosome;
 import org.jgap.Configuration;
@@ -14,11 +15,14 @@ import org.jgap.Population;
 import org.jgap.event.EventManager;
 import org.jgap.impl.CompositeGene;
 import org.jgap.impl.DefaultConfiguration;
+import org.jgap.impl.DoubleGene;
+
+import jade.core.AID;
 
 public class GlobalOpt {
 	
 	private Configuration m_config;
-	private int maxEvolution = 100;
+	private int maxEvolution = 50;
 	private int populationSize = 50; 
 	private int serv;
 	private double[] param;
@@ -28,7 +32,7 @@ public class GlobalOpt {
 	private double[] prob;
 	private String[][] ofertas;
 	
-	public GlobalOpt(double[] param, int[] tipoNodo, double[] restr, int[] iter, double[] prob, String[][] ofertas){
+	public GlobalOpt(double[] param, int[] tipoNodo, double[] restr, int[] iter, double[] prob, ArrayList ofertas){
 		this.setIter(iter);
 		this.setParam(param);
 		this.setProb(prob);
@@ -43,14 +47,15 @@ public class GlobalOpt {
 	}
 	
 	public Configuration createConfiguration() throws InvalidConfigurationException {
+		Configuration.reset();
 		Configuration config = new DefaultConfiguration();
 		config.setEventManager(new EventManager());
-	    config.setFitnessEvaluator(new DefaultFitnessEvaluator());
+	    //config.setFitnessEvaluator(new DefaultFitnessEvaluator());
 		return config;
 		
 	}
 	
-	public IChromosome servOptimos(String[][] ofertas) throws Exception {
+	public IChromosome servOptimos() throws Exception {
 		m_config = createConfiguration();
 		FitnessFunction ff = createFitnessFunction();
 		m_config.setFitnessFunction(ff);
@@ -58,15 +63,32 @@ public class GlobalOpt {
 		m_config.setPopulationSize(populationSize);
 		
 		Gene[] sampleGenes = new Gene[serv];
+		System.out.println("Ofertas:");
+		for(int i = 0 ; i < ofertas.length;i++){
+			System.out.println(ofertas[i]);
+		}
 		int[] asigno = this.asignarAleatorio(ofertas);
+		for(int i = 0;i<asigno.length;i++){
+			System.out.println("Asigno tiene el valor "+asigno[i]);
+		}
 		int cont = 0;
 		while(cont<serv){
-			CompositeGene compGene = new CompositeGene();
-			Gene[] gen = new Gene[11]; // 9 atributos, precio y si es bundling(nro proveedor)
-			for(int j = 0;j < gen.length;j++){
-				gen[j].setAllele(ofertas[asigno[cont]][j]); // lugar de la oferta asignada de manera aleatoria para la tarea en la posición "cont"
+			CompositeGene compGene = new CompositeGene(m_config);// 9 atributos, precio
+			Gene[] gen = new Gene[10]; 
+			for(int j = 0;j < 9;j++){
+				gen[j] = new DoubleGene(m_config,0.0,1.0);
+				System.out.println("Se setea el alelo "+j+" con el valor "+ofertas[asigno[cont]][j]);
+				gen[j].setAllele(Double.parseDouble(ofertas[asigno[cont]][j])); // lugar de la oferta asignada de manera aleatoria para la tarea en la posición "cont"
 				compGene.addGene(gen[j]);
 			}
+			
+			gen[9]=new DoubleGene(m_config,0.0,5.0);// se setea el precio que puede estar entre 0 y 5 
+			gen[9].setAllele(Double.parseDouble(ofertas[asigno[cont]][12]));
+			System.out.println("Se setea el precio del gen "+cont+" con el valor "+ofertas[cont][12]);
+			compGene.addGene(gen[9]);
+			// id gen queda como AID proveedor + nombre + id(serv)
+			compGene.setApplicationData(ofertas[asigno[cont]][9]+"_"+ofertas[asigno[cont]][10]+"_"+ofertas[asigno[cont]][11]);
+			//compGene.setUniqueIDTemplate(ofertas[asigno[cont]][9]+"_"+ofertas[asigno[cont]][10]+"_", Integer.parseInt(ofertas[asigno[cont]][11]));
 			sampleGenes[cont] = compGene;
 			cont++;
 		}
@@ -118,14 +140,53 @@ public class GlobalOpt {
 			this.prob[i] = prob[i];
 		}
 	}
-	public void setOfertas(String[][] ofertas) {
-	    this.ofertas = new String[ofertas.length][ofertas[0].length];
-	    for(int i = 0;i < ofertas.length;i++){
-		    for(int j = 0;j < ofertas[0].length;j++){
-		    	this.ofertas[i][j] = ofertas[i][j];
-		    }
+	public void setOfertas(ArrayList ofertas) {
+		this.ofertas = new String[ofertas.size()][13];
+		
+	    for(int i = 0;i < this.ofertas.length;i++){
+	    	ArrayList serv = (ArrayList) ofertas.get(i); // obtengo un ArrayList
+	    	System.out.println("El arreglo tiene "+serv.size()+" elementos");
+	    	for(int j = 0;j < serv.size();j++){
+	    		if(j<9){
+	    			double aux = (double) serv.get(j);
+	    			this.ofertas[i][j] = String.valueOf(aux); // guardo los elementos del arraylist (atributos del serv)
+	    		}else{
+	    			if(j==11){
+	    				int aux = Integer.parseInt((String) serv.get(j));
+	    				this.ofertas[i][j] = String.valueOf(aux);
+	    			}else{
+	    				if(j==12){
+	    					double aux = (double) serv.get(j);
+	    					this.ofertas[i][j] = String.valueOf(aux);
+	    				}else{
+	    				this.ofertas[i][j] = (String) serv.get(j);
+	    				}
+	    			}
+	    		}
+	    		System.out.println("Se guarda el atributo "+j+" del serv "+i +" es "+this.ofertas[i][j]);
+	    	}
+	    	/*Iterator iter = serv.iterator();
+	    	int cont = 0;
+	    	while(iter.hasNext()){
+	    		
+	    	}*/
 	    }
 	}
+	
+	public String[] obtenerNombre(ArrayList ofertas){
+		String[] aux = new String[ofertas.size()]; 
+		for(int i = 0;i < ofertas.size();i++){
+	    	ArrayList serv1 = (ArrayList) ofertas.get(i); // obtengo un ArrayList
+	    	//System.out.println("El arreglo tiene "+serv.size()+" elementos");
+	    	//for(int j = 0;j < serv1.size();j++){
+	    	
+	    	aux[i] = (String) serv1.get(9);
+	    	//}
+		}
+		return aux;
+	}
+	
+	
 	
 	public int getMaxEvolution() {
 	    return maxEvolution;
@@ -146,10 +207,11 @@ public class GlobalOpt {
 		return m_config;
 	}
 	
-	public ArrayList ordenarServicios(String[][] ofertas, String serv){ // Genera un arraylist con las posiciones en ofertas para el servicio serv baasado en las ofertas obtenidas.
-		ArrayList ofrecidos = new ArrayList();
+	public ArrayList<Integer> ordenarServicios(String[][] ofertas, String serv){ // Genera un arraylist con las posiciones en ofertas para el servicio serv baasado en las ofertas obtenidas.
+		ArrayList<Integer> ofrecidos = new ArrayList<Integer>();
 		for(int i = 0;i < ofertas.length;i++){
-			if(serv.equals(ofertas[i][9])){
+			if(serv.equals(ofertas[i][10])){
+				System.out.println("Si el nombre del servicio "+ ofertas[i][10]+ " es igual a "+serv);
 				ofrecidos.add(i);
 			}
 		}
@@ -160,11 +222,16 @@ public class GlobalOpt {
 		int[] asignar = new int[serv];
 		for(int i  = 0;i < serv;i++){
 			String nombre = "serv"+i;
-			ArrayList list = ordenarServicios(ofertas, nombre);
+			System.out.println("Se buscan las ofertas que contengan el servicio "+nombre);
+			ArrayList<Integer> list = ordenarServicios(ofertas, nombre);
+			
 			int max = list.size();
-			double aleatorio = Math.random()*max;
-			int lugar = (int) aleatorio;
-			asignar[i] = lugar;
+			System.out.println("Se encontraron "+max+ " ofertas.");
+			if(max>0){
+				double aleatorio = Math.random()*max;
+				int lugar = list.get((int) aleatorio);
+				asignar[i] = lugar;
+			}
 		}
 		return asignar;
 	}

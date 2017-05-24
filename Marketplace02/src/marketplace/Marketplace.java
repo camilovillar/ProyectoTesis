@@ -27,6 +27,9 @@ public class Marketplace {
 		while(j<=1000){
 		AgentController ac2 = cc.createNewAgent("Proveedor0", "agentes.Proveedor", null);
 		ac2.start();
+		if(j<2){
+			break;
+		}
 		AgentController ac3 = cc.createNewAgent("Proveedor1", "agentes.Proveedor", null);
 		ac3.start();
 		AgentController ac4 = cc.createNewAgent("Proveedor2", "agentes.Proveedor", null);

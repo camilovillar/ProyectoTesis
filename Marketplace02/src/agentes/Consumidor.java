@@ -125,8 +125,13 @@ public class Consumidor extends Agent{
 			//manejo de error
 		}
 		
+		//Sleep para esperar la inicialización del broker con una parte random
+		try {
+			Thread.sleep((int) (200 * (2*Math.random())));
+		} catch (Exception e) {
+		}
 		
-		
+		//www.redeszone.net/2012/09/03/curso-java-volumen-vi-todo-sobre-semaforos-en-java/#sthash.f6ftBjtO.dpuf
 		
 		servicios = proceso.getActiv();
 		if (servicios != null && servicios.length > 0) {
@@ -142,17 +147,14 @@ public class Consumidor extends Agent{
             
 			try {
 				result = DFService.search(this, dfd);
-				System.out.println(result.length + " resultados." );
-				if (result.length>0){
-	                System.out.println(" " + result[0].getName() );
-				}
+				System.out.println("Se encontró "+result.length +" broker. Su nombre es "+result[0].getName() );
 				broker = result[0].getName();
 			} catch (FIPAException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			tiempo_f = System.currentTimeMillis();
-            System.out.println("Broker encontrado: "+broker+". a los "+ ( tiempo_f - tiempo_i ) +" milisegundos.");
+            System.out.println("Broker encontrado: "+broker+". a los (milisegundos) "+ ( tiempo_f - tiempo_i ));
             
 			addBehaviour(new enviarRequerimiento());
 			addBehaviour(new recibirPropuesta());

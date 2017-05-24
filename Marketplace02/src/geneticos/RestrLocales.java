@@ -10,7 +10,7 @@ import geneticos.NivelesServicio;
 public class RestrLocales{
 	
 	private Configuration m_config;
-	private int maxEvolution = 2;
+	private int maxEvolution = 3;
 	private int populationSize = 50; 
 	private int serv;
 	private String[][] arregloServ;
@@ -18,8 +18,13 @@ public class RestrLocales{
 	private long tiempo_i;
 	private long tiempo_f;
 	private double[] util;
+	private int[] tipoNodo;
+	private int[] iter; 
+	private double[] prob; 
+	private double[] restr;
 	
-	public RestrLocales(int n, String[][] arregloServ, double[] param){
+	public RestrLocales(int n, String[][] arregloServ, double[] param, int[] tipoNodo, int[] iter, double[] prob, double[] restr){
+		
 		this.arregloServ = arregloServ;
 		//System.out.println("Se setea el arreglo de servicios de dimensiones "+ arregloServ.length +" x "+ arregloServ[0].length);
 		/*for(int i = 0;i<arregloServ[0].length;i++){
@@ -33,10 +38,14 @@ public class RestrLocales{
 				util[i] += param[j]*Double.parseDouble(arregloServ[i][j+1]);
 			}
 		}
+		this.tipoNodo=tipoNodo;
+		this.iter = iter;
+		this.prob = prob;
+		this.restr = restr;
 	}
 	
 	public FitnessFunction createFitnessFunction(int n) { // n número de actividades/servicios
-	    return new RestrLocalesFFunction(n, arregloServ, param, util); 
+	    return new RestrLocalesFFunction(n, arregloServ, param, util, tipoNodo, iter, prob, restr); 
 	}
 	
 	public Configuration createConfiguration() throws InvalidConfigurationException {
@@ -106,7 +115,7 @@ public class RestrLocales{
 	    	Gene[][] genes = new Gene[serv][9];
 	    	
 	    	double[][] asignar = nivel.asignarAleatorio(niveles);
-		    System.out.println("Asigna los niveles de servicio aleatorios");
+		   // System.out.println("Asigna los niveles de servicio aleatorios");
 		    for(int x = 0;x<asignar.length;x++){
 		    	for(int y = 0;y < asignar[0].length;y++){
 		    		//System.out.println("Asignar " + x + ", "+ y +" tiene el valor "+asignar[x][y]);
@@ -137,7 +146,7 @@ public class RestrLocales{
 	    }
 	    
 	    tiempo_f = System.currentTimeMillis();
-		System.out.println("El problema generó un cromosoma a los "+ ( tiempo_f - tiempo_i ) +" milisegundos.");
+		System.out.println("El problema generó un cromosoma a los (milisegundos) "+ ( tiempo_f - tiempo_i ));
 		
 	    m_config.setSampleChromosome(cromosomes[0]);
 	    Population pop = new Population(m_config, cromosomes);
@@ -149,10 +158,9 @@ public class RestrLocales{
 	    	  population.evolve();
 	    	  best = population.getFittestChromosome();
 	    	  System.out.println("El mejor cromosoma en esta evolución tiene un ajuste de "+best.getFitnessValue());
-	    	  for(int j = 0;j < best.getGenes().length;j++){
-	    		  System.out.println("El gen "+j+" tiene un valor "+best.getGenes()[j].getAllele());
-	    		  
-	    	  }
+	    	  /*for(int j = 0;j < best.getGenes().length;j++){
+	    		  System.out.println("El gen "+j+" tiene un valor "+best.getGenes()[j].getAllele());  
+	    	  }*/
 	      }
 	    
 	    return best;

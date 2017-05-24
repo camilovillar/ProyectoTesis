@@ -124,6 +124,7 @@ public class Servicios {
 					c++;
 				}	
 			}
+			// ajusto el valor que considera el 0
 			obj.put("nServ", c);
 			try {
 				FileWriter file = new FileWriter(path+"\\Prov\\Proveedor"+i+".json");

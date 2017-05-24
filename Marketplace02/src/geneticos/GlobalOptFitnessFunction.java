@@ -1,6 +1,7 @@
 package geneticos;
 
 import java.util.ArrayList;
+import java.util.Vector;
 
 import org.jgap.FitnessFunction;
 import org.jgap.Gene;
@@ -17,6 +18,7 @@ public class GlobalOptFitnessFunction extends FitnessFunction{
 	private int[] iter; 
 	private double[] prob;
 	private int serv;
+	private String[] data;
 	
 
 	public GlobalOptFitnessFunction(double[] param, int[] tipoNodo, double[] restr, int[] iter, double[] prob){
@@ -39,31 +41,47 @@ public class GlobalOptFitnessFunction extends FitnessFunction{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+		for(int j = 0;j < data.length;j++){
+			for(int i = 0;i < param.length;i++){
+				if(i==0 || i==3)
+				fitness += param[i]*Double.parseDouble(data[j][i]);
+			}
+		}
 		double[] restricGlobal = this.calcAgregado(data, tipoNodo);
 		
 		double penalty = this.calPenalty(data, restricGlobal);
-		
-		
-		
-		
+		fitness-=penalty;
+		System.out.println("La función de ajuste es "+fitness);
 		return Math.max(fitness,0.0);
 	}
 	
 	protected String[][] obtenerDatos(IChromosome crom) throws InvalidConfigurationException{
 		String[][] valores = new String[serv][11];
+		data= new String[serv];
 		Gene[] genes = new Gene[serv];
 		genes = crom.getGenes();
-		CompositeGene compGene = new CompositeGene();
+		//CompositeGene compGene = new CompositeGene();
 		for(int i = 0;i < serv;i++){
-			compGene = (CompositeGene) genes[i];
-			valores[i] = (String[]) compGene.getAllele();			
+			CompositeGene compGene = (CompositeGene) genes[i];
+			data[i]=(String) compGene.getApplicationData();
+			Vector a = (Vector) compGene.getAllele();	//atrib, precio
+			for(int j =0;j < a.size();j++){
+				double aux = (double) a.get(j);
+				valores[i][j]= String.valueOf(aux);
+			}
 		}
 		return valores;
 	}
 	
 	protected double[] calcAgregado(String[][] valores, int[] tipoNodo){
 		double[] agregado = new double[9*serv];
+		agregado[1]=1.0;
+		agregado[2]=1.0;
+		agregado[4]=1.0;
+		agregado[5]=1.0;
+		agregado[6]=1.0;
+		agregado[7]=1.0;
+		agregado[8]=1.0;
 		int tipoAnt = 0; // Para guardar el tipo de nodo de la corrida anterior.
 		int inicio4 = 0;
 		double minRend = 0.0; // Para guardar el mínimo de rendimiento de un conjunto de nodos
@@ -106,6 +124,7 @@ public class GlobalOptFitnessFunction extends FitnessFunction{
 				maxTpo=Double.parseDouble(valores[i][3]);
 				maxLat=Double.parseDouble(valores[i][0]);
 			}
+			if((i+1)<serv){
 			if(tipoNodo[i+1] == 3){ // si el siguiente es del mismo tipo, entonces no hago nada en los valores (0,3 y 5), porque se deberá compara
 				//agregado[0] += data[i][0];
 				agregado[1] *= Double.parseDouble(valores[i][1]);
@@ -127,13 +146,24 @@ public class GlobalOptFitnessFunction extends FitnessFunction{
 				agregado[7] *= Double.parseDouble(valores[i][7]);
 				agregado[8] *= Double.parseDouble(valores[i][8]);
 			}
-			
+			}else{
+				agregado[0] += maxLat;
+				agregado[1] *= Double.parseDouble(valores[i][1]);
+				agregado[2] *= Double.parseDouble(valores[i][2]);
+				agregado[3] += maxTpo;
+				agregado[4] *= Double.parseDouble(valores[i][4]);
+				agregado[5] += minRend;
+				agregado[6] *= Double.parseDouble(valores[i][6]);
+				agregado[7] *= Double.parseDouble(valores[i][7]);
+				agregado[8] *= Double.parseDouble(valores[i][8]);
+			}
 			tipoAnt = 3;
 			break;
 		case 4: // branch
 			if(tipoAnt != 4){ 
 				inicio4 = i;
 			}
+			if((i+1)<serv){
 			if(tipoNodo[i+1] != 4){
 				double r1 = 0.0;
 				double r2 = 0.0;
@@ -158,6 +188,7 @@ public class GlobalOptFitnessFunction extends FitnessFunction{
 				agregado[6] *= r6;
 				agregado[7] *= r7;
 				agregado[8] *= r8;
+			}
 			}
 			tipoAnt = 4;
 			break;
@@ -248,11 +279,11 @@ public class GlobalOptFitnessFunction extends FitnessFunction{
 		divndo += b;
 		divsor += 9;
 		
-		int c = this.chequeaBundling(valores);
+		/*int c = this.chequeaBundling(valores);
 		
 		divndo+=c;
 		divsor+=c;
-		
+		*/
 		return (divndo/divsor);
 		
 	}
