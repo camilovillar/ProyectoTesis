@@ -270,23 +270,23 @@ public class Proceso extends Agregacion{
 	public void setRestriccion(double n){
 		if(n==0.5){
 			restricciones[0][0]="latencia";
-			restricciones[0][1]="2.0";
+			restricciones[0][1]="3.0";
 			restricciones[1][0]="documentacion";
-			restricciones[1][1]="0.1";
+			restricciones[1][1]="0.001";
 			restricciones[2][0]="mejorespr";
-			restricciones[2][1]="0.1";
+			restricciones[2][1]="0.001";
 			restricciones[3][0]="tiempo";
-			restricciones[3][1]="2.0";
+			restricciones[3][1]="3.0";
 			restricciones[4][0]="dispo";
-			restricciones[4][1]="0.1";
+			restricciones[4][1]="0.001";
 			restricciones[5][0]="through";
 			restricciones[5][1]="0.2";
 			restricciones[6][0]="exito";
-			restricciones[6][1]="0.1";
+			restricciones[6][1]="0.001";
 			restricciones[7][0]="confiab";
-			restricciones[7][1]="0.1";
+			restricciones[7][1]="0.001";
 			restricciones[8][0]="confor";
-			restricciones[8][1]="0.1";
+			restricciones[8][1]="0.001";
 		}
 	}
 	public String[][] getRestriccion(){

@@ -19,13 +19,13 @@ public class RestrLocalesFFunction extends FitnessFunction{
 	private String[][] atrib;
 	private String[] tipo;
 	private double[] param;
-	private double[] restricciones;
+	//private double[] restricciones;
 	private double[] util;
 	private int[] nServN;
 	private int[] tipoNodo;
 	private int[] iter; 
 	private double[] prob; 
-	private double[] restr;
+	private double[] restr; // restricciones globales
 	
 	
 	public RestrLocalesFFunction(int i_nroServ, String[][] atrib, double[] param, double[] util, int[] tipoNodo, int[] iter, double[] prob, double[] restr){ // Número de actividades en un proceso por el número de atributos de calidad
@@ -49,6 +49,7 @@ public class RestrLocalesFFunction extends FitnessFunction{
 		Gene[] gene = cromosoma.getGenes();
 		double[] alelos = new double[gene.length];
 		double[][] opera = new double[nServ][9];
+		double[] opera2 = new double[nServ];
 		double resultado = 1.0;
 		
 		for(int i=0; i<gene.length;i++){
@@ -57,28 +58,39 @@ public class RestrLocalesFFunction extends FitnessFunction{
 		System.out.println("2. Se rescata el valor de los alelos");
 		this.saveNServ();
 		for(int i = 0;i<nServ;i++){
-		for(int j = 0;j<opera[0].length;j++){
-			String act = "serv"+i;
-			opera[i][j]= 0;
-			opera[i][j] = (getNoRestringidos(j, act, alelos[i*9+j]));
-			opera[i][j] /= (getNServ(act));
-			opera[i][j] *= (getUtilidad(i, alelos));
-			opera[i][j] /= (getUMax(act));
-		}
+			for(int j = 0;j<opera[0].length;j++){
+				String act = "serv"+i;
+				//opera[i][j]= 0;
+				opera2[i] = 0;
+				opera2[i] = getNoRestringidos(i,alelos);
+				opera2[i] /= getNServ(act);
+				opera2[i] *= getUtilidad2(i,act,alelos);
+				opera2[i] /= getUMax(act);
+				//opera[i][j] = (getNoRestringidos(j, act, alelos[i*9+j]));
+				//System.out.println(opera[i][j]);
+				//opera[i][j] /= (getNServ(act));
+				//System.out.println(opera[i][j]);
+				//opera[i][j] *= (getUtilidad(i, alelos));
+				//System.out.println(opera[i][j]);
+				//opera[i][j] /= (getUMax(act));
+				//System.out.println(opera[i][j]);
+			}
 		}
 		
 		System.out.println("3. Hago los cálculos para la función de ajuste");
 		
-		for(int i = 0;i<opera.length;i++){
-			for(int j = 0;j<opera[0].length;j++){
-				resultado*=opera[i][j];
-			}
+		for(int i = 0;i<opera2.length;i++){
+			resultado*=opera2[i];			
+			/*for(int j = 0;j<opera[0].length;j++){
+				
+				resultado*=(opera[i][j]); // utilizo logaritmo para linealizar la función y sumar en vez de multiplicar, se evitan los números pequeños
+			}*/
 		}
-		
+		System.out.println("El ajuste de este cromosoma sin penalty es: "+resultado);
 		//resultado+=5.0;//Factor de ajuste para que el valor sea positivo
-		
+		resultado+=100;
 		double penalty = calcPenalty(cromosoma, tipoNodo, iter, prob, restr);
-		//resultado -=penalty;
+		resultado -=penalty;
 		System.out.println("4. Calculo la penalización");
 		System.out.println("5. El ajuste de este cromosoma es de: "+resultado);
 		return resultado;
@@ -102,8 +114,11 @@ public class RestrLocalesFFunction extends FitnessFunction{
 		double utilidad = 0;
 		for(int i = 0;i< param.length;i++){
 			//System.out.println("El largo de param es "+param.length +" y se multiplica con alelo "+(serv*9+i));
-			utilidad += param[i]*alelos[serv*9+i];
-			
+			if(i==0 || i == 3){
+				utilidad+= (1-param[i])*alelos[serv*9+i];
+			}else{
+				utilidad += param[i]*alelos[serv*9+i];
+			}
 		}
 		//System.out.println("La utilidad alelos es :"+utilidad );
 		return utilidad;
@@ -115,10 +130,53 @@ public class RestrLocalesFFunction extends FitnessFunction{
 		return utilidad;
 	}
 	
+	public double getUtilidad2(int a, String serv, double[] alelo){
+		List utilidades = new ArrayList();
+		double umax = -9999.0;
+		for(int i = 0;i<util.length;i++){
+			if(tipo[i].equals(serv)){
+				if(Double.parseDouble(atrib[i][0])<alelo[a*9+0]){
+				if(Double.parseDouble(atrib[i][1])>alelo[a*9+1]){
+				if(Double.parseDouble(atrib[i][2])>alelo[a*9+2]){
+				if(Double.parseDouble(atrib[i][3])<alelo[a*9+3]){
+				if(Double.parseDouble(atrib[i][4])>alelo[a*9+4]){
+				if(Double.parseDouble(atrib[i][5])>alelo[a*9+5]){
+				if(Double.parseDouble(atrib[i][6])>alelo[a*9+6]){
+				if(Double.parseDouble(atrib[i][7])>alelo[a*9+7]){
+				if(Double.parseDouble(atrib[i][8])>alelo[a*9+8]){
+					utilidades.add(getUtilidad(i));			// si pasa todas las restricciones
+				}
+				}
+				}
+				}
+				}
+				}
+				}
+				}
+				}
+				
+				Iterator iter = utilidades.iterator();
+				while(iter.hasNext()){
+					double num = (double) iter.next();
+					if(num> umax){
+						umax=num;
+					}
+				}
+				
+			}
+		}
+		
+		
+		return umax;
+	}
+	
 	public double getUMax(String serv){
 		List utilidades = new ArrayList();
+		
 		for(int i = 0;i<util.length;i++){
-			utilidades.add(getUtilidad(i));
+			if(tipo[i].equals(serv)){
+				utilidades.add(getUtilidad(i));
+			}
 		}
 		double umax = -9999.0;
 		Iterator iUtil = utilidades.iterator();
@@ -135,12 +193,12 @@ public class RestrLocalesFFunction extends FitnessFunction{
 	public int getNoRestringidos(int pos, String serv, double alelo){ // nro de servicios que cumplen con la restricción.
 		int noRestr = 0;
 		if(pos == 0 || pos == 3){ // latencia y tiempo de ejec
-		for(int i =0;i<tipo.length;i++){				
-			if(tipo[i].equals(serv) && Double.parseDouble(atrib[i][pos])<alelo){
-				//System.out.println("Se revisa si el "+ tipo[i]+" es igual a " +serv+ " y "+atrib[i][pos]+" cumple con la restriccion "+ alelo + " para el atributo "+ pos );
-				noRestr++;
+			for(int i =0;i<tipo.length;i++){				
+				if(tipo[i].equals(serv) && Double.parseDouble(atrib[i][pos])<alelo){
+					//System.out.println("Se revisa si el "+ tipo[i]+" es igual a " +serv+ " y "+atrib[i][pos]+" cumple con la restriccion "+ alelo + " para el atributo "+ pos );
+					noRestr++;
+				}
 			}
-		}
 		}else{
 			for(int i =0;i<atrib.length;i++){
 				if(tipo[i].equals(serv) && Double.parseDouble(atrib[i][pos])>alelo){
@@ -152,6 +210,33 @@ public class RestrLocalesFFunction extends FitnessFunction{
 		//System.out.println("Los servicios no restringidos son :"+noRestr );
 		if(noRestr == 0) noRestr =1;
 		return noRestr;
+	}
+	public int getNoRestringidos(int serv, double[] alelo){ // serv indica el número del servicio que se está revisando
+		int n = 0;
+		for(int i  = 0;i < atrib.length;i++){
+			if(tipo[i].equals(serv)){
+				if(Double.parseDouble(atrib[i][0])<alelo[serv*9+0]){
+				if(Double.parseDouble(atrib[i][1])>alelo[serv*9+1]){
+				if(Double.parseDouble(atrib[i][2])>alelo[serv*9+2]){
+				if(Double.parseDouble(atrib[i][3])<alelo[serv*9+3]){
+				if(Double.parseDouble(atrib[i][4])>alelo[serv*9+4]){
+				if(Double.parseDouble(atrib[i][5])>alelo[serv*9+5]){
+				if(Double.parseDouble(atrib[i][6])>alelo[serv*9+6]){
+				if(Double.parseDouble(atrib[i][7])>alelo[serv*9+7]){
+				if(Double.parseDouble(atrib[i][8])>alelo[serv*9+8]){
+					n++;			// si pasa todas las restricciones, entonces se suma 1 a los serv no restringidos
+				}
+				}
+				}
+				}
+				}
+				}
+				}
+				}
+				}
+			}
+		}
+		return n;
 	}
 	public void saveNServ(){
 		nServN = new int[nServ];
@@ -188,9 +273,9 @@ public class RestrLocalesFFunction extends FitnessFunction{
 	}
 	
 	
-	public void setRestricciones(double[] restr){
+	/*public void setRestricciones(double[] restr){
 		restricciones = restr;
-	}
+	}*/
 	public void setParam(double[] parametrosFU){
 		param = new double[parametrosFU.length];
 		for(int i = 0;i < parametrosFU.length;i++){

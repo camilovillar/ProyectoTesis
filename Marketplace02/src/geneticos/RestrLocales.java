@@ -2,16 +2,18 @@ package geneticos;
 
 import org.jgap.*;
 import org.jgap.event.EventManager;
+import org.jgap.impl.CrossoverOperator;
 import org.jgap.impl.DefaultConfiguration;
 import org.jgap.impl.DoubleGene;
+import org.jgap.impl.MutationOperator;
 
 import geneticos.NivelesServicio;
 
 public class RestrLocales{
 	
 	private Configuration m_config;
-	private int maxEvolution = 3;
-	private int populationSize = 50; 
+	private int maxEvolution = 100;
+	private int populationSize = 20;
 	private int serv;
 	private String[][] arregloServ;
 	private double[] param;
@@ -103,6 +105,8 @@ public class RestrLocales{
 	    //System.out.println("Se setea el elitismo");
 	    m_config.setPopulationSize(populationSize);
 	    //System.out.println("Se setea el tamaño de la población");
+	    m_config.addGeneticOperator(new CrossoverOperator(m_config, 20));
+	    m_config.addGeneticOperator(new MutationOperator(m_config, 0));
 	    
 	    NivelesServicio nivel = new NivelesServicio( arregloServ , serv);
 	    //System.out.println("Crea los niveles de servicio aleatorios");

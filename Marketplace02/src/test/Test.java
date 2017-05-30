@@ -20,7 +20,7 @@ public class Test {
 	public static void main(String[] args) throws StaleProxyException, FileNotFoundException {
 		//long ti = System.currentTimeMillis();
 		int j = 100; // setear el número de proveedores
-		for(int i=5;i<6;i+=5){
+		for(int i=20;i<21;i+=5){
 			try{
 				FileOutputStream file = new FileOutputStream("C:\\Users\\Camilo\\Desktop\\Eclipse\\resultados\\output"+i+"Act"+j+"Prov"+System.currentTimeMillis()+".txt");
 				PrintStream out = new PrintStream(file);

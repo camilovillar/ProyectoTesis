@@ -125,13 +125,6 @@ public class Consumidor extends Agent{
 			//manejo de error
 		}
 		
-		//Sleep para esperar la inicialización del broker con una parte random
-		try {
-			Thread.sleep((int) (200 * (2*Math.random())));
-		} catch (Exception e) {
-		}
-		
-		//www.redeszone.net/2012/09/03/curso-java-volumen-vi-todo-sobre-semaforos-en-java/#sthash.f6ftBjtO.dpuf
 		
 		servicios = proceso.getActiv();
 		if (servicios != null && servicios.length > 0) {
@@ -144,6 +137,16 @@ public class Consumidor extends Agent{
             dfd.addServices(sd);
             
             DFAgentDescription[] result;
+            
+          //Sleep para esperar la inicialización del broker con una parte random
+    		try {
+    			Thread.sleep((int) (200 * (2*Math.random())));
+    		} catch (Exception e) {
+    		}
+    		
+    		//www.redeszone.net/2012/09/03/curso-java-volumen-vi-todo-sobre-semaforos-en-java/#sthash.f6ftBjtO.dpuf
+    		
+            
             
 			try {
 				result = DFService.search(this, dfd);

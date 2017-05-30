@@ -22,7 +22,7 @@ import jade.core.AID;
 public class GlobalOpt {
 	
 	private Configuration m_config;
-	private int maxEvolution = 50;
+	private int maxEvolution = 100;
 	private int populationSize = 50; 
 	private int serv;
 	private double[] param;
@@ -154,12 +154,15 @@ public class GlobalOpt {
 	    			if(j==11){
 	    				int aux = Integer.parseInt((String) serv.get(j));
 	    				this.ofertas[i][j] = String.valueOf(aux);
+	    				System.out.println("Se guarda el atributo "+j+" del serv "+i +" es "+this.ofertas[i][j]);
 	    			}else{
 	    				if(j==12){
 	    					double aux = (double) serv.get(j);
 	    					this.ofertas[i][j] = String.valueOf(aux);
+	    					System.out.println("Se guarda el atributo "+j+" del serv "+i +" es "+this.ofertas[i][j]);
 	    				}else{
-	    				this.ofertas[i][j] = (String) serv.get(j);
+	    					this.ofertas[i][j] = (String) serv.get(j);
+	    					System.out.println("Se guarda el atributo "+j+" del serv "+i +" es "+this.ofertas[i][j]);
 	    				}
 	    			}
 	    		}

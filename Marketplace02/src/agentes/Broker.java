@@ -65,7 +65,7 @@ public class Broker extends Agent{
 	private int[] iter;
 	private double[] probab;
 	private int nServ;
-	private int niveles = 60;
+	//private int niveles = 50;
 	private ArrayList ofertas;
 	private AID[] ofertantes;
 	
@@ -297,15 +297,15 @@ public class Broker extends Agent{
 	}
 	public double[] generarRestricciones(String[][] arregloServ){
 		double[] r = new double[nServ*9];
-		/*for(int i = 0;i < nServ;i++){
-			r[i*9] = 10000.0;
-			r[(i+1)*9-6] = 10000.0;
-		}*/
+		for(int i = 0;i < nServ;i++){
+			r[i*9] = 1.0;
+			r[(i+1)*9-6] = 1.0;
+		}
 		
-		RestrLocales re = new RestrLocales(nServ, arregloServ, parametros, tipos, iter, probab, rGlobales);
+		/*RestrLocales re = new RestrLocales(nServ, arregloServ, parametros, tipos, iter, probab, rGlobales);
 		//re.setNivelesServicio();
 		try {
-			IChromosome resultado = re.restrOptimas(niveles);
+			IChromosome resultado = re.restrOptimas(50);// nro de niveles de calidad para un atributo
 			Gene[] genes = new Gene[nServ*9];
 			genes = resultado.getGenes();
 			//System.out.println("Se recibe el resultado, el primer gen es "+genes[0].getAllele());
@@ -318,7 +318,7 @@ public class Broker extends Agent{
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}*/
 		return r;
 	}
 	public void agregarRestrRequerimiento(double [] rLocales){
@@ -405,7 +405,7 @@ public class Broker extends Agent{
 				//if (cont >= proveedores.length) {
 				System.out.println("Se obtuvieron "+ofertas0.size()+" ofertas");
 				for(int i = 0;i < ofertas0.size();i++){
-					System.out.println(ofertas0.get(i));
+					System.out.println("La oferta "+i+ " es "+ofertas0.get(i));
 				}
 				
 				elegirMejoresOfertas(ofertas0);
@@ -505,16 +505,12 @@ public class Broker extends Agent{
 						String nombre = (String) ofert.get(j);// rescato el nombre del servicio
 						System.out.println("El servicio "+ j+" tiene nombre "+ nombre);
 						JSONArray atrib = (JSONArray) jsonOferta.get(nombre);
+						ofer = new ArrayList();
 						for(int k = 0;k < 13;k++){
 							System.out.println("Se rescata el atributo "+k + " del servicio "+nombre+" cuyo valor es "+atrib.get(k));
 							ofer.add(atrib.get(k));
 						// El orden es: atributos (0 a 8), nombreAgente (9), nombre (10), id (11), precio (12)
 						}
-						
-						/*Iterator<String> iterator = ofert.iterator();
-						while(iterator.hasNext()) {
-							ofer.add(iterator.next()); // Arreglo de cada oferta
-						}*/
 						ofertas0.add(ofer);
 					}
 				
