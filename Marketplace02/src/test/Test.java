@@ -19,19 +19,24 @@ public class Test {
 
 	public static void main(String[] args) throws StaleProxyException, FileNotFoundException {
 		//long ti = System.currentTimeMillis();
-		int j = 100; // setear el número de proveedores
-		for(int i=20;i<21;i+=5){
+		int i = 10; // setear el número de proveedores
+		int j = 100; // setea número de datos de servicios a utilizar
+		int l = 2000;
+		for(int cont=0;cont<2001;cont++){
 			try{
 				FileOutputStream file = new FileOutputStream("C:\\Users\\Camilo\\Desktop\\Eclipse\\resultados\\output"+i+"Act"+j+"Prov"+System.currentTimeMillis()+".txt");
 				PrintStream out = new PrintStream(file);
 				System.setOut(out);
 		
-				Marketplace m = new Marketplace(i,j,true); // Actividades, proveedores, debo redistribuir los servicios (true si cambio número de actividades o proveedores)
+				Marketplace m = new Marketplace(i,j,true, l); // Actividades, proveedores, debo redistribuir los servicios (true si cambio número de actividades o proveedores)
 				System.out.println("Comienza la negociación.");
 				boolean fin = true;
-				while(fin){
-					fin = m.getFin();
-				}
+				
+				try {
+	    			Thread.sleep((int) (60000 * (1 + 2*Math.random())));
+	    		} catch (Exception e) {
+	    			e.printStackTrace();
+	    		}
 			
 				m.detenerMarket();
 			

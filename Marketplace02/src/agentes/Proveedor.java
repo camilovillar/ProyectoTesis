@@ -50,7 +50,8 @@ public class Proveedor extends Agent{
 	private long tiempo_f;
 	private double probBundling;
 	private int nroBundling;
-	
+	private double descuento;
+	private double margen;
 	
 	protected void setup(){
 		tiempo_i = System.currentTimeMillis();
@@ -67,18 +68,27 @@ public class Proveedor extends Agent{
 		//System.out.println(nombreAgente[0]+" "+nroBundling);
 		probBundling = funcion.getProbBundling();
 		//System.out.println(probBundling);
-		aName[0]="latencia";
-		aName[1]="documentacion";
-		aName[2]="mejPracticas";
-		aName[3]="tiempo";
-		aName[4]="disponibilidad";
-		aName[5]="rendimiento";
-		aName[6]="tasaExito";
-		aName[7]="confiabilidad";
-		aName[8]="conformidad";
+		
+		descuento = funcion.getDescuento();
+		
+		margen = funcion.getMargen();
+		
+		aName[0]="tiempo";
+		aName[1]="disponibilidad";
+		aName[2]="rendimiento";
+		aName[3]="tasaExito";
+		aName[4]="confiabilidad";
+		aName[5]="conformidad";
+		aName[6]="mejPracticas";
+		aName[7]="latencia";
+		aName[8]="documentacion";
 		
 		// Leer archivo json del proveedor
 		nServProv=obtenerNumeroServicios(nombreAgente[0]);
+		
+		if(nServProv == 0){
+			myAgent.doDelete();
+		}
 		//System.out.println("El número de servicios asignados al proveedor es de: "+nServProv);
 		serv = obtenerServicios(nombreAgente[0]);
 		//System.out.println("El número de servicios guardados del proveedor es de: "+serv.length);
@@ -125,19 +135,17 @@ public class Proveedor extends Agent{
 			}
 		}
 		tiempo_f = System.currentTimeMillis();
-		System.out.println("El "+myAgent.getName()+" leyó sus servicios a los "+ ( tiempo_f - tiempo_i ) +" milisegundos.");
+		//System.out.println("El "+myAgent.getName()+" leyó sus servicios a los "+ ( tiempo_f - tiempo_i ) +" milisegundos.");
 		
 		// Evalúo cada servicio con los parámetros de la función de utilidad del proveedor
 		precio = new double[nServProv];
 		for(int i = 0; i<nServProv;i++){
-			precio[i]=(1-param[0])*atrib[i][0]+param[1]*atrib[i][1]+param[2]*atrib[i][2]+(1-param[3])*atrib[i][3]+param[4]*atrib[i][4]+param[5]*atrib[i][5]+param[6]*atrib[i][6]+param[7]*atrib[i][7]+param[8]*atrib[i][8];
+			precio[i]=param[0]*(atrib[i][0])+param[1]*atrib[i][1]+param[2]*atrib[i][2]+param[3]*(atrib[i][3])+param[4]*atrib[i][4]+param[5]*atrib[i][5]+param[6]*atrib[i][6]+param[7]*atrib[i][7]+param[8]*atrib[i][8];
 		}
-		if(nServProv == 0){
-			myAgent.doDelete();
-		}
+		
 				
 		tiempo_f = System.currentTimeMillis();
-		System.out.println("El "+myAgent.getName()+" valoró sus servicios a los "+ ( tiempo_f - tiempo_i ) +" milisegundos.");
+		//System.out.println("El "+myAgent.getName()+" valoró sus servicios a los "+ ( tiempo_f - tiempo_i ) +" milisegundos.");
 		// Registrar el agente en un Directory Facilitator
 		
 		registrarEnDF();
@@ -148,6 +156,8 @@ public class Proveedor extends Agent{
 		addBehaviour(new RecibirRequerimiento());
 		
 		addBehaviour(new ConfirmaOrden());
+		
+		addBehaviour(new OrdenRechazada());
 	}// Cierra setup()
 	
 	public int obtenerNumeroServicios(String nombreAgente){
@@ -166,6 +176,7 @@ public class Proveedor extends Agent{
 		} catch (ParseException e) {
 			//manejo de error
 		}
+		
 		return nServProv;
 	}
 	
@@ -210,7 +221,7 @@ public class Proveedor extends Agent{
 		dfd.addServices(sd);
 		
 		
-		// Registro los servicios del agente FALTA PROBAR
+		// Registro los servicios del agente
 		int cont = 0;
 		for(int i = 0;i<nServProv;i++){
 			ServiceDescription sd1 = new ServiceDescription();
@@ -234,21 +245,16 @@ public class Proveedor extends Agent{
 	
 	protected void takeDown(){
 		
-		try {
+		/*try {
 			DFService.deregister(this);
 		}
 		catch (FIPAException fe) {
 			fe.printStackTrace();
-		}
+		}*/
 		tiempo_f = System.currentTimeMillis();
 		System.out.println("El "+myAgent.getName()+" trabajó "+ ( tiempo_f - tiempo_i ) +" milisegundos.");
-		
+		myAgent.doDelete();
 	}// Cierra el takeDown
-	
-	/*public double[] obtenerFuncionUtilidad(FuncionUtilidad f){
-		double param[] = f.getParametros();
-		return param;
-	}*/
 
 	private class RecibirRequerimiento extends CyclicBehaviour {
 		
@@ -305,28 +311,27 @@ public class Proveedor extends Agent{
 				} catch (ParseException e) {
 					//manejo de error
 				}
-				/*Convierto atributos de serv a double
-				double atrib2[][]=new double[nServ][9];
-				for(int i = 0; i<nServ-1 ; i++){
-					for(int j=0;j<9;j++){
-						atrib2[i][j]= Double.parseDouble(serv[i][j+1]);
-					}
-				}
-				*/
+				
 				tiempo_f = System.currentTimeMillis();
 				//System.out.println("El "+myAgent.getName()+" parsea el req a los "+ ( tiempo_f - tiempo_i ) +" milisegundos.");
+				
+				
 				int cumple[] = cumpleRestr(rLocales); // Arreglo que indica si cumple o no
 				
 				int suma0 = 0;
 				for(int i = 0;i < cumple.length;i++){
 					suma0+=cumple[i];
 				}
+				
 				System.out.println("Los servicios del "+nombreAgente[0]+" que cumplen con las restricciones son "+suma0);
-				/*if (cumple == null){
-					ACLMessage notify = new ACLMessage(ACLMessage.REFUSE); 
-					notify.addReceiver(broker);
-					send(notify);
-				}*/
+				
+				if(suma0 == 0){
+					enviarRefuse(broker,reply, requerimiento);
+					
+					takeDown();
+					
+				}else{
+				
 				int mejorOferta[] = elegirMejorOferta(cumple); // Evalúo los servicios que valoro más (es más probable que el consumidor igual los valores)
 				
 				int suma = 0;
@@ -340,11 +345,25 @@ public class Proveedor extends Agent{
 				crearOferta(mejorOferta, requerimiento);
 				System.out.println("El "+myAgent.getName()+" generó la oferta a los "+ ( tiempo_f - tiempo_i ) +" milisegundos.");
 				enviarOferta(broker, reply, requerimiento);
-				
+				}
 			}
 		}// Cierra action
 		
 	}
+	private class OrdenRechazada extends CyclicBehaviour {
+		public void action(){
+			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.REFUSE);
+			ACLMessage msg = myAgent.receive(mt);
+			if(msg != null){
+				String cont = msg.getContent();
+				if(cont.equals("refuse")){
+					System.out.println("Al cabo que ni quería");
+					doDelete();
+				}
+			}
+		}
+	}
+	
 	private class ConfirmaOrden extends CyclicBehaviour {
 		private static final long serialVersionUID = -1617198703783939574L;
 
@@ -376,45 +395,35 @@ public class Proveedor extends Agent{
 	
 	public int[] cumpleRestr(double[][] restricciones){
 		int cumple[] = new int[nServProv];
-		
-		for(int i = 0;i < restricciones.length;i++){
-			String nombre = "serv"+i;
+		System.out.println("El "+nombreAgente[0]+" tiene "+ nServProv +" servicios.");
+		for(int i = 0;i < cumple.length;i++){
 			for(int j = 0;j < nServProv;j++){
+			String nombre = "serv"+j;
 				if(serv[j][10].equals(nombre)){ // comparo el nombre del servicio
-					System.out.println(nombreAgente[0]+" compara el atributo "+atrib[j][0]+" con la restricción "+restricciones[i][0]);
-				if(atrib[j][0]<restricciones[i][0]){
-					System.out.println(nombreAgente[0]+" compara el atributo "+atrib[j][1]+" con la restricción "+restricciones[i][1]);
-				if(atrib[j][1]>restricciones[i][1]){
-					System.out.println(nombreAgente[0]+" compara el atributo "+atrib[j][2]+" con la restricción "+restricciones[i][2]);
-				if(atrib[j][2]>restricciones[i][2]){
-					System.out.println(nombreAgente[0]+" compara el atributo "+atrib[j][3]+" con la restricción "+restricciones[i][3]);
-				if(atrib[j][3]<restricciones[i][3]){
-					System.out.println(nombreAgente[0]+" compara el atributo "+atrib[j][4]+" con la restricción "+restricciones[i][4]);
-				if(atrib[j][4]>restricciones[i][4]){
-					System.out.println(nombreAgente[0]+" compara el atributo "+atrib[j][5]+" con la restricción "+restricciones[i][5]);
-				if(atrib[j][5]>restricciones[i][5]){
-					System.out.println(nombreAgente[0]+" compara el atributo "+atrib[j][6]+" con la restricción "+restricciones[i][6]);
-				if(atrib[j][6]>restricciones[i][6]){
-					System.out.println(nombreAgente[0]+" compara el atributo "+atrib[j][7]+" con la restricción "+restricciones[i][7]);
-				if(atrib[j][7]>restricciones[i][7]){
-					System.out.println(nombreAgente[0]+" compara el atributo "+atrib[j][8]+" con la restricción "+restricciones[i][8]);
-				if(atrib[j][8]>restricciones[i][8]){
-					System.out.println(nombreAgente[0]+" compara el atributo "+atrib[j][0]+" con la restricción "+restricciones[i][0]);
-					cumple[j]=1;
-				}
-				}
-				}
-				}
-				}
-				}
-				}
-				}
-				}
+					//System.out.println(nombreAgente[0]+" compara el atributo "+atrib[j][0]+" con la restricción "+restricciones[i][0]);
+					for(int k = 0;k < restricciones[0].length;k++){
+						if(atrib[j][k]>restricciones[j][k]){
+							cumple[j] = 1;
+						}else{
+							cumple[j] = 0;
+						}
+					}
 				}
 			}
-		}
-		
+		}	
 		return cumple;
+	}
+	
+	public void enviarRefuse(AID broker, ACLMessage reply, String requerimiento){
+		reply = new ACLMessage(ACLMessage.REFUSE);
+		reply.addReceiver(broker);
+		reply.setContent("NO PARTICIPO");
+		reply.setConversationId("service-trade");
+		reply.setReplyWith("ref"+System.currentTimeMillis()); 
+		myAgent.send(reply);
+		tiempo_f = System.currentTimeMillis();
+		System.out.println("El "+myAgent.getName()+" envió rechazo a los "+ ( tiempo_f - tiempo_i ) +" milisegundos.");
+		
 	}
 	
 	public int[] elegirMejorOferta(int[] cumple){ // entrega la posición de los mejores servicios
@@ -431,16 +440,17 @@ public class Proveedor extends Agent{
 			double[] p1 = new double[servDisp.length];
 			for(int i = 0;i < serv.length;i++){
 				for(int j = 0;j < servDisp.length;j++){
-					if(servDisp[j].equals(serv[i][10])){
-						if(precio[i]>p1[j]){
-							p1[j]=precio[i];
-							m1[j]=i;
-							
+					if(cumple[i]==1){
+						if(servDisp[j].equals(serv[i][10])){
+							if(precio[i]>p1[j]){
+								p1[j]=precio[i]+descuento*margen*precio[i]; // precio más el margen con el descuento respectivo
+								m1[j]=i;
+							}
 						}
 					}
 				}
 			}
-			System.out.println("El "+nombreAgente[0]+" tiene "+servDisp.length+" servicios disponibles y "+nroBundling+" nro de bund");
+			//System.out.println("El "+nombreAgente[0]+" tiene "+servDisp.length+" servicios disponibles y "+nroBundling+" nro de bund");
 			if(servDisp.length > nroBundling){// Si los servicios disponibles son más que los que asigno a bundling 
 				System.out.println("El "+nombreAgente[0]+" tiene que entrar a escoger lo mejor entre lo disponible" );
 				for(int i=0;i<(p1.length-1);i++){
@@ -489,7 +499,7 @@ public class Proveedor extends Agent{
 			for(int i = 0;i < mejores.length;i++){
 				if(cumple[i]==1){
 					if(precio[i]>p0){
-						p0 = precio[i]; // Voy guardando el precio
+						p0 = precio[i]+precio[i]*margen; // Voy guardando el precio
 						m0 = i; // Guardo el lugar que ocupa
 					}
 				}
@@ -503,17 +513,16 @@ public class Proveedor extends Agent{
 	public String[] getServDisp(){
 		String[] servDisp;
 		ArrayList<String> list = new ArrayList<String>();
-		// REVISAR ESTO!!!!!
 		list.add(serv[0][10]);// agrego el primer serv a la lista
-		System.out.println("Agrego el "+serv[0][10]);
+		//System.out.println("Agrego el "+serv[0][10]);
 		for(int i = 0;i < nServProv;i++){
 			int k = 0;
 			for(int j = 0;j < list.size();j++){
 				if((list.get(j).equals(serv[i][10]))){
-					System.out.println(nombreAgente[0]+" No agrego el "+serv[i][10]);
+					//System.out.println(nombreAgente[0]+" No agrego el "+serv[i][10]);
 				}else{
 					list.add(serv[i][10]);
-					System.out.println(nombreAgente[0]+" Agrego el "+serv[i][10]);
+					//System.out.println(nombreAgente[0]+" Agrego el "+serv[i][10]);
 					break;
 				}
 			}
@@ -521,7 +530,7 @@ public class Proveedor extends Agent{
 		servDisp = new String[list.size()];
 		for(int i = 0;i < servDisp.length;i++){
 			servDisp[i] = (String) list.get(i);
-			System.out.println("El servicio "+servDisp[i]+ " fue asignado al "+ nombreAgente[0]);
+			//System.out.println("El servicio "+servDisp[i]+ " fue asignado al "+ nombreAgente[0]);
 		}
 		return servDisp;
 	}
@@ -558,7 +567,7 @@ public class Proveedor extends Agent{
 		}
 	}
 	
-	public void enviarOferta(AID boker, ACLMessage reply, String requerimiento){
+	public void enviarOferta(AID broker, ACLMessage reply, String requerimiento){
 		reply = new ACLMessage(ACLMessage.PROPOSE);
 		reply.addReceiver(broker);
 		reply.setContent("oferta_"+nombreAgente[0]+"_"+requerimiento);

@@ -10,5 +10,6 @@
 	<classpathentry kind="lib" path="C:/Users/Camilo/Desktop/Eclipse/jgap_3.6.3_full/jgap-tests.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Camilo/Desktop/Eclipse/JSON/json-simple-1.1.1.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Camilo/Desktop/Eclipse/javacsv2.1/javacsv.jar"/>
+	<classpathentry kind="lib" path="C:/gurobi702/win64/lib/gurobi.jar" sourcepath="C:/Users/Camilo/Documents/Gurobi License"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

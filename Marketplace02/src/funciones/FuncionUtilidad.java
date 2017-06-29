@@ -6,6 +6,7 @@ public class FuncionUtilidad {
 	private double descuento;
 	private double probBundling;
 	private int nroBundling;
+	private double margen;
 	
 	public FuncionUtilidad(int tipo){// tipo indica si el agente es consumidor o proveedor.
 		setParametros(tipo);
@@ -39,6 +40,7 @@ public class FuncionUtilidad {
 			descuento = 0.0;
 			probBundling = 0.0;
 			nroBundling = 0;
+			margen = (Math.random()*0.3)+0.1; //margen entre un 10% y un 30%
 			//System.out.println("Los parametros de la funcion son: descuento "+ descuento + " prob " + probBundling + " nro "+nroBundling);
 			
 			break;
@@ -61,9 +63,10 @@ public class FuncionUtilidad {
 				}
 			}
 			}
-			descuento = (Math.random()*0.6)+0.1;
+			descuento = (Math.random()*0.5)+0.1; // margen entre 10% y 50% (considerando el descuento sobre el margen)
 			probBundling = Math.random();
 			nroBundling = (int) (Math.random()*4)+2;
+			margen = (Math.random()*0.3)+0.1; // margen entre 10% y 30% 
 			//System.out.println("Los parametros de la funcion son: descuento "+ descuento + " prob " + probBundling + " nro "+nroBundling);
 			break;
 		}
@@ -86,6 +89,8 @@ public class FuncionUtilidad {
 		return nroBundling;
 	}
 	
-	
+	public double getMargen(){
+		return margen;
+	}
 	
 }

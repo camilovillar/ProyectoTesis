@@ -18,6 +18,7 @@ public class Proceso extends Agregacion{
 	private String[] activ;
 	private int[] iter;
 	private double[] probab;
+	private double presupuesto;
 	
 	private String nombre;
 	JSONObject obj = new JSONObject();
@@ -29,7 +30,7 @@ public class Proceso extends Agregacion{
 	JSONObject restric = new JSONObject();
 	
 		
-	public Proceso(int n) { // Se le entrega el número de actividades/servicios del proceso
+	public Proceso(int n, double r) { // Se le entrega el número de actividades/servicios del proceso
 		long time_start;
 		long time_end;
 		int cont = 0;
@@ -240,11 +241,11 @@ public class Proceso extends Agregacion{
 		obj.put("Actividad", activi);
 		obj.put("NNodos", act);
 		
-		setRestriccion(0.5); // Se deberían setear otras condiciones
-		double[] globales = new double[9];
-		globales = restricGlobal(this);
+		setRestriccion(r); // Se deberían setear otras condiciones
+		double[] globales;
+		globales = restricGlobal(this, r);
 		
-		for(int i=0;i<9;i++){
+		for(int i=0;i<restricciones.length;i++){
 			restric.put(restricciones[i][0], globales[i]);
 		}
 		obj.put("Restricciones",restric);
@@ -268,30 +269,78 @@ public class Proceso extends Agregacion{
 	}// Cierra constructor
 	
 	public void setRestriccion(double n){
+		if(n==0.3){
+			restricciones[0][0]="tiempo";
+			restricciones[0][1]="0.3";
+			restricciones[1][0]="dispo";
+			restricciones[1][1]="0.3";
+			restricciones[2][0]="through";
+			restricciones[2][1]="0.3";
+			restricciones[3][0]="exito";
+			restricciones[3][1]="0.3";
+			restricciones[4][0]="confiab";
+			restricciones[4][1]="0.3";
+			restricciones[5][0]="confor";
+			restricciones[5][1]="0.3";
+			restricciones[6][0]="mejorespr";
+			restricciones[6][1]="0.3";
+			restricciones[7][0]="latencia";
+			restricciones[7][1]="0.3";
+			restricciones[8][0]="documentacion";
+			restricciones[8][1]="0.3";
+			restricciones[9][0]="presupuesto";
+		}
+		
 		if(n==0.5){
-			restricciones[0][0]="latencia";
-			restricciones[0][1]="3.0";
-			restricciones[1][0]="documentacion";
-			restricciones[1][1]="0.001";
-			restricciones[2][0]="mejorespr";
-			restricciones[2][1]="0.001";
-			restricciones[3][0]="tiempo";
-			restricciones[3][1]="3.0";
-			restricciones[4][0]="dispo";
-			restricciones[4][1]="0.001";
-			restricciones[5][0]="through";
-			restricciones[5][1]="0.2";
-			restricciones[6][0]="exito";
-			restricciones[6][1]="0.001";
-			restricciones[7][0]="confiab";
-			restricciones[7][1]="0.001";
-			restricciones[8][0]="confor";
-			restricciones[8][1]="0.001";
+			
+			restricciones[0][0]="tiempo";
+			restricciones[0][1]="0.5";
+			restricciones[1][0]="dispo";
+			restricciones[1][1]="0.50";
+			restricciones[2][0]="through";
+			restricciones[2][1]="0.5";
+			restricciones[3][0]="exito";
+			restricciones[3][1]="0.5";
+			restricciones[4][0]="confiab";
+			restricciones[4][1]="0.5";
+			restricciones[5][0]="confor";
+			restricciones[5][1]="0.5";
+			restricciones[6][0]="mejorespr";
+			restricciones[6][1]="0.5";
+			restricciones[7][0]="latencia";
+			restricciones[7][1]="0.5";
+			restricciones[8][0]="documentacion";
+			restricciones[8][1]="0.5";
+			restricciones[9][0]="presupuesto";
+		}
+		
+		if(n==0.7){
+			restricciones[0][0]="tiempo";
+			restricciones[0][1]="0.7";
+			restricciones[1][0]="dispo";
+			restricciones[1][1]="0.7";
+			restricciones[2][0]="through";
+			restricciones[2][1]="0.7";
+			restricciones[3][0]="exito";
+			restricciones[3][1]="0.7";
+			restricciones[4][0]="confiab";
+			restricciones[4][1]="0.7";
+			restricciones[5][0]="confor";
+			restricciones[5][1]="0.7";
+			restricciones[6][0]="mejorespr";
+			restricciones[6][1]="0.7";
+			restricciones[7][0]="latencia";
+			restricciones[7][1]="0.7";
+			restricciones[8][0]="documentacion";
+			restricciones[8][1]="0.7";
+			restricciones[9][0]="presupuesto";
 		}
 	}
+	
 	public String[][] getRestriccion(){
 		return restricciones;
 	}
+	
 	public int getN(){ // Obtener el número de actividades del proceso
 		return act;
 	}
@@ -307,6 +356,20 @@ public class Proceso extends Agregacion{
 			}
 		}
 		return cont;
+	}
+	public double getPresupuesto(double r){
+		if(r== 0.3){
+			presupuesto = (2.4)*act;
+		}
+		
+		if(r== 0.5){
+			presupuesto = (2.1)*act;
+		}
+		
+		if(r== 0.7){
+			presupuesto = (1.9)*act;
+		}
+		return presupuesto;
 	}
 	public String getName(){
 		return nombre;
@@ -326,15 +389,16 @@ public class Proceso extends Agregacion{
 	public int[] getIter(){ // Devuelve el numero de iteraciones de los nodos, cmabia sólo si es de secuencia
 		return iter;
 	}
-	public double[] restricGlobal(Proceso p){ 
+	public double[] restricGlobal(Proceso p, double r){ 
 		
-		double[] restricGlobal = new double[9];
+		double[] restricGlobal = new double[10];
 		restricGlobal[1] = 1;
-		restricGlobal[2] = 1;
+		restricGlobal[3] = 1;
 		restricGlobal[4] = 1;
+		restricGlobal[5] = 1;
 		restricGlobal[6] = 1;
-		restricGlobal[7] = 1;
 		restricGlobal[8] = 1;
+		restricGlobal[9] = p.getPresupuesto(r);
 		int[] tipoNodo = p.getTipoNodo();
 		int[] iter = p.getIter();
 		String[][] restric = p.getRestriccion();
@@ -347,24 +411,24 @@ public class Proceso extends Agregacion{
 			case 1:
 				restricGlobal[0]+=Double.parseDouble(restric[0][1]);
 				restricGlobal[1]*=Double.parseDouble(restric[1][1]);
-				restricGlobal[2]*=Double.parseDouble(restric[2][1]);
-				restricGlobal[3]+=Double.parseDouble(restric[3][1]);
+				restricGlobal[2]+=Double.parseDouble(restric[2][1]);
+				restricGlobal[3]*=Double.parseDouble(restric[3][1]);
 				restricGlobal[4]*=Double.parseDouble(restric[4][1]);
-				restricGlobal[5]+=Double.parseDouble(restric[5][1]);
+				restricGlobal[5]*=Double.parseDouble(restric[5][1]);
 				restricGlobal[6]*=Double.parseDouble(restric[6][1]);
-				restricGlobal[7]*=Double.parseDouble(restric[7][1]);
+				restricGlobal[7]+=Double.parseDouble(restric[7][1]);
 				restricGlobal[8]*=Double.parseDouble(restric[8][1]);
 				cont++;
 				break;
 			case 2:
 				restricGlobal[0]+= (iter[cont]*Double.parseDouble(restric[0][1]));
 				restricGlobal[1]*=(Math.pow(Double.parseDouble(restric[1][1]), iter[cont]));
-				restricGlobal[2]*=(Math.pow(Double.parseDouble(restric[2][1]), iter[cont]));
-				restricGlobal[3]+=(iter[cont]*Double.parseDouble(restric[3][1]));
+				restricGlobal[2]+=(iter[cont]*Double.parseDouble(restric[2][1]));
+				restricGlobal[3]*=(Math.pow(Double.parseDouble(restric[3][1]), iter[cont]));
 				restricGlobal[4]*=(Math.pow(Double.parseDouble(restric[4][1]), iter[cont]));
-				restricGlobal[5]+=(iter[cont]*Double.parseDouble(restric[5][1]));
+				restricGlobal[5]*=(Math.pow(Double.parseDouble(restric[5][1]), iter[cont]));
 				restricGlobal[6]*=(Math.pow(Double.parseDouble(restric[6][1]), iter[cont]));
-				restricGlobal[7]*=(Math.pow(Double.parseDouble(restric[7][1]), iter[cont]));
+				restricGlobal[7]+=(iter[cont]*Double.parseDouble(restric[7][1]));
 				restricGlobal[8]*=(Math.pow(Double.parseDouble(restric[8][1]), iter[cont]));
 				cont++;
 				break;
@@ -393,12 +457,12 @@ public class Proceso extends Agregacion{
 				
 				restricGlobal[0]+= Double.parseDouble(restric[0][1]);// Maximo
 				restricGlobal[1]*=(Math.pow(Double.parseDouble(restric[1][1]), cont2+1));	
-				restricGlobal[2]*=(Math.pow(Double.parseDouble(restric[2][1]), cont2+1));
-				restricGlobal[3]+=(Double.parseDouble(restric[3][1])); // maximo
+				restricGlobal[2]+=(Double.parseDouble(restric[2][1])); // minimo
+				restricGlobal[3]*=(Math.pow(Double.parseDouble(restric[3][1]), cont2+1));
 				restricGlobal[4]*=(Math.pow(Double.parseDouble(restric[4][1]), cont2+1));
-				restricGlobal[5]+=(Double.parseDouble(restric[5][1])); // minimo
+				restricGlobal[5]*=(Math.pow(Double.parseDouble(restric[5][1]), cont2+1));
 				restricGlobal[6]*=(Math.pow(Double.parseDouble(restric[6][1]), cont2+1));
-				restricGlobal[7]*=(Math.pow(Double.parseDouble(restric[7][1]), cont2+1));
+				restricGlobal[7]+=(Double.parseDouble(restric[7][1])); // maximo
 				restricGlobal[8]*=(Math.pow(Double.parseDouble(restric[8][1]), cont2+1));
 				
 				break;
@@ -406,12 +470,12 @@ public class Proceso extends Agregacion{
 				if(cont+1>=act){
 					restricGlobal[0]+=Double.parseDouble(restric[0][1]);
 					restricGlobal[1]*=Double.parseDouble(restric[1][1]);
-					restricGlobal[2]*=Double.parseDouble(restric[2][1]);
-					restricGlobal[3]+=Double.parseDouble(restric[3][1]);
+					restricGlobal[2]+=Double.parseDouble(restric[2][1]);
+					restricGlobal[3]*=Double.parseDouble(restric[3][1]);
 					restricGlobal[4]*=Double.parseDouble(restric[4][1]);
-					restricGlobal[5]+=Double.parseDouble(restric[5][1]);
+					restricGlobal[5]*=Double.parseDouble(restric[5][1]);
 					restricGlobal[6]*=Double.parseDouble(restric[6][1]);
-					restricGlobal[7]*=Double.parseDouble(restric[7][1]);
+					restricGlobal[7]+=Double.parseDouble(restric[7][1]);
 					restricGlobal[8]*=Double.parseDouble(restric[8][1]);
 					cont++;
 					break;
@@ -420,12 +484,12 @@ public class Proceso extends Agregacion{
 				
 				restricGlobal[0]+=Double.parseDouble(restric[0][1]);
 				restricGlobal[1]*=Double.parseDouble(restric[1][1]);
-				restricGlobal[2]*=Double.parseDouble(restric[2][1]);
-				restricGlobal[3]+=Double.parseDouble(restric[3][1]);
+				restricGlobal[2]+=Double.parseDouble(restric[2][1]);
+				restricGlobal[3]*=Double.parseDouble(restric[3][1]);
 				restricGlobal[4]*=Double.parseDouble(restric[4][1]);
-				restricGlobal[5]+=Double.parseDouble(restric[5][1]);
+				restricGlobal[5]*=Double.parseDouble(restric[5][1]);
 				restricGlobal[6]*=Double.parseDouble(restric[6][1]);
-				restricGlobal[7]*=Double.parseDouble(restric[7][1]);
+				restricGlobal[7]+=Double.parseDouble(restric[7][1]);
 				restricGlobal[8]*=Double.parseDouble(restric[8][1]);
 				}
 				cont++;
@@ -435,8 +499,10 @@ public class Proceso extends Agregacion{
 			
 		//}
 		}
-		
-		
+		System.out.println("Las restricciones globales son: ");
+		for(int i  = 0;i < restricGlobal.length;i++){
+			System.out.println(restricGlobal[i]);
+		}
 		
 		return restricGlobal;
 		

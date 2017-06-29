@@ -47,27 +47,27 @@ public class Consumidor extends Agent{
 	private String nproceso;
 	private long tiempo_i;
 	private long tiempo_f;
+	private double presupuesto;
 	
 	protected void setup(){
 		tiempo_i = System.currentTimeMillis();
 		System.out.println("Hola! Consumidor "+getAID().getName()+" está listo.");
+		
+		//recupero los argumentos entregados, indica el número de actividades en el proceso
 		Object[] args = getArguments();
 		int n=0;
 		if (args != null && args.length > 0) {
 			n = (int) args[0];
 		}
 		
+		double r = 0.3;
+		
 		funcion = new FuncionUtilidad(1);
-		proceso = new Proceso(n);
+		proceso = new Proceso(n, r); 
 		nproceso = proceso.getName();
 		double param[] = funcion.getParametros(); 
-		if(param[8]<0){
-			funcion = new FuncionUtilidad(1);
-			double param2[] = funcion.getParametros();
-			for(int j=0;j<param.length;j++){
-				param[j]=param2[j];
-			}
-		}
+		
+		presupuesto = proceso.getPresupuesto(r);
 
 		//Agregar parametros de funcion de utilidad a proceso. http://stackoverflow.com/questions/23724221/java-append-object-to-json
 
@@ -140,8 +140,9 @@ public class Consumidor extends Agent{
             
           //Sleep para esperar la inicialización del broker con una parte random
     		try {
-    			Thread.sleep((int) (200 * (2*Math.random())));
+    			Thread.sleep((int) (300 * (2*Math.random())));
     		} catch (Exception e) {
+    			e.printStackTrace();
     		}
     		
     		//www.redeszone.net/2012/09/03/curso-java-volumen-vi-todo-sobre-semaforos-en-java/#sthash.f6ftBjtO.dpuf
@@ -198,19 +199,51 @@ public class Consumidor extends Agent{
 	private class recibirPropuesta extends Behaviour {
 
 		private static final long serialVersionUID = -6144388368618375199L;
-		private MessageTemplate mt;
+		
 		
 		@Override
 		public void action() {
 			// TODO Auto-generated method stub
+			MessageTemplate mt = new MessageTemplate(null);
 			ACLMessage reply = myAgent.receive(mt);
 			if (reply != null) {
 				
 				if (reply.getPerformative() == ACLMessage.INFORM) {// Broker informa los resultados de la negociación
+					double precio1 = 0;
+					String info = reply.getContent();
+					JSONParser parser = new JSONParser();
+					try {
+						FileReader f = new FileReader("C:\\Users\\Camilo\\Desktop\\Eclipse\\JSON\\resultados\\"+info+".json");
+						Object resul = parser.parse(f);
+						JSONObject jsonResul = (JSONObject) resul;
+						
+						JSONArray proveedores = (JSONArray) jsonResul.get("Proveedores");
+						long precio = (long) jsonResul.get("Precio");
+						precio1 = (double) precio;
+						//obtener la info
 					
-					System.out.println(nproceso + " fue negociado exitosamente.");
-					//System.out.println("Precio = Agregar variable de precio final total. "); // 
-					myAgent.doDelete();
+					} catch (FileNotFoundException e) {
+						e.printStackTrace();
+					} catch (IOException e) {
+						e.printStackTrace();
+						//manejo de error
+					} catch (ParseException e) {
+						e.printStackTrace();
+						//manejo de error
+					}
+					
+					//obtener resultados de la negociación
+					// Comparar con funcion de utilidad 
+					
+					
+					System.out.println("Precio =  "+precio1); //
+					if(precio1<presupuesto){
+						System.out.println(nproceso + " fue negociado exitosamente.");
+						myAgent.doDelete();
+					}else{
+						System.out.println("Negociación fallida: proceso no instanciado");
+						doDelete();
+					}
 				}
 				else {
 					System.out.println("Intento fallido: proceso no instanciado");
@@ -229,7 +262,7 @@ public class Consumidor extends Agent{
 		@Override
 		public boolean done() {
 			// TODO Auto-generated method stub
-			return (mt != null);
+			return true;
 		}
 		
 	}// Cierra recibirRespuesta

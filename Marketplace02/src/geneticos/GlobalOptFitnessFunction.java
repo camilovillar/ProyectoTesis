@@ -19,15 +19,18 @@ public class GlobalOptFitnessFunction extends FitnessFunction{
 	private double[] prob;
 	private int serv;
 	private String[] data;
-	
+	private String[][] ofertas;
+	private int[] bundling;
 
-	public GlobalOptFitnessFunction(double[] param, int[] tipoNodo, double[] restr, int[] iter, double[] prob){
-		this.setIter(iter);
-		this.setParam(param);
-		this.setProb(prob);
-		this.setRestricciones(restr);
-		this.setTipoNodo(tipoNodo);
+	public GlobalOptFitnessFunction(double[] param, int[] tipoNodo, double[] restr, int[] iter, double[] prob, String[][] ofertas, int[] bundling){
+		this.iter = iter;
+		this.param = param;
+		this.prob = prob;
+		this.restr = restr;
+		this.tipoNodo =tipoNodo;
 		this.serv = tipoNodo.length;
+		this.ofertas = ofertas;
+		this.bundling = bundling;
 	}
 	
 	@Override
@@ -41,17 +44,16 @@ public class GlobalOptFitnessFunction extends FitnessFunction{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		for(int j = 0;j < data.length;j++){
-			for(int i = 0;i < param.length;i++){
-				if(i==0 || i==3)
-				fitness += param[i]*Double.parseDouble(data[j][i]);
+		for(int i = 0;i < data.length;i++){
+			for(int j = 0;j < param.length;j++){
+				fitness += param[j]*Double.parseDouble(data[i][j]);				
 			}
 		}
 		double[] restricGlobal = this.calcAgregado(data, tipoNodo);
 		
-		double penalty = this.calPenalty(data, restricGlobal);
+		double penalty = this.calPenalty(data, restricGlobal, bundling);
 		fitness-=penalty;
-		System.out.println("La función de ajuste es "+fitness);
+		//System.out.println("La función de ajuste es "+fitness);
 		return Math.max(fitness,0.0);
 	}
 	
@@ -76,11 +78,11 @@ public class GlobalOptFitnessFunction extends FitnessFunction{
 	protected double[] calcAgregado(String[][] valores, int[] tipoNodo){
 		double[] agregado = new double[9*serv];
 		agregado[1]=1.0;
-		agregado[2]=1.0;
+		agregado[3]=1.0;
 		agregado[4]=1.0;
 		agregado[5]=1.0;
 		agregado[6]=1.0;
-		agregado[7]=1.0;
+		//agregado[7]=1.0;
 		agregado[8]=1.0;
 		int tipoAnt = 0; // Para guardar el tipo de nodo de la corrida anterior.
 		int inicio4 = 0;
@@ -93,68 +95,68 @@ public class GlobalOptFitnessFunction extends FitnessFunction{
 		case 1: // secuencia
 			agregado[0] += Double.parseDouble(valores[i][0]);
 			agregado[1] *= Double.parseDouble(valores[i][1]);
-			agregado[2] *= Double.parseDouble(valores[i][2]);
-			agregado[3] += Double.parseDouble(valores[i][3]);
+			agregado[2] += Double.parseDouble(valores[i][2]);
+			agregado[3] *= Double.parseDouble(valores[i][3]);
 			agregado[4] *= Double.parseDouble(valores[i][4]);
-			agregado[5] += Double.parseDouble(valores[i][5]);
+			agregado[5] *= Double.parseDouble(valores[i][5]);
 			agregado[6] *= Double.parseDouble(valores[i][6]);
-			agregado[7] *= Double.parseDouble(valores[i][7]);
+			agregado[7] += Double.parseDouble(valores[i][7]);
 			agregado[8] *= Double.parseDouble(valores[i][8]);
 			tipoAnt = 1;
 			break;
 		case 2: // sec con iter
 			agregado[0] += iter[i]*Double.parseDouble(valores[i][0]);
 			agregado[1] *= Math.pow(Double.parseDouble(valores[i][1]),iter[i]);
-			agregado[2] *= Math.pow(Double.parseDouble(valores[i][2]),iter[i]);
-			agregado[3] += iter[i]*Double.parseDouble(valores[i][3]);
+			agregado[2] += iter[i]*Double.parseDouble(valores[i][2]);
+			agregado[3] *= Math.pow(Double.parseDouble(valores[i][3]),iter[i]);
 			agregado[4] *= Math.pow(Double.parseDouble(valores[i][4]),iter[i]);
-			agregado[5] += iter[i]*Double.parseDouble(valores[i][5]);
+			agregado[5] *= Math.pow(Double.parseDouble(valores[i][5]),iter[i]);
 			agregado[6] *= Math.pow(Double.parseDouble(valores[i][6]),iter[i]);
-			agregado[7] *= Math.pow(Double.parseDouble(valores[i][7]),iter[i]);
+			agregado[7] += iter[i]*Double.parseDouble(valores[i][7]);
 			agregado[8] *= Math.pow(Double.parseDouble(valores[i][8]),iter[i]);
 			tipoAnt = 2;
 			break;
 		case 3: // paralelo
 			if(tipoAnt == 3){ // seteo lo valores máx y mín
-				if(Double.parseDouble(valores[i][5]) < minRend){ minRend=Double.parseDouble(valores[i][5]);}
-				if(Double.parseDouble(valores[i][3]) > maxTpo){ maxTpo=Double.parseDouble(valores[i][3]);}
-				if(Double.parseDouble(valores[i][0]) > maxLat){ maxLat=Double.parseDouble(valores[i][0]);}
+				if(Double.parseDouble(valores[i][0]) > maxTpo){ maxTpo=Double.parseDouble(valores[i][0]);}
+				if(Double.parseDouble(valores[i][2]) < minRend){ minRend=Double.parseDouble(valores[i][2]);}
+				if(Double.parseDouble(valores[i][7]) > maxLat){ maxLat=Double.parseDouble(valores[i][7]);}
 			}else{
-				minRend=Double.parseDouble(valores[i][5]);
-				maxTpo=Double.parseDouble(valores[i][3]);
-				maxLat=Double.parseDouble(valores[i][0]);
+				maxTpo=Double.parseDouble(valores[i][0]);
+				minRend=Double.parseDouble(valores[i][2]);
+				maxLat=Double.parseDouble(valores[i][7]);
 			}
 			if((i+1)<serv){
 			if(tipoNodo[i+1] == 3){ // si el siguiente es del mismo tipo, entonces no hago nada en los valores (0,3 y 5), porque se deberá compara
 				//agregado[0] += data[i][0];
 				agregado[1] *= Double.parseDouble(valores[i][1]);
-				agregado[2] *= Double.parseDouble(valores[i][2]);
-				//agregado[3] += Double.parseDouble(valores[i][3]);
+				//agregado[2] += Double.parseDouble(valores[i][2]);
+				agregado[3] *= Double.parseDouble(valores[i][3]);
 				agregado[4] *= Double.parseDouble(valores[i][4]);
-				//agregado[5] += Double.parseDouble(valores[i][5]);
+				agregado[5] *= Double.parseDouble(valores[i][5]);
 				agregado[6] *= Double.parseDouble(valores[i][6]);
-				agregado[7] *= Double.parseDouble(valores[i][7]);
+				//agregado[7] += Double.parseDouble(valores[i][7]);
 				agregado[8] *= Double.parseDouble(valores[i][8]);
 			}else{ // sino
-				agregado[0] += maxLat;
+				agregado[0] += maxTpo;
 				agregado[1] *= Double.parseDouble(valores[i][1]);
-				agregado[2] *= Double.parseDouble(valores[i][2]);
-				agregado[3] += maxTpo;
+				agregado[2] += minRend;
+				agregado[3] *= Double.parseDouble(valores[i][3]);
 				agregado[4] *= Double.parseDouble(valores[i][4]);
-				agregado[5] += minRend;
+				agregado[5] *= Double.parseDouble(valores[i][5]);
 				agregado[6] *= Double.parseDouble(valores[i][6]);
-				agregado[7] *= Double.parseDouble(valores[i][7]);
+				agregado[7] += maxLat;
 				agregado[8] *= Double.parseDouble(valores[i][8]);
 			}
 			}else{
-				agregado[0] += maxLat;
+				agregado[0] += maxTpo;
 				agregado[1] *= Double.parseDouble(valores[i][1]);
-				agregado[2] *= Double.parseDouble(valores[i][2]);
-				agregado[3] += maxTpo;
+				agregado[2] += minRend;
+				agregado[3] *= Double.parseDouble(valores[i][3]);
 				agregado[4] *= Double.parseDouble(valores[i][4]);
-				agregado[5] += minRend;
+				agregado[5] *= Double.parseDouble(valores[i][5]);
 				agregado[6] *= Double.parseDouble(valores[i][6]);
-				agregado[7] *= Double.parseDouble(valores[i][7]);
+				agregado[7] += maxLat;
 				agregado[8] *= Double.parseDouble(valores[i][8]);
 			}
 			tipoAnt = 3;
@@ -166,27 +168,27 @@ public class GlobalOptFitnessFunction extends FitnessFunction{
 			if((i+1)<serv){
 			if(tipoNodo[i+1] != 4){
 				double r1 = 0.0;
-				double r2 = 0.0;
+				double r3 = 0.0;
 				double r4 = 0.0;
+				double r5 = 0.0;
 				double r6 = 0.0;
-				double r7 = 0.0;
 				double r8 = 0.0;
 				for(int j = 0;j < (i - inicio4 + 1);j++){
 					agregado[0] += prob[inicio4+j]*Double.parseDouble(valores[inicio4+j][0]);
 					r1 *= prob[inicio4+j]*Double.parseDouble(valores[inicio4+j][1]);
-					r2 *= prob[inicio4+j]*Double.parseDouble(valores[inicio4+j][2]);
-					agregado[3] += prob[inicio4+j]*Double.parseDouble(valores[inicio4+j][3]);
+					agregado[2] += prob[inicio4+j]*Double.parseDouble(valores[inicio4+j][2]);
+					r3 *= prob[inicio4+j]*Double.parseDouble(valores[inicio4+j][3]);
 					r4 *= prob[inicio4+j]*Double.parseDouble(valores[inicio4+j][4]);
-					agregado[5] += prob[inicio4+j]*Double.parseDouble(valores[inicio4+j][5]);
+					r5 *= prob[inicio4+j]*Double.parseDouble(valores[inicio4+j][5]);
 					r6 *= prob[inicio4+j]*Double.parseDouble(valores[inicio4+j][6]);
-					r7 *= prob[inicio4+j]*Double.parseDouble(valores[inicio4+j][7]);
+					agregado[7] += prob[inicio4+j]*Double.parseDouble(valores[inicio4+j][7]);
 					r8 *= prob[inicio4+j]*Double.parseDouble(valores[inicio4+j][8]);
 				}
 				agregado[1] *= r1;
-				agregado[2] *= r2;
+				agregado[3] *= r3;
 				agregado[4] *= r4;
+				agregado[5] *= r5;
 				agregado[6] *= r6;
-				agregado[7] *= r7;
 				agregado[8] *= r8;
 			}
 			}
@@ -197,94 +199,108 @@ public class GlobalOptFitnessFunction extends FitnessFunction{
 		return agregado;
 	}
 	
-	protected int chequeaRestricciones(double[] restricGlobal){
+	protected double chequeaRestricciones(double[] restricGlobal){
 		int g = 0;
 		
-		if(restricGlobal[0]>restr[0]){g++;}
+		if(restricGlobal[0]<restr[0]){g++;}
 		if(restricGlobal[1]<restr[1]){g++;}
 		if(restricGlobal[2]<restr[2]){g++;}
-		if(restricGlobal[3]>restr[3]){g++;}
+		if(restricGlobal[3]<restr[3]){g++;}
 		if(restricGlobal[4]<restr[4]){g++;}
-		if(restricGlobal[5]>restr[5]){g++;}
+		if(restricGlobal[5]<restr[5]){g++;}
 		if(restricGlobal[6]<restr[6]){g++;}
 		if(restricGlobal[7]<restr[7]){g++;}
 		if(restricGlobal[8]<restr[8]){g++;}
 		
+		g/=9;
+		
 		return g;
 	}
 	
-	protected int chequeaNeg(double[] restricGlobal){
+	protected double chequeaNeg(double[] restricGlobal){
 		int g=0;
 		
-		if(restricGlobal[0]>restr[0]){g++;}
-		if(restricGlobal[1]<restr[1]){g++;}
-		if(restricGlobal[2]<restr[2]){g++;}
-		if(restricGlobal[3]>restr[3]){g++;}
-		if(restricGlobal[4]<restr[4]){g++;}
-		if(restricGlobal[5]>restr[5]){g++;}
-		if(restricGlobal[6]<restr[6]){g++;}
-		if(restricGlobal[7]<restr[7]){g++;}
-		if(restricGlobal[8]<restr[8]){g++;}
+		if(restricGlobal[0]<0){g++;}
+		if(restricGlobal[1]<0){g++;}
+		if(restricGlobal[2]<0){g++;}
+		if(restricGlobal[3]<0){g++;}
+		if(restricGlobal[4]<0){g++;}
+		if(restricGlobal[5]<0){g++;}
+		if(restricGlobal[6]<0){g++;}
+		if(restricGlobal[7]<0){g++;}
+		if(restricGlobal[8]<0){g++;}
+		
+		g /= 9;
 		
 		return g;
 	}
 	
-	protected int chequeaBundling(String[][] valores){
-		String[][] bundlings = new String[valores.length][2];
-		int max = -100;
-		for(int i = 0;i < valores.length;i++){
-			String bund = valores[i][11];
-			String[] num = bund.split("_");
-			if(Integer.parseInt(num[1]) != 0){
-				bundlings[i][0] = num[0];
-				bundlings[i][1] = num[1];	
+	protected double chequeaBundling(String[][] valores, int[] bundling){
+		
+		//Separo los datos anexos del cromosoma, aux0 corresponde al número (id) de la oferta 
+		String[] aux;
+		int[] aux0 = new int[data.length];
+		for(int i = 0;i < aux0.length;i++){
+			aux = data[i].split("_");
+			//System.out.println(aux[0]+" "+aux[1]+" "+aux[2]+" "+aux[3]);
+			aux0[i] = (int) Integer.parseInt(aux[3]);  
+		}
+		
+		int total = 0;
+		//Cuento los servicios por oferta
+		int[] sumaBundling = new int[bundling.length];
+		for(int i = 0;i < sumaBundling.length;i++){
+			for(int j = 0;j < aux0.length;j++){
+				if(aux0[j]== i){
+					sumaBundling[i] +=1;
+					//System.out.println("El valor de sumabundling "+i+ " es "+sumaBundling[i]);
+				}
 			}
-			if(Integer.parseInt(num[0])>max){
-				max = Integer.parseInt(num[0]);
+			if(bundling[i] != 1){ //cuento los bundlings que tienen más de un servicio
+				total += 1;
 			}
 		}
-		int[][] num = new int[max+1][2];
-		for(int j = 0;j < bundlings.length;j++){
-			int a = Integer.parseInt(bundlings[j][0]);
-			int b = Integer.parseInt(bundlings[j][1]);
-			if(b>0){
-				for(int k = 0;k < max;k++){
-					if(a == k){
-						num[k][0]++; // Si 
-						num[k][1]=b;
-					}
-				}	
-			}
+		
+		//Si todas las ofertas son con un servicio...
+		if(total == 0){
+			return 0.0;
 		}
 		int no = 0;
-		for(int l= 0;l < max;l++){
-			if(num[l][0] != num[l][1]){
-				no++;
+		//Chequeo que estén completos los bundlings
+		for(int i = 0;i < bundling.length;i++){
+			if(sumaBundling[i] != 0){ //Si tengo algun servicio de la oferta i
+				if(sumaBundling[i] != bundling[i]){
+					no+=1;
+				}
 			}
 		}
-		return no;
+		return (no/total);
+		
 	}
 	
-	protected double calPenalty(String[][] valores, double[] restricGlobal){
-		double divndo = 0.0;
-		double divsor = 0.0;
+	public int getMax(int[] aux){
+		int maximo= -999;
+		for(int i = 0;i<aux.length;i++){
+			int aux2 = aux[i];
+			if(aux2 > maximo){
+				maximo = aux2;
+			}
+		}
+		return maximo;	
+	}
+	
+	protected double calPenalty(String[][] valores, double[] restricGlobal, int[] bundling){
+		double penalty = 0.0;
 		
-		int a = this.chequeaNeg(restricGlobal);
+		double a = this.chequeaNeg(restricGlobal);
+
+		double b = this.chequeaRestricciones(restricGlobal);
 		
-		divndo += a;
-		divsor += a;
+		double c = this.chequeaBundling(valores, bundling);
 		
-		int b = this.chequeaRestricciones(restricGlobal);
+		penalty = a + b + c;
 		
-		divndo += b;
-		divsor += 9;
-		
-		/*int c = this.chequeaBundling(valores);
-		
-		divndo+=c;
-		divsor+=c;
-		*/
-		return (divndo/divsor);
+		return penalty;
 		
 	}
 	
@@ -306,6 +322,7 @@ public class GlobalOptFitnessFunction extends FitnessFunction{
 		}
 		penalty = cont/largo;
 	}*/
+	
 	public void setParam(double[] parametrosFU){
 		param = new double[parametrosFU.length];
 		for(int i = 0;i < parametrosFU.length;i++){

@@ -21,7 +21,7 @@ public class Servicios {
 	String nombreArchivo = "Servicios1.csv";
 	JSONObject obj = new JSONObject();	
 	
-	public String[] getServicios(int n, int o, int p){ // n de servicios totales, n de proveedores, n de servicios a negociar
+	public String[] getServicios(int n, int o, int p){ // n es nro de servicios totales, o es nro de proveedores, p es nro de servicios a negociar
 		String[] serv = new String[n];
 		JSONParser parser = new JSONParser();
 		try {
@@ -38,10 +38,13 @@ public class Servicios {
 			}
 		} catch (FileNotFoundException e) {
 			//manejo de error
+			e.printStackTrace();
 		} catch (IOException e) {
 			//manejo de error
+			e.printStackTrace();
 		} catch (ParseException e) {
 			//manejo de error
+			e.printStackTrace();
 		}
 		
 		String serv1 = ";serv";
@@ -52,7 +55,12 @@ public class Servicios {
 			int aleatorio = (int) (Math.random() * (o));
 			int aleatorio1 = (int) (Math.random() * (p));
 			serv[i]+=serv1+aleatorio1;
-			serv[i]+=prov+aleatorio;
+			if(i <= o){ // Me aseguro de que todos los agentes reciban al menos un servicio para ofrecer.
+				serv[i]+=prov+i;
+			}else{
+				serv[i]+=prov+aleatorio;
+			}
+			
 		}
 		return serv;
 	}
@@ -107,14 +115,14 @@ public class Servicios {
             e.printStackTrace();
         }
 	}// Cierra creaArchivoServicios
-	public void creaArchivosProveedores(String[][] atrib, int n){
+	public void creaArchivosProveedores(String[][] atrib, int n, int o){
 		// Arreglo de dos dimensiones con atributos 
 		// Cada fila es un servicio, cada columna es un atributo, el último (10) es proveedor
 		// n es el número de proveedores.
 		JSONObject obj = new JSONObject();
 		for(int i = 0; i < n ;i++){
 			int c = 0;
-			for(int j = 0;j < 2507;j++){
+			for(int j = 0;j < o;j++){
 				if(atrib[j][11].equals("Proveedor"+i)){
 					JSONArray list = new JSONArray();
 					for(int k = 0;k < 11;k++){

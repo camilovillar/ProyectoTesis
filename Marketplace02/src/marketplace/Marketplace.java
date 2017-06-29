@@ -13,14 +13,14 @@ public class Marketplace {
 	ContainerController cc = jade.core.Runtime.instance().createMainContainer(p);
 	AgentController ac0;
 	
-	public Marketplace(int i, int j, boolean k) throws StaleProxyException{ // i actividades, j proveedores, k = true si se distribuyen de nuevo los servicios, false si no
+	public Marketplace(int i, int j, boolean k, int l) throws StaleProxyException{ // i actividades, j proveedores, k = true si se distribuyen de nuevo los servicios, false si no; l servicios totales
 		if(k){
 			Servicios s = new Servicios();
 			s.creaArchivoServicios();
-			String[][] atrib = s.getAtributos(s.getServicios(2507, j, i), 2507); // Servicios totales, proveedores, actividades proceso
-			s.creaArchivosProveedores(atrib, j); // proveedores
+			String[][] atrib = s.getAtributos(s.getServicios(l, j, i), l); // Servicios totales, proveedores, actividades proceso
+			s.creaArchivosProveedores(atrib, j, l); // proveedores
 		}
-		//Argumento para el consumidor
+		//Argumento para el consumidor, indica el número de actividades del proceso
 		Object[] arg = new Object[1];
 		arg[0]=i;
 		
@@ -2058,16 +2058,18 @@ public class Marketplace {
 		ac1000.start();
 		AgentController ac1001 = cc.createNewAgent("Proveedor999", "agentes.Proveedor", null);
 		ac1001.start();
+			if(j<=1000){
+				break;
+			}
+		
 		}
 		ac0 = cc.createNewAgent("Agente1", "agentes.Broker", null);
 		ac0.start();
 		
 		AgentController ac1 = cc.createNewAgent("Agente2", "agentes.Consumidor", arg);
 		ac1.start();
-		
-		
-		
 	}
+	
 	public boolean getFin() throws StaleProxyException{
 		boolean fin=true;
 		int n = (ac0.getState()).getCode();
@@ -2079,7 +2081,6 @@ public class Marketplace {
 	public void detenerMarket() throws StaleProxyException{
 		cc.kill();
 		jade.core.Runtime.instance().shutDown();
-		
 	}
 	
 

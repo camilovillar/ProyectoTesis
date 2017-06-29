@@ -12,7 +12,7 @@ import geneticos.NivelesServicio;
 public class RestrLocales{
 	
 	private Configuration m_config;
-	private int maxEvolution = 100;
+	private int maxEvolution = 70;
 	private int populationSize = 20;
 	private int serv;
 	private String[][] arregloServ;
@@ -105,8 +105,8 @@ public class RestrLocales{
 	    //System.out.println("Se setea el elitismo");
 	    m_config.setPopulationSize(populationSize);
 	    //System.out.println("Se setea el tamaño de la población");
-	    m_config.addGeneticOperator(new CrossoverOperator(m_config, 20));
-	    m_config.addGeneticOperator(new MutationOperator(m_config, 0));
+	    m_config.addGeneticOperator(new CrossoverOperator(m_config));
+	    m_config.addGeneticOperator(new MutationOperator(m_config));
 	    
 	    NivelesServicio nivel = new NivelesServicio( arregloServ , serv);
 	    //System.out.println("Crea los niveles de servicio aleatorios");
@@ -114,17 +114,19 @@ public class RestrLocales{
 	    BaseChromosome sampleChromosome = new Chromosome(m_config);
 	    
 	    int n = serv*9;
-	    IChromosome[] cromosomes = new IChromosome[populationSize];
+	    IChromosome cromosome = null;
+	    //IChromosome[] cromosomes = new IChromosome[populationSize];
 	    for(int k = 0;k < populationSize;k++){
 	    	Gene[][] genes = new Gene[serv][9];
 	    	
 	    	double[][] asignar = nivel.asignarAleatorio(niveles);
-		   // System.out.println("Asigna los niveles de servicio aleatorios");
+		   /* System.out.println("Asigna los niveles de servicio aleatorios");
 		    for(int x = 0;x<asignar.length;x++){
 		    	for(int y = 0;y < asignar[0].length;y++){
-		    		//System.out.println("Asignar " + x + ", "+ y +" tiene el valor "+asignar[x][y]);
+		    		System.out.println("Asignar " + x + ", "+ y +" tiene el valor "+asignar[x][y]);
 		    	}
 		    }
+		    */
 	    	
 		    /*for (int i = 0; i < serv ; i++) {
 	    		for(int j = 0;j < 9; j++){    
@@ -146,14 +148,17 @@ public class RestrLocales{
 	    	}		    
 		    
 	    	Chromosome samplechromosome = new Chromosome(m_config, gen);
-	    	cromosomes[k] = samplechromosome;
+	    	//cromosomes[k] = samplechromosome;
+	    	cromosome = samplechromosome;
 	    }
 	    
 	    tiempo_f = System.currentTimeMillis();
 		System.out.println("El problema generó un cromosoma a los (milisegundos) "+ ( tiempo_f - tiempo_i ));
 		
-	    m_config.setSampleChromosome(cromosomes[0]);
-	    Population pop = new Population(m_config, cromosomes);
+	   // m_config.setSampleChromosome(cromosomes[0]);
+		m_config.setSampleChromosome(cromosome);
+		Population pop = new Population(m_config, cromosome);
+		//Population pop = new Population(m_config, cromosomes);
 	    Genotype population = new Genotype(m_config, pop);
 	    IChromosome best = null;
 	    
