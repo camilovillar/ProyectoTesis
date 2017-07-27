@@ -1,6 +1,6 @@
 package linearprogramming;
-import geneticos.NivelesServicio;
 import gurobi.*;
+import nivelescalidad.NivelesServicio;
 
 
 public class RestrLocalesLP {
@@ -35,15 +35,22 @@ public class RestrLocalesLP {
 		//double[][][] puntaje = new double[serv][arregloServ[0].length][niveles]; // matriz serv*atributos*niveles
 		
 		double[][][] puntaje = calcularFuncionH(matriz, arregloServ);
+		double[][][] puntaje2 = new double[puntaje.length][puntaje[0].length][puntaje[0][0].length];
 		int[] nServ = contarServicios(tipo);
+		
 		for(int i = 0;i<puntaje.length;i++){
 			for(int j = 0;j < puntaje[0].length;j++){
 				for(int k = 0;k < puntaje[0][0].length;k++){
-					puntaje[i][j][k]/=nServ[i];
+					System.out.println("El puntaje "+i+","+j+","+k+" es "+ puntaje[i][j][k]);
+					System.out.println("El número de servicios de tipo "+i+ " es "+nServ[i]);
+					puntaje2[i][j][k] = puntaje[i][j][k];
+					puntaje2[i][j][k] /= nServ[i];
+					System.out.println("El puntaje "+i+","+j+","+k+" es "+ puntaje2[i][j][k] );
 				}
 			}
 		}
-		double[][][] logPuntaje = calcularLog(puntaje);
+		double[][][] logPuntaje = calcularLog(puntaje2);
+		System.out.println("El logaritmo del puntaje "+0+","+0+","+0+" es "+logPuntaje[0][0][0]);
 		
 		return logPuntaje;
 	}
@@ -53,7 +60,7 @@ public class RestrLocalesLP {
 		for(int i = 0;i < puntaje.length;i++){
 			for(int j = 0;j < puntaje[0].length;j++){
 				for(int k = 0;k < puntaje[0][0].length;k++){
-					logPuntaje[i][j][k] = Math.log(puntaje[i][j][k]);					
+					logPuntaje[i][j][k] = Math.log10(puntaje[i][j][k]);					
 				}
 			}
 		}
@@ -70,9 +77,16 @@ public class RestrLocalesLP {
 			String serv = "serv"+i;
 			for(int j = 0; j< resultado[0].length;j++){
 				for(int k = 0;k < resultado[0][0].length;k++){
-					if(tipo[i].equals(serv) && Double.parseDouble(servicios[i][j+1])<matriz[i][j][k]){
-						resultado[i][j][k]+=1;
+					if(j == 0 || j==2 || j == 7){
+						if(tipo[i].equals(serv) && Double.parseDouble(servicios[i][j+1])<matriz[i][j][k]){
+							resultado[i][j][k]+=1;
+						}						
+					}else{
+						if(tipo[i].equals(serv) && Double.parseDouble(servicios[i][j+1])>matriz[i][j][k]){
+							resultado[i][j][k]+=1;
+						}
 					}
+					
 				}
 			}
 		}
@@ -310,6 +324,8 @@ public class RestrLocalesLP {
 		
 		NivelesServicio nivel = new NivelesServicio( arregloServ , serv);
 		double[][][] matriz = nivel.getNiveles(niveles);
+		System.out.println("matriz 0,0,0 es "+matriz[0][0][0]);
+		
 		double[][][] logPuntaje = calcularLogPuntaje(matriz);
 		double[][][] resultado=new double[matriz.length][matriz[0].length][matriz[0][0].length];
 		
@@ -329,32 +345,49 @@ public class RestrLocalesLP {
 			}
 			model.update();
 			
+			System.out.println("Crea las variables");
+			
 			//Objetivo es maximizar
 			model.set(GRB.IntAttr.ModelSense, GRB.MAXIMIZE);
 			GRBLinExpr obj = new GRBLinExpr();
 			
+			System.out.println("Seteo la función objetivo");
 			
-			//Restricciones
+			//Restricciones de calidad
 			GRBLinExpr[] r = new GRBLinExpr[restr.length];
 			
-			//Lado derecho
-			for(int i = 0;i < restr.length;i++){
-				System.out.println(restr[i]);
-				r[i].addConstant(restr[i]);
-				System.out.println(restr[i]);
-			}
+			System.out.println("Crea el espacio para las restricciones");
+			
+			//Lado derecho se setea directo
+			/*for(int i = 0;i < restr.length;i++){
+			*	System.out.println("Entra a crear lado derecho con la restrcción " +restr[i]);
+			*	r[i].addConstant(restr[i]);
+			}*/
 			//Lado izquierdo
 			
+			//Vector de expresiones lineales para el lado izquierdo de las restricciones
 			GRBLinExpr[] lhs = new GRBLinExpr[restr.length];
+			
 			
 			GRBLinExpr[][][] lhs2= new GRBLinExpr[matriz.length][matriz[0].length][matriz[0][0].length];
 			GRBLinExpr[][] lhs3 = new GRBLinExpr[matriz.length][matriz[0].length];
+			
+			System.out.println("Creo el espacio para el lado izquierdo");
+			System.out.println("Agrego expresiones a la función objetivo");
 			for(int i = 0;i < lhs2.length;i++){
 				for(int j = 0;j < lhs2[0].length;j++){
 					for(int k = 0;k < lhs2[0][0].length;k++){
-						lhs2[i][j][k].addTerm(matriz[i][j][k], x[i][j][k]);
-						lhs3[i][j].multAdd(1, lhs2[i][j][k]); 
+						
+						//Agrego el logaritmo del puntaje x X a la función objetivo
+						System.out.println("Comienzo con el atributo "+logPuntaje[i][j][k]);
 						obj.addTerm(logPuntaje[i][j][k], x[i][j][k]);
+						
+						System.out.println("Para el lado izquierdo comienzo con el atributo "+matriz[i][j][k]);
+						lhs2[i][j][k].addTerm(matriz[i][j][k], x[i][j][k]);
+						
+						lhs3[i][j].multAdd(1, lhs2[i][j][k]);
+						
+						
 					}
 				}
 			}
@@ -377,7 +410,7 @@ public class RestrLocalesLP {
 			lhs[8].addConstant(calcularFAPorcentaje(datos, 8));
 			
 			for(int i = 0;i < r.length;i++){
-				model.addConstr(lhs[i], GRB.LESS_EQUAL, r[i], "r"+i);
+				model.addConstr(lhs[i], GRB.LESS_EQUAL, restr[i], "r"+i);
 			}
 			model.update();
 			

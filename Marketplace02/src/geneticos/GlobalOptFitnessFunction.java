@@ -21,8 +21,9 @@ public class GlobalOptFitnessFunction extends FitnessFunction{
 	private String[] data;
 	private String[][] ofertas;
 	private int[] bundling;
+	private ArrayList<ArrayList> ofertasOrdenadas;
 
-	public GlobalOptFitnessFunction(double[] param, int[] tipoNodo, double[] restr, int[] iter, double[] prob, String[][] ofertas, int[] bundling){
+	public GlobalOptFitnessFunction(double[] param, int[] tipoNodo, double[] restr, int[] iter, double[] prob, String[][] ofertas, int[] bundling, ArrayList ofertasOrdenadas){
 		this.iter = iter;
 		this.param = param;
 		this.prob = prob;
@@ -31,58 +32,120 @@ public class GlobalOptFitnessFunction extends FitnessFunction{
 		this.serv = tipoNodo.length;
 		this.ofertas = ofertas;
 		this.bundling = bundling;
+		this.ofertasOrdenadas = ofertasOrdenadas;
 	}
 	
 	@Override
 	protected double evaluate(IChromosome cromosoma) {
 		double fitness = 0.0;
 		
-		String[][] data = new String[serv][11];
+		String[][] atributos = new String[serv][11];
+		int[] idOferta = new int[serv];
+		//double[] 
+		//int[] datos2 = new int[serv];
 		try {
-			data = this.obtenerDatos(cromosoma);
+			atributos = this.obtenerDatos2(cromosoma);
+			idOferta = this.obtenerIdOferta(cromosoma);
 		} catch (InvalidConfigurationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		for(int i = 0;i < data.length;i++){
+		for(int i = 0;i < atributos.length;i++){
 			for(int j = 0;j < param.length;j++){
-				fitness += param[j]*Double.parseDouble(data[i][j]);				
+				fitness += param[j]*Double.parseDouble(atributos[i][j]);				
 			}
 		}
-		double[] restricGlobal = this.calcAgregado(data, tipoNodo);
+		//double[] restricGlobal = this.calcAgregado(atributos, tipoNodo);
+		System.out.println("La función de ajuste es "+fitness);
+		//double penalty = this.calPenalty(atributos, restricGlobal, idOferta, bundling);
+		double penalty = this.calPenalty2(atributos, idOferta, bundling);
 		
-		double penalty = this.calPenalty(data, restricGlobal, bundling);
+		System.out.println("El castigo es "+penalty);
+		
 		fitness-=penalty;
-		//System.out.println("La función de ajuste es "+fitness);
+		if(fitness <0) fitness = 0.0;
+		System.out.println("La función de ajuste es "+fitness);
 		return Math.max(fitness,0.0);
+		
 	}
 	
 	protected String[][] obtenerDatos(IChromosome crom) throws InvalidConfigurationException{
 		String[][] valores = new String[serv][11];
-		data= new String[serv];
+		//data= new String[serv];
 		Gene[] genes = new Gene[serv];
 		genes = crom.getGenes();
 		//CompositeGene compGene = new CompositeGene();
 		for(int i = 0;i < serv;i++){
 			CompositeGene compGene = (CompositeGene) genes[i];
-			data[i]=(String) compGene.getApplicationData();
+			//setData(i,(String) compGene.getApplicationData());
 			Vector a = (Vector) compGene.getAllele();	//atrib, precio
-			for(int j =0;j < a.size();j++){
+			for(int j =0;j < (a.size()-1);j++){
 				double aux = (double) a.get(j);
 				valores[i][j]= String.valueOf(aux);
+				System.out.println("El valor de "+i+" "+j+" es "+valores[i][j]);
 			}
+			System.out.println("El valor de "+i+" "+10+" es "+a.get(10));
+		}
+		return valores;
+	}
+	protected String[][] obtenerDatos2(IChromosome crom) throws InvalidConfigurationException{
+		// devuelve un areglo con los atributos y el precio
+		String[][] valores = new String[serv][11];
+		Gene[] genes = crom.getGenes();
+		for(int i = 0;i < genes.length; i++){
+			int alelo = (int) genes[i].getAllele(); 
+			ArrayList aux0 = (ArrayList) ofertasOrdenadas.get(i);
+			//System.out.println(aux0);
+			int posicion = (int) aux0.get(alelo);
+			// El orden es: atributos (0 a 8), nombreAgente (9), nombre (10), id (11), precio (12), indicador de la oferta como (13)
+			for(int j = 0;j < valores[0].length-1; j++){
+				valores[i][j] = ofertas[posicion][j];
+			}
+			valores[i][10]= ofertas[posicion][12];
 		}
 		return valores;
 	}
 	
+	protected int[] obtenerIdOferta(IChromosome crom) throws InvalidConfigurationException{
+		int[] idOferta = new int[serv];
+		Gene[] genes = new Gene[serv];
+		genes = crom.getGenes();
+		for(int i = 0;i < genes.length;i++){
+			int alelo = (int) genes[i].getAllele();
+			ArrayList aux0 = (ArrayList) ofertasOrdenadas.get(i);
+			//System.out.println(aux0);
+			int posicion = (int) aux0.get(alelo);
+			idOferta[i] = (int) Integer.parseInt(ofertas[posicion][13]);
+		}
+		return idOferta;
+	}
+	
+	protected int[] obtenerIdOferta2(IChromosome crom) throws InvalidConfigurationException{
+		int[] ids = new int[serv];
+		Gene[] genes = new Gene[serv];
+		
+		genes = crom.getGenes();
+		
+		CompositeGene compGene;
+		
+		for(int i = 0;i < genes.length;i++){
+			compGene = (CompositeGene) genes[i];
+			Vector a = (Vector) compGene.getAllele();	//atrib, precio, idOferta
+			ids[i] = (int) a.get(10);
+			//ids[i]= Integer.parseInt(String.valueOf(aux));
+			System.out.println("El valor de "+i+" es "+ids[i]);
+		}	
+		
+		return ids;
+	}
+	
 	protected double[] calcAgregado(String[][] valores, int[] tipoNodo){
-		double[] agregado = new double[9*serv];
+		double[] agregado = new double[10];
 		agregado[1]=1.0;
 		agregado[3]=1.0;
 		agregado[4]=1.0;
 		agregado[5]=1.0;
 		agregado[6]=1.0;
-		//agregado[7]=1.0;
 		agregado[8]=1.0;
 		int tipoAnt = 0; // Para guardar el tipo de nodo de la corrida anterior.
 		int inicio4 = 0;
@@ -91,6 +154,8 @@ public class GlobalOptFitnessFunction extends FitnessFunction{
 		double maxLat = 0.0; // Para guardar el máximo de latencia de un conjunto de nodos
 		
 		for(int i = 0;i < valores.length;i++){
+			agregado[9] += Double.parseDouble(valores[i][10]); // sumo los precios
+		
 		switch(tipoNodo[i]){
 		case 1: // secuencia
 			agregado[0] += Double.parseDouble(valores[i][0]);
@@ -167,12 +232,12 @@ public class GlobalOptFitnessFunction extends FitnessFunction{
 			}
 			if((i+1)<serv){
 			if(tipoNodo[i+1] != 4){
-				double r1 = 0.0;
-				double r3 = 0.0;
-				double r4 = 0.0;
-				double r5 = 0.0;
-				double r6 = 0.0;
-				double r8 = 0.0;
+				double r1 = 1.0;
+				double r3 = 1.0;
+				double r4 = 1.0;
+				double r5 = 1.0;
+				double r6 = 1.0;
+				double r8 = 1.0;
 				for(int j = 0;j < (i - inicio4 + 1);j++){
 					agregado[0] += prob[inicio4+j]*Double.parseDouble(valores[inicio4+j][0]);
 					r1 *= prob[inicio4+j]*Double.parseDouble(valores[inicio4+j][1]);
@@ -196,23 +261,66 @@ public class GlobalOptFitnessFunction extends FitnessFunction{
 			break;
 		}
 		}
+		
 		return agregado;
 	}
 	
-	protected double chequeaRestricciones(double[] restricGlobal){
+	protected int chequeaRestricciones(double[] restricGlobal){
 		int g = 0;
 		
-		if(restricGlobal[0]<restr[0]){g++;}
-		if(restricGlobal[1]<restr[1]){g++;}
-		if(restricGlobal[2]<restr[2]){g++;}
-		if(restricGlobal[3]<restr[3]){g++;}
-		if(restricGlobal[4]<restr[4]){g++;}
-		if(restricGlobal[5]<restr[5]){g++;}
-		if(restricGlobal[6]<restr[6]){g++;}
-		if(restricGlobal[7]<restr[7]){g++;}
-		if(restricGlobal[8]<restr[8]){g++;}
+		//for(int i = 0;i < restricGlobal.length;i++){
+			if(restricGlobal[0]<=restr[0]){
+				g++;
+				System.out.println("No se cumple la "+0+"esima restricción");
+				System.out.println("agregado es "+ restricGlobal[0] + " la restricción es "+ restr[0]);
+			}
+			if(restricGlobal[1]>=restr[1]){
+				g++;
+				System.out.println("No se cumple la "+1+"esima restricción");
+				System.out.println("agregado es "+ restricGlobal[1] + " la restricción es "+ restr[1]);
+			}
+			if(restricGlobal[2]<=restr[2]){
+				g++;
+				System.out.println("No se cumple la "+2+"esima restricción");
+				System.out.println("agregado es "+ restricGlobal[2] + " la restricción es "+ restr[2]);
+			}
+			if(restricGlobal[3]>=restr[3]){
+				g++;
+				System.out.println("No se cumple la "+3+"esima restricción");
+				System.out.println("agregado es "+ restricGlobal[3] + " la restricción es "+ restr[3]);
+			}
+			if(restricGlobal[4]>=restr[4]){
+				g++;
+				System.out.println("No se cumple la "+4+"esima restricción");
+				System.out.println("agregado es "+ restricGlobal[4] + " la restricción es "+ restr[4]);
+			}
+			if(restricGlobal[5]>=restr[5]){
+				g++;
+				System.out.println("No se cumple la "+5+"esima restricción");
+				System.out.println("agregado es "+ restricGlobal[5] + " la restricción es "+ restr[5]);
+			}
+			if(restricGlobal[6]>=restr[6]){
+				g++;
+				System.out.println("No se cumple la "+6+"esima restricción");
+				System.out.println("agregado es "+ restricGlobal[6] + " la restricción es "+ restr[6]);
+			}
+			if(restricGlobal[7]<=restr[7]){
+				g++;
+				System.out.println("No se cumple la "+7+"esima restricción");
+				System.out.println("agregado es "+ restricGlobal[7] + " la restricción es "+ restr[7]);
+			}
+			if(restricGlobal[8]>=restr[8]){
+				g++;
+				System.out.println("No se cumple la "+8+"esima restricción");
+				System.out.println("agregado es "+ restricGlobal[8] + " la restricción es "+ restr[8]);
+			}
+		//}
 		
-		g/=9;
+		
+		System.out.println("No se cumplen "+ (g) +" restricciones");
+		
+		
+		//System.out.println("El castigo por restricciones no cumplidas es de "+ g);
 		
 		return g;
 	}
@@ -230,52 +338,87 @@ public class GlobalOptFitnessFunction extends FitnessFunction{
 		if(restricGlobal[7]<0){g++;}
 		if(restricGlobal[8]<0){g++;}
 		
+		
 		g /= 9;
 		
 		return g;
 	}
 	
-	protected double chequeaBundling(String[][] valores, int[] bundling){
+	protected double chequeaBundling(String[][] valores, int[] bundling, String[] datos){
 		
 		//Separo los datos anexos del cromosoma, aux0 corresponde al número (id) de la oferta 
-		String[] aux;
-		int[] aux0 = new int[data.length];
-		for(int i = 0;i < aux0.length;i++){
-			aux = data[i].split("_");
-			//System.out.println(aux[0]+" "+aux[1]+" "+aux[2]+" "+aux[3]);
-			aux0[i] = (int) Integer.parseInt(aux[3]);  
-		}
+		//String[] aux;
+		int[] idOferta = new int[datos.length];
+		int[] idOferta2 = new int[datos.length];
+		//int[] idServicio = new int[datos.length];
 		
-		int total = 0;
-		//Cuento los servicios por oferta
+		//Recupero el número de la oferta recibida a la que corresponde el 
+		
 		int[] sumaBundling = new int[bundling.length];
-		for(int i = 0;i < sumaBundling.length;i++){
-			for(int j = 0;j < aux0.length;j++){
-				if(aux0[j]== i){
-					sumaBundling[i] +=1;
-					//System.out.println("El valor de sumabundling "+i+ " es "+sumaBundling[i]);
-				}
-			}
-			if(bundling[i] != 1){ //cuento los bundlings que tienen más de un servicio
-				total += 1;
-			}
+		//int[] sumaBundling2 = new int[bundling.length];
+		int total = 0;
+		for(int i = 0;i < idOferta.length;i++){
+			
+			idOferta2[i] = Integer.parseInt(valores[i][13]);
+			//System.out.println("El serv "+ i +" corresponde a la oferta "+idOferta2[i]);
+			sumaBundling[idOferta2[i]]++;
+			total++;
+			//revisado
 		}
 		
-		//Si todas las ofertas son con un servicio...
-		if(total == 0){
-			return 0.0;
-		}
 		int no = 0;
 		//Chequeo que estén completos los bundlings
 		for(int i = 0;i < bundling.length;i++){
-			if(sumaBundling[i] != 0){ //Si tengo algun servicio de la oferta i
+			//System.out.println("sumabundling de " +i+" es "+sumaBundling[i]);
+			if(sumaBundling[i] != 0){ //Si tengo algun servicio de la oferta i	
 				if(sumaBundling[i] != bundling[i]){
+					//System.out.println("bundling es "+bundling[i]);
 					no+=1;
+				}else{
+					System.out.println("sumabundling de " +i+" es "+sumaBundling[i]);
+					System.out.println("bundling es "+bundling[i] +" son iguales!");
 				}
 			}
 		}
+		System.out.println("No es igual a "+no+ " y total es "+total);
 		return (no/total);
 		
+	}
+	
+	protected double chequeaBundling2(String[][] valores, int[] bundling, int[] datos){
+		
+		double resultado;
+		int[] sumaBundling2 = new int[bundling.length];
+		int total = 0;
+		for(int i = 0;i < datos.length;i++){
+			System.out.println("El serv "+ i +" corresponde a la oferta "+datos[i]);
+			sumaBundling2[datos[i]]++;
+			total++;
+			//revisado
+		}
+		
+		int no = 0;
+		//Chequeo que estén completos los bundlings
+		for(int j = 0;j < bundling.length;j++){
+			System.out.println("sumabundling2 de " +j+" es "+sumaBundling2[j]);
+			if(sumaBundling2[j] != 0){ //Si tengo algun servicio de la oferta i	
+				if(sumaBundling2[j] != bundling[j]){
+					System.out.println("bundling "+j+" es "+bundling[j]);
+					no+=1;
+				}else{
+					//System.out.println("sumabundling2 de " +j+" es "+sumaBundling2[j]);
+					System.out.println("bundling es "+bundling[j] +" son iguales!");
+				}
+			}
+		}
+		System.out.println("No es igual a "+no+ " y total es "+total);
+		
+		System.out.println("El castigo por bundling retornado es "+(no/total));
+		
+		resultado = no;
+		resultado /= total;
+		
+		return resultado;
 	}
 	
 	public int getMax(int[] aux){
@@ -289,39 +432,66 @@ public class GlobalOptFitnessFunction extends FitnessFunction{
 		return maximo;	
 	}
 	
-	protected double calPenalty(String[][] valores, double[] restricGlobal, int[] bundling){
+	public int chequeaPresupuesto(double[] restricGlobal){
+		int c=0;
+		if(restricGlobal[9]>restr[9]){c = 1;}
+		System.out.println("El presupuesto es "+ restr[9] +" y el precio acumulado es "+restricGlobal[9]);
+		return c;
+	}
+	
+	protected double calPenalty(String[][] valores, double[] restricGlobal, String[] datos, int[] bundling){
 		double penalty = 0.0;
+		double w1 = 1.0;
+		double w2 = 2.0;		
+		double w3 = serv*2;
+		int a = 0;
+		double b = 0.0;
+		double c = 0.0;
 		
-		double a = this.chequeaNeg(restricGlobal);
+		a = this.chequeaPresupuesto(restricGlobal);
 
-		double b = this.chequeaRestricciones(restricGlobal);
+		b = this.chequeaRestricciones(restricGlobal);
 		
-		double c = this.chequeaBundling(valores, bundling);
+		c = this.chequeaBundling(valores, bundling, datos);
 		
-		penalty = a + b + c;
+		
+		penalty = w1*a + w2*b/9 + w3*c;
 		
 		return penalty;
 		
 	}
-	
-	/*protected double calcPenalty(IChromosome crom){
-		double penalty = 0;
-		for(int i = 0;i < largo;i++){
-			if(i == 0 || i == 3){
-				if(valores[i]<restricciones[i]){
-					cont++;
-					
-				}
-			}else{
-				if(valores[i]>restricciones[i]){
-					cont++;				
-					
-				}
-			}
-			return penalty;
-		}
-		penalty = cont/largo;
-	}*/
+	protected double calPenalty2(String[][] valores, int[] datos, int[] bundling){
+		double penalty = 0.0;
+		double w1 = 1.0;
+		double w2 = 3.0;		
+		double w3 = serv*1.5;
+		
+		int a = 0;
+		int b = 0;
+		double c = 0.0;
+		
+		double[] restricGlobal = this.calcAgregado(valores, tipoNodo);
+		//double d = this.chequeaRestricciones(agregado);
+		
+		a = chequeaPresupuesto(restricGlobal);
+		System.out.println("El castigo por presupuesto es "+a);
+		System.out.println("El castigo por presupuesto luego de ponderar es "+(w1*a));
+
+		b = chequeaRestricciones(restricGlobal);
+		System.out.println("El castigo por violar restricciones es "+b);
+		System.out.println("El castigo por violar restricciones luego de ponderar es "+(w2*b/9));
+		
+		c = chequeaBundling2(valores, bundling, datos);
+		//System.out.println("c tiene el valor de "+c);
+		//System.out.println("El castigo por bundling es "+c);
+		System.out.println("El castigo por bundling luego de ponderar es "+(w3*c));
+		
+		penalty += w2*b/9;
+		penalty += w1*a + w3*c;
+		
+		return penalty;
+		
+	}
 	
 	public void setParam(double[] parametrosFU){
 		param = new double[parametrosFU.length];

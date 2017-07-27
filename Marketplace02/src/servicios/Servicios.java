@@ -18,7 +18,7 @@ public class Servicios {
 	String[] servicios;
 	String[][] servCQ;
 	String path = "C:\\Users\\Camilo\\Desktop\\Eclipse\\JSON\\";
-	String nombreArchivo = "Servicios1.csv";
+	String nombreArchivo = "ServiciosExpandido.csv";
 	JSONObject obj = new JSONObject();	
 	
 	public String[] getServicios(int n, int o, int p){ // n es nro de servicios totales, o es nro de proveedores, p es nro de servicios a negociar
@@ -55,7 +55,7 @@ public class Servicios {
 			int aleatorio = (int) (Math.random() * (o));
 			int aleatorio1 = (int) (Math.random() * (p));
 			serv[i]+=serv1+aleatorio1;
-			if(i <= o){ // Me aseguro de que todos los agentes reciban al menos un servicio para ofrecer.
+			if(i < o){ // Me aseguro de que todos los agentes reciban al menos un servicio para ofrecer.
 				serv[i]+=prov+i;
 			}else{
 				serv[i]+=prov+aleatorio;
@@ -93,9 +93,10 @@ public class Servicios {
                 list.add(id);
                 
                 obj.put("serv"+cont, list);
+                
                 cont++;
             }
-            
+            System.out.println("Se agregaron "+cont+" servicios al archivo JSONServicios");
             try {
 
     			FileWriter file = new FileWriter(path+"JSONServicios.json");

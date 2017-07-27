@@ -13,7 +13,7 @@ public class Marketplace {
 	ContainerController cc = jade.core.Runtime.instance().createMainContainer(p);
 	AgentController ac0;
 	
-	public Marketplace(int i, int j, boolean k, int l) throws StaleProxyException{ // i actividades, j proveedores, k = true si se distribuyen de nuevo los servicios, false si no; l servicios totales
+	public Marketplace(int i, int j, boolean k, int l, int m) throws StaleProxyException{ // i actividades, j proveedores, k = true si se distribuyen de nuevo los servicios, false si no; l servicios totales
 		if(k){
 			Servicios s = new Servicios();
 			s.creaArchivoServicios();
@@ -21,8 +21,12 @@ public class Marketplace {
 			s.creaArchivosProveedores(atrib, j, l); // proveedores
 		}
 		//Argumento para el consumidor, indica el número de actividades del proceso
-		Object[] arg = new Object[1];
+		Object[] arg = new Object[2];
 		arg[0]=i;
+		arg[1]=m;
+		//Argumento para el broker, indica el número de proveedores en el mercado
+		Object[] arg0 = new Object[1];
+		arg0[0]=j;
 		
 		while(j<=1000){
 		AgentController ac2 = cc.createNewAgent("Proveedor0", "agentes.Proveedor", null);
@@ -458,6 +462,9 @@ public class Marketplace {
 		ac200.start();
 		AgentController ac201 = cc.createNewAgent("Proveedor199", "agentes.Proveedor", null);
 		ac201.start();
+		if(j<=201){
+			break;
+		}
 		AgentController ac202 = cc.createNewAgent("Proveedor200", "agentes.Proveedor", null);
 		ac202.start();
 		AgentController ac203 = cc.createNewAgent("Proveedor201", "agentes.Proveedor", null);
@@ -658,6 +665,9 @@ public class Marketplace {
 		ac300.start();
 		AgentController ac301 = cc.createNewAgent("Proveedor299", "agentes.Proveedor", null);
 		ac301.start();
+		if(j<=301){
+			break;
+		}
 		AgentController ac302 = cc.createNewAgent("Proveedor300", "agentes.Proveedor", null);
 		ac302.start();
 		AgentController ac303 = cc.createNewAgent("Proveedor301", "agentes.Proveedor", null);
@@ -858,6 +868,9 @@ public class Marketplace {
 		ac400.start();
 		AgentController ac401 = cc.createNewAgent("Proveedor399", "agentes.Proveedor", null);
 		ac401.start();
+		if(j<=401){
+			break;
+		}
 		AgentController ac402 = cc.createNewAgent("Proveedor400", "agentes.Proveedor", null);
 		ac402.start();
 		AgentController ac403 = cc.createNewAgent("Proveedor401", "agentes.Proveedor", null);
@@ -1058,6 +1071,9 @@ public class Marketplace {
 		ac500.start();
 		AgentController ac501 = cc.createNewAgent("Proveedor499", "agentes.Proveedor", null);
 		ac501.start();
+		if(j<=501){
+			break;
+		}
 		AgentController ac502 = cc.createNewAgent("Proveedor500", "agentes.Proveedor", null);
 		ac502.start();
 		AgentController ac503 = cc.createNewAgent("Proveedor501", "agentes.Proveedor", null);
@@ -1258,6 +1274,9 @@ public class Marketplace {
 		ac600.start();
 		AgentController ac601 = cc.createNewAgent("Proveedor599", "agentes.Proveedor", null);
 		ac601.start();
+		if(j<=601){
+			break;
+		}
 		AgentController ac602 = cc.createNewAgent("Proveedor600", "agentes.Proveedor", null);
 		ac602.start();
 		AgentController ac603 = cc.createNewAgent("Proveedor601", "agentes.Proveedor", null);
@@ -1458,6 +1477,9 @@ public class Marketplace {
 		ac700.start();
 		AgentController ac701 = cc.createNewAgent("Proveedor699", "agentes.Proveedor", null);
 		ac701.start();
+		if(j<=701){
+			break;
+		}
 		AgentController ac702 = cc.createNewAgent("Proveedor700", "agentes.Proveedor", null);
 		ac702.start();
 		AgentController ac703 = cc.createNewAgent("Proveedor701", "agentes.Proveedor", null);
@@ -1658,6 +1680,9 @@ public class Marketplace {
 		ac800.start();
 		AgentController ac801 = cc.createNewAgent("Proveedor799", "agentes.Proveedor", null);
 		ac801.start();
+		if(j<=801){
+			break;
+		}
 		AgentController ac802 = cc.createNewAgent("Proveedor800", "agentes.Proveedor", null);
 		ac802.start();
 		AgentController ac803 = cc.createNewAgent("Proveedor801", "agentes.Proveedor", null);
@@ -1858,6 +1883,9 @@ public class Marketplace {
 		ac900.start();
 		AgentController ac901 = cc.createNewAgent("Proveedor899", "agentes.Proveedor", null);
 		ac901.start();
+		if(j<=901){
+			break;
+		}
 		AgentController ac902 = cc.createNewAgent("Proveedor900", "agentes.Proveedor", null);
 		ac902.start();
 		AgentController ac903 = cc.createNewAgent("Proveedor901", "agentes.Proveedor", null);
@@ -2063,7 +2091,7 @@ public class Marketplace {
 			}
 		
 		}
-		ac0 = cc.createNewAgent("Agente1", "agentes.Broker", null);
+		ac0 = cc.createNewAgent("Agente1", "agentes.Broker", arg0);
 		ac0.start();
 		
 		AgentController ac1 = cc.createNewAgent("Agente2", "agentes.Consumidor", arg);

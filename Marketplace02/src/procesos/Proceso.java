@@ -21,16 +21,17 @@ public class Proceso extends Agregacion{
 	private double presupuesto;
 	
 	private String nombre;
-	JSONObject obj = new JSONObject();
-	JSONArray nodos = new JSONArray();
-	JSONArray tipoN = new JSONArray();
-	JSONArray activi = new JSONArray();
-	JSONArray itera = new JSONArray();
-	JSONArray probabi = new JSONArray();
-	JSONObject restric = new JSONObject();
+	private JSONObject obj = new JSONObject();
+	private JSONArray nodos = new JSONArray();
+	private JSONArray tipoN = new JSONArray();
+	private JSONArray activi = new JSONArray();
+	private JSONArray itera = new JSONArray();
+	private JSONArray probabi = new JSONArray();
+	private JSONObject restric = new JSONObject();
+	private double complejidad = 0.0;
 	
 		
-	public Proceso(int n, double r) { // Se le entrega el número de actividades/servicios del proceso
+	public Proceso(int n, int r) { // Se le entrega el número de actividades/servicios del proceso
 		long time_start;
 		long time_end;
 		int cont = 0;
@@ -43,6 +44,8 @@ public class Proceso extends Agregacion{
 		probab = new double[n];
 		act = n;
 		time_start = System.currentTimeMillis();
+		
+		
 		obj.put(nombre, time_start);
 		
 		
@@ -233,6 +236,7 @@ public class Proceso extends Agregacion{
 				}
 			}
 		} // Cierra while
+		
 		// Agrego restricciones globales al archivo
 		obj.put("Nodos", nodos);
 		obj.put("Tipo", tipoN);
@@ -244,6 +248,7 @@ public class Proceso extends Agregacion{
 		setRestriccion(r); // Se deberían setear otras condiciones
 		double[] globales;
 		globales = restricGlobal(this, r);
+		setComplejidad();
 		
 		for(int i=0;i<restricciones.length;i++){
 			restric.put(restricciones[i][0], globales[i]);
@@ -263,50 +268,47 @@ public class Proceso extends Agregacion{
 		time_end = System.currentTimeMillis();
 		System.out.println("Tiempo de generación del proceso: "+ ( time_end - time_start ) +" milisegundos.");
 		
-		
-		
-		
 	}// Cierra constructor
 	
-	public void setRestriccion(double n){
-		if(n==0.3){
+	public void setRestriccion(int n){
+		if(n==1){
 			restricciones[0][0]="tiempo";
-			restricciones[0][1]="0.3";
+			restricciones[0][1]="0.5";
 			restricciones[1][0]="dispo";
-			restricciones[1][1]="0.3";
+			restricciones[1][1]="0.5";
 			restricciones[2][0]="through";
-			restricciones[2][1]="0.3";
+			restricciones[2][1]="0.1";
 			restricciones[3][0]="exito";
-			restricciones[3][1]="0.3";
+			restricciones[3][1]="0.55";
 			restricciones[4][0]="confiab";
-			restricciones[4][1]="0.3";
+			restricciones[4][1]="0.55";
 			restricciones[5][0]="confor";
-			restricciones[5][1]="0.3";
+			restricciones[5][1]="0.65";
 			restricciones[6][0]="mejorespr";
-			restricciones[6][1]="0.3";
+			restricciones[6][1]="0.4";
 			restricciones[7][0]="latencia";
-			restricciones[7][1]="0.3";
+			restricciones[7][1]="0.4";
 			restricciones[8][0]="documentacion";
 			restricciones[8][1]="0.3";
 			restricciones[9][0]="presupuesto";
 		}
 		
-		if(n==0.5){
+		if(n==2){
 			
 			restricciones[0][0]="tiempo";
-			restricciones[0][1]="0.5";
+			restricciones[0][1]="0.7";
 			restricciones[1][0]="dispo";
-			restricciones[1][1]="0.50";
+			restricciones[1][1]="0.70";
 			restricciones[2][0]="through";
-			restricciones[2][1]="0.5";
+			restricciones[2][1]="0.1";
 			restricciones[3][0]="exito";
-			restricciones[3][1]="0.5";
+			restricciones[3][1]="0.9";
 			restricciones[4][0]="confiab";
-			restricciones[4][1]="0.5";
+			restricciones[4][1]="0.68";
 			restricciones[5][0]="confor";
-			restricciones[5][1]="0.5";
+			restricciones[5][1]="0.8";
 			restricciones[6][0]="mejorespr";
-			restricciones[6][1]="0.5";
+			restricciones[6][1]="0.65";
 			restricciones[7][0]="latencia";
 			restricciones[7][1]="0.5";
 			restricciones[8][0]="documentacion";
@@ -314,27 +316,69 @@ public class Proceso extends Agregacion{
 			restricciones[9][0]="presupuesto";
 		}
 		
-		if(n==0.7){
+		if(n==3){
 			restricciones[0][0]="tiempo";
-			restricciones[0][1]="0.7";
+			restricciones[0][1]="0.9";
 			restricciones[1][0]="dispo";
-			restricciones[1][1]="0.7";
+			restricciones[1][1]="0.82";
 			restricciones[2][0]="through";
-			restricciones[2][1]="0.7";
+			restricciones[2][1]="0.33";
 			restricciones[3][0]="exito";
-			restricciones[3][1]="0.7";
+			restricciones[3][1]="0.93";
 			restricciones[4][0]="confiab";
-			restricciones[4][1]="0.7";
+			restricciones[4][1]="0.8";
 			restricciones[5][0]="confor";
-			restricciones[5][1]="0.7";
+			restricciones[5][1]="0.85";
 			restricciones[6][0]="mejorespr";
-			restricciones[6][1]="0.7";
+			restricciones[6][1]="0.8";
 			restricciones[7][0]="latencia";
-			restricciones[7][1]="0.7";
+			restricciones[7][1]="0.9";
 			restricciones[8][0]="documentacion";
-			restricciones[8][1]="0.7";
+			restricciones[8][1]="0.6";
 			restricciones[9][0]="presupuesto";
 		}
+	}
+	public void setComplejidad(){ // Usando CFC (Cardoso 2005) sólo importan los nodos tipos 3 y 4
+		int complejidad = 0;
+		int cont3 = 0;
+		int cont4 = 0;
+		for(int i = 0;i < tipoNodo.length;i++){
+		switch(tipoNodo[i]){
+		case 1: // secuencia
+			complejidad += 0;//
+			break;
+		case 2: // sec con iter
+			complejidad += 0;
+			break;
+		case 3: // paralelo
+			/*if(tipoNodo[i-1]!=3){
+				cont3=1;
+			}*/
+			if((i+1) < tipoNodo.length){ // si quedan nodos por revisar
+				if(tipoNodo[i+1] != 3){  // si el siguiente no es 3, le sumo la complejidad
+					complejidad++;
+				} // si es tres no hago nada, pues en el siguiente se suma
+				else{
+					complejidad++;
+				}
+			}else{ //Si no hay más nodos, le sumo la complejidad
+				complejidad += cont3;
+			}
+			break;
+		case 4: // branch
+			cont4++; 
+			if((i+1)< tipoNodo.length){ // asumiendo que sólo saldrá por uno de los nodos del branch, puede incluirse una probabilidad para que sea menor al máximo posible (cont4) y mayor o igual a uno
+				if(tipoNodo[i+1] != 4){
+					complejidad++;
+				}
+			}else{
+				complejidad++;
+			}
+			break;
+		}
+		}
+		System.out.println("La complejidad del proceso es "+complejidad);
+		this.complejidad = complejidad;
 	}
 	
 	public String[][] getRestriccion(){
@@ -357,17 +401,17 @@ public class Proceso extends Agregacion{
 		}
 		return cont;
 	}
-	public double getPresupuesto(double r){
-		if(r== 0.3){
-			presupuesto = (2.4)*act;
+	public double getPresupuesto(int r){
+		if(r== 1){
+			presupuesto = (1)*act;
 		}
 		
-		if(r== 0.5){
-			presupuesto = (2.1)*act;
+		if(r== 2){
+			presupuesto = (0.9)*act;
 		}
 		
-		if(r== 0.7){
-			presupuesto = (1.9)*act;
+		if(r== 3){
+			presupuesto = (0.8)*act;
 		}
 		return presupuesto;
 	}
@@ -389,7 +433,7 @@ public class Proceso extends Agregacion{
 	public int[] getIter(){ // Devuelve el numero de iteraciones de los nodos, cmabia sólo si es de secuencia
 		return iter;
 	}
-	public double[] restricGlobal(Proceso p, double r){ 
+	public double[] restricGlobal(Proceso p, int r){ 
 		
 		double[] restricGlobal = new double[10];
 		restricGlobal[1] = 1;
@@ -403,6 +447,11 @@ public class Proceso extends Agregacion{
 		int[] iter = p.getIter();
 		String[][] restric = p.getRestriccion();
 		int cont = 0; 
+		int tipoAnt = 0;
+		double minRend = 0.0; // Para guardar el mínimo de rendimiento de un conjunto de nodos
+		double maxTpo = 0.0; // Para guardar el máximo de tiempo de respuesta de un conjunto de nodos
+		double maxLat = 0.0; // Para guardar el máximo de latencia de un conjunto de nodos
+		
 		while(cont<tipoNodo.length){ // Caso en que se fija un valor para todos los nodos (una especie de restriccion global basada en un valor ideal para todas las actividades)
 		//for( int i = 0 ; i < tipoNodo.length ; i++ ){
 			
@@ -435,7 +484,9 @@ public class Proceso extends Agregacion{
 			case 3:
 				int cont2 = 0;
 				boolean check = true;
+				
 				while(check){
+					// sumo uno al contador 2 y al 1
 					cont2++;
 					cont++;
 					int suma = cont+cont2;
@@ -465,8 +516,11 @@ public class Proceso extends Agregacion{
 				restricGlobal[7]+=(Double.parseDouble(restric[7][1])); // maximo
 				restricGlobal[8]*=(Math.pow(Double.parseDouble(restric[8][1]), cont2+1));
 				
+				
 				break;
 			case 4:
+				
+				
 				if(cont+1>=act){
 					restricGlobal[0]+=Double.parseDouble(restric[0][1]);
 					restricGlobal[1]*=Double.parseDouble(restric[1][1]);

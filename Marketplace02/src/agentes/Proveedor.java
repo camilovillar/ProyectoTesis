@@ -4,9 +4,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Hashtable;
 import java.util.Iterator;
 
 import org.json.simple.JSONArray;
@@ -19,22 +18,18 @@ import funciones.FuncionUtilidad;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
-import jade.core.behaviours.OneShotBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.Property;
-//import jade.domain.FIPAAgentManagement.Property;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
-//import procesos.Proceso;
 
 public class Proveedor extends Agent{
 	
 	private static final long serialVersionUID = -2231756242227649792L;
 	// Se usa un catálogo para ordenar el servicio, sus atributos
-	private Hashtable<String, Double> catalogue;
 	private FuncionUtilidad funcion;
 	String[][] serv;
 	int nServ; // n servicios en el requerimiento
@@ -55,7 +50,7 @@ public class Proveedor extends Agent{
 	
 	protected void setup(){
 		tiempo_i = System.currentTimeMillis();
-		System.out.println("Hola! El proveedor "+getAID().getName()+" está listo.");
+		//System.out.println("Hola! El proveedor "+getAID().getName()+" está listo.");
 		nombreAgente = this.getName().split("@");
 		
 		
@@ -91,41 +86,6 @@ public class Proveedor extends Agent{
 		}
 		//System.out.println("El número de servicios asignados al proveedor es de: "+nServProv);
 		serv = obtenerServicios(nombreAgente[0]);
-		//System.out.println("El número de servicios guardados del proveedor es de: "+serv.length);
-		/*
-		int cont = 0;
-		JSONParser parser = new JSONParser();
-		try {
-			Object obj = parser.parse(new FileReader("C:\\Users\\Camilo\\Desktop\\Eclipse\\JSON\\Prov\\"+nombreAgente[0]+".json"));
-			JSONObject jsonObject = (JSONObject) obj;
-			long n = (long) jsonObject.get("nServ");
-			nServProv = (int) n;
-			serv = new String[nServProv][11];
-			
-			while(cont < nServProv-1){
-				int cont2 = 0;
-				JSONArray servs = (JSONArray) jsonObject.get("servi"+cont);
-				@SuppressWarnings("unchecked")
-				Iterator<String> iterator = servs.iterator();
-				while (iterator.hasNext()) {
-					serv[cont][cont2] = (iterator.next());
-					cont2++;
-					System.out.println("Se rescató el atributo "+serv[cont][cont2]);
-				}
-				cont++;				
-			}
-		} catch (FileNotFoundException e) {
-			//manejo de error
-		} catch (IOException e) {
-			//manejo de error
-		} catch (ParseException e) {
-			//manejo de error
-		}
-		*/
-		//Convierto atributos de serv a double
-		/*for(int i = 0;i < serv[0].length;i++){
-			System.out.println("Serv "+i+" tiene el valores "+serv[0][i]);
-		}*/
 		
 		atrib = new double[nServProv][9];
 		for(int i = 0; i<serv.length ; i++){
@@ -151,7 +111,7 @@ public class Proveedor extends Agent{
 		registrarEnDF();
 		
 		tiempo_f = System.currentTimeMillis();
-		System.out.println("El "+myAgent.getName()+" registró sus servicios a los "+ ( tiempo_f - tiempo_i ) +" milisegundos.");
+		//System.out.println("El "+myAgent.getName()+" registró sus servicios a los "+ ( tiempo_f - tiempo_i ) +" milisegundos.");
 		
 		addBehaviour(new RecibirRequerimiento());
 		
@@ -222,7 +182,6 @@ public class Proveedor extends Agent{
 		
 		
 		// Registro los servicios del agente
-		int cont = 0;
 		for(int i = 0;i<nServProv;i++){
 			ServiceDescription sd1 = new ServiceDescription();
 			sd1.setName(serv[i][10]);
@@ -231,7 +190,6 @@ public class Proveedor extends Agent{
 				sd1.addProperties(new Property(aName[j],atrib[i][j]));
 			}
 			dfd.addServices(sd1);
-			cont++;
 			//System.out.println("Se registró el servicio "+serv[i][10]+" del prov "+ nombreAgente[0] );
 		}
 		//System.out.println("Se registraron "+cont+" servicios del agente "+nombreAgente[0]);
@@ -270,7 +228,6 @@ public class Proveedor extends Agent{
 				System.out.println("El "+myAgent.getName()+" recibe el req a los "+ ( tiempo_f - tiempo_i ) +" milisegundos.");
 				ACLMessage reply = msg.createReply();
 				broker = msg.getSender();
-				int cont = 0;
 				JSONParser parser = new JSONParser();
 				try {
 					Object obj = parser.parse(new FileReader("C:\\Users\\Camilo\\Desktop\\Eclipse\\JSON\\requerimientos\\"+requerimiento+".json"));
@@ -279,7 +236,6 @@ public class Proveedor extends Agent{
 					nServ = (int) n;
 					
 					String[] servs = new String[nServ];
-					
 					
 					int cont2 = 0;
 					JSONArray servs2 = (JSONArray) jsonObject.get("Actividad");
@@ -299,9 +255,10 @@ public class Proveedor extends Agent{
 						rLocales[cont3][contR] = aux;
 						contR++;
 						
-						if((contR)%9==0){
-						cont3++;
-						contR=0;}	
+						if(contR%9==0){
+							cont3++;
+							contR=0;
+						}	
 					}
 					
 				} catch (FileNotFoundException e) {
@@ -334,11 +291,11 @@ public class Proveedor extends Agent{
 				
 				int mejorOferta[] = elegirMejorOferta(cumple); // Evalúo los servicios que valoro más (es más probable que el consumidor igual los valores)
 				
-				int suma = 0;
+				/*int suma = 0;
 				for(int i = 0;i < mejorOferta.length;i++){
 					suma+=mejorOferta[i];
-				}
-				System.out.println("La oferta del "+nombreAgente[0]+" debe tener "+suma+ " elementos.");
+				}*/
+				//System.out.println("La oferta del "+nombreAgente[0]+" debe tener "+suma+ " elementos.");
 				// Genero la oferta y la envío en JSON
 				tiempo_f = System.currentTimeMillis();
 				
@@ -351,6 +308,8 @@ public class Proveedor extends Agent{
 		
 	}
 	private class OrdenRechazada extends CyclicBehaviour {
+		private static final long serialVersionUID = 1L;
+
 		public void action(){
 			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.REFUSE);
 			ACLMessage msg = myAgent.receive(mt);
@@ -395,17 +354,25 @@ public class Proveedor extends Agent{
 	
 	public int[] cumpleRestr(double[][] restricciones){
 		int cumple[] = new int[nServProv];
-		System.out.println("El "+nombreAgente[0]+" tiene "+ nServProv +" servicios.");
+		//System.out.println("El "+nombreAgente[0]+" tiene "+ nServProv +" servicios.");
 		for(int i = 0;i < cumple.length;i++){
-			for(int j = 0;j < nServProv;j++){
+			for(int j = 0;j < nServ;j++){
 			String nombre = "serv"+j;
-				if(serv[j][10].equals(nombre)){ // comparo el nombre del servicio
+				if(serv[i][10].equals(nombre)){ // comparo el nombre del servicio
 					//System.out.println(nombreAgente[0]+" compara el atributo "+atrib[j][0]+" con la restricción "+restricciones[i][0]);
 					for(int k = 0;k < restricciones[0].length;k++){
-						if(atrib[j][k]>restricciones[j][k]){
-							cumple[j] = 1;
+						if(i == 0 || i==2 || i== 7){
+							if(atrib[i][k]<=restricciones[j][k]){
+								cumple[i] = 1;
+							}else{
+								cumple[i] = 0;
+							}
 						}else{
-							cumple[j] = 0;
+							if(atrib[i][k]>=restricciones[j][k]){
+								cumple[i] = 1;
+							}else{
+								cumple[i] = 0;
+							}
 						}
 					}
 				}
@@ -429,13 +396,19 @@ public class Proveedor extends Agent{
 	public int[] elegirMejorOferta(int[] cumple){ // entrega la posición de los mejores servicios
 		int[] mejores = new int[nServProv]; // guardo al final la posición de los mejores servicios
 		String[] servDisp = getServDisp();
+		int suma=0;
+		for(int i = 0;i < cumple.length;i++){
+			if(cumple[i] == 1) suma++;
+		}
 		System.out.println("El "+nombreAgente[0]+" tiene "+servDisp.length+" servicios disponibles" );
 		ArrayList p = new ArrayList(); // arreglo para guardar precio de bundling
 		ArrayList m = new ArrayList(); // arreglo para guardar posición del serv a ofertar
-		ArrayList n = new ArrayList(); // arreglo para guardar los nombres de los servicios
+		//ArrayList<Object> n = new ArrayList<Object>(); // arreglo para guardar los nombres de los servicios
+		System.out.println("El nro de bund es "+ nroBundling+ " para el "+nombreAgente[0]);
 		System.out.println("La prob de bund es "+ probBundling+ " para el "+nombreAgente[0]+" entonces");
-		if(probBundling>0.4){
-			System.out.println("Entra a hacer bundling el "+nombreAgente[0]);
+		
+		if(probBundling>0.4 && suma > 1){
+			//System.out.println("Entra a hacer bundling el "+nombreAgente[0]);
 			int[] m1 = new int[servDisp.length];
 			double[] p1 = new double[servDisp.length];
 			for(int i = 0;i < serv.length;i++){
@@ -443,7 +416,7 @@ public class Proveedor extends Agent{
 					if(cumple[i]==1){
 						if(servDisp[j].equals(serv[i][10])){
 							if(precio[i]>p1[j]){
-								p1[j]=precio[i]+descuento*margen*precio[i]; // precio más el margen con el descuento respectivo
+								p1[j]=precio[i]+(1-descuento)*margen*precio[i]; // precio más el margen con el descuento respectivo
 								m1[j]=i;
 							}
 						}
@@ -452,7 +425,7 @@ public class Proveedor extends Agent{
 			}
 			//System.out.println("El "+nombreAgente[0]+" tiene "+servDisp.length+" servicios disponibles y "+nroBundling+" nro de bund");
 			if(servDisp.length > nroBundling){// Si los servicios disponibles son más que los que asigno a bundling 
-				System.out.println("El "+nombreAgente[0]+" tiene que entrar a escoger lo mejor entre lo disponible" );
+				//System.out.println("El "+nombreAgente[0]+" tiene que entrar a escoger lo mejor entre lo disponible" );
 				for(int i=0;i<(p1.length-1);i++){
 		            for(int j=i+1;j<p1.length;j++){
 		                if(p1[i]>p1[j]){
@@ -465,27 +438,46 @@ public class Proveedor extends Agent{
 		                }
 		            }
 		        }
-				for(int i = 0;i < nroBundling;i++){
-					p.add(p1[i]);
-					m.add(m1[i]);
+				int[] agregado = new int[nroBundling];
+				for(int i = 0;i < agregado.length;i++){
+					if(i>=1){
+						boolean agrego = true;
+						for(int j = 0;j < i;j++){
+							if((serv[m1[i]][10].equals(serv[agregado[j]][10]))){
+								agrego = false;
+							}
+						}
+						if(agrego){
+							p.add(p1[i]);
+							m.add(m1[i]);
+							agregado[i] = m1[i];
+						}
+					}else{ // i = 0 
+						p.add(p1[i]);
+						m.add(m1[i]);
+						agregado[i] = m1[i];
+					}					
 				}
-				System.out.println("El"+nombreAgente[0]+" agregó "+p.size());
+				System.out.println("El "+nombreAgente[0]+" agregó "+p.size());
 			}else
 			if(servDisp.length == nroBundling){ // Si es el mismo número
-				System.out.println("El "+nombreAgente[0]+" tiene que enviar el mejor de cada disponible" );
+				//System.out.println("El "+nombreAgente[0]+" tiene que enviar el mejor de cada disponible" );
 				for(int i = 0;i < servDisp.length;i++){
 					p.add(p1[i]);
 					m.add(m1[i]);
 				}
-				System.out.println("El"+nombreAgente[0]+" agregó "+p.size());
+				System.out.println("El "+nombreAgente[0]+" agregó "+p.size());
 			}else
 			if(servDisp.length < nroBundling){// Si el número de bundling es mayor que el número de servicios disponibles
-				System.out.println("El "+nombreAgente[0]+" tiene que enviar el mejor de cada disponible sin completar el n de bund" );
+				//System.out.println("El "+nombreAgente[0]+" tiene que enviar el mejor de cada disponible sin completar el n de bund" );
+				if(servDisp.length==1){
+					p1[0]= p1[0]/(1+(1-descuento)*margen); // deshago el descuento, ya que no ofrece un pack realmente
+				}
 				for(int i = 0;i < servDisp.length;i++){
 					p.add(p1[i]);
 					m.add(m1[i]);
 				}
-				System.out.println("El"+nombreAgente[0]+" agregó "+p.size());
+				System.out.println("El "+nombreAgente[0]+" agregó "+p.size());
 				nroBundling = servDisp.length; // actualizo el número de bundling
 			}
 			
@@ -493,7 +485,8 @@ public class Proveedor extends Agent{
 				mejores[(int) m.get(i)] = 1;
 			}
 		}else{ // si la probabilidad de bundling es menor, entonces se elige el servicio con el mayor precio para la oferta
-			System.out.println("No entra a hacer bundling el "+nombreAgente[0]);
+			// o si tiene sólo un servicio que cumpla con las restricciones
+			//System.out.println("No entra a hacer bundling el "+nombreAgente[0]);
 			double p0 = 0.0;
 			int m0 = 0;
 			for(int i = 0;i < mejores.length;i++){
@@ -516,15 +509,15 @@ public class Proveedor extends Agent{
 		list.add(serv[0][10]);// agrego el primer serv a la lista
 		//System.out.println("Agrego el "+serv[0][10]);
 		for(int i = 0;i < nServProv;i++){
-			int k = 0;
+			boolean agregar = true;
 			for(int j = 0;j < list.size();j++){
 				if((list.get(j).equals(serv[i][10]))){
-					//System.out.println(nombreAgente[0]+" No agrego el "+serv[i][10]);
-				}else{
-					list.add(serv[i][10]);
+					agregar = false;
 					//System.out.println(nombreAgente[0]+" Agrego el "+serv[i][10]);
-					break;
 				}
+			}
+			if(agregar){
+				list.add(serv[i][10]);
 			}
 		}
 		servDisp = new String[list.size()];

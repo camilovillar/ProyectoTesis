@@ -8,13 +8,10 @@ import org.jgap.FitnessFunction;
 import org.jgap.Gene;
 import org.jgap.IChromosome;
 
-import funciones.FuncionUtilidad;
-
 public class RestrLocalesFFunction extends FitnessFunction{
 
 	private static final long serialVersionUID = -5484443467776976033L;
 	
-	private int nroGenes;
 	int nServ;
 	private String[][] atrib;
 	private String[] tipo;
@@ -26,9 +23,11 @@ public class RestrLocalesFFunction extends FitnessFunction{
 	private int[] iter; 
 	private double[] prob; 
 	private double[] restr; // restricciones globales
+	private long ti;
+	private double[][][] arregloNiveles;
 	
 	
-	public RestrLocalesFFunction(int i_nroServ, String[][] atrib, double[] param, double[] util, int[] tipoNodo, int[] iter, double[] prob, double[] restr){ // Número de actividades en un proceso por el número de atributos de calidad
+	public RestrLocalesFFunction(int i_nroServ, String[][] atrib, double[] param, double[] util, int[] tipoNodo, int[] iter, double[] prob, double[] restr, double[][][] arregloNiveles){ // Número de actividades en un proceso por el número de atributos de calidad
 		nServ = i_nroServ;
 		//nroGenes = i_nroServ*9 ; 
 		this.setAtrib(atrib);
@@ -38,6 +37,7 @@ public class RestrLocalesFFunction extends FitnessFunction{
 		this.iter = iter;
 		this.prob = prob;
 		this.restr = restr;
+		this.arregloNiveles = arregloNiveles;
 		
 	}
 
@@ -46,38 +46,53 @@ public class RestrLocalesFFunction extends FitnessFunction{
 	@Override
 	protected double evaluate(IChromosome cromosoma) {
 		//System.out.println("1. Entra a evaluar el cromosoma");
+		ti = System.currentTimeMillis();
 		Gene[] gene = cromosoma.getGenes();
-		double[] alelos = new double[gene.length];
+		int[] alelos = new int[gene.length];
 		int largo = (alelos.length/9);
 		double[][] opera = new double[largo][9];
 		
+		
 		for(int i = 0;i < gene.length;i++){
-			alelos[i] =(double) gene[i].getAllele();
+			alelos[i] =(int) gene[i].getAllele(); 
 		}
+		
 		
 		for(int i = 0;i < opera.length;i++){
 			for(int j = 0;j < opera[0].length;j++){
 				//System.out.println(i*9+j);
-				opera[i][j] = alelos[i*9+j];
+				opera[i][j] = arregloNiveles[i][j][alelos[i]];
 			}
 		}
+		
+		long tf = System.currentTimeMillis();
+		System.out.println("El tiempo de obtener los genes es "+(tf-ti));
 		this.saveNServ();
 		
 		double[][] probabilidad = getProbabilidad(opera);
 		double[][] puntaje = getPuntaje(opera, probabilidad);
 		double[] utilidad = getUtilidad3(puntaje);
 		
+		//tf = System.currentTimeMillis();
+		//System.out.println("El tiempo de calcular la utilidad es "+(tf-ti));
+		
 		double ajuste = 0;
 		for(int i = 0;i < utilidad.length;i++){
 			ajuste += utilidad[i]*param[i];
 		}
 		
-		//System.out.println("Se calcula el ajuste "+ajuste);
+		System.out.println("Se calcula el ajuste "+ajuste);
 		
 		double penalty = calcPenalty(opera);
 		
+		System.out.println("El castigo es "+penalty);
+		
+		tf = System.currentTimeMillis();
+		System.out.println("El tiempo al calcular el castigo a la utilidad es "+(tf-ti));
+		
 		ajuste -= penalty;
-		//System.out.println("El ajuste de este cromosoma es de: "+ajuste);
+		if(ajuste<0) ajuste = 0.0;
+		System.out.println("El ajuste de este cromosoma es de: "+ajuste);
 		return ajuste;
 		
 	} // Cierra método evaluate 
@@ -90,7 +105,7 @@ public class RestrLocalesFFunction extends FitnessFunction{
 	}
 	
 	public double getUtilidad2(int a, String serv, double[] alelo){
-		List utilidades = new ArrayList();
+		List<Double> utilidades = new ArrayList<Double>();
 		double umax = -9999.0;
 		for(int i = 0;i<util.length;i++){
 			if(tipo[i].equals(serv)){
@@ -114,7 +129,7 @@ public class RestrLocalesFFunction extends FitnessFunction{
 				}
 				}
 				
-				Iterator iter = utilidades.iterator();
+				Iterator<Double> iter = utilidades.iterator();
 				while(iter.hasNext()){
 					double num = (double) iter.next();
 					if(num> umax){
@@ -130,7 +145,7 @@ public class RestrLocalesFFunction extends FitnessFunction{
 	}
 	
 	public double getUMax(String serv){
-		List utilidades = new ArrayList();
+		List<Double> utilidades = new ArrayList<Double>();
 		
 		for(int i = 0;i<util.length;i++){
 			if(tipo[i].equals(serv)){
@@ -138,7 +153,7 @@ public class RestrLocalesFFunction extends FitnessFunction{
 			}
 		}
 		double umax = -9999.0;
-		Iterator iUtil = utilidades.iterator();
+		Iterator<Double> iUtil = utilidades.iterator();
 		while(iUtil.hasNext()){
 			double num = (double) iUtil.next();
 			if(num> umax){
@@ -412,15 +427,12 @@ public class RestrLocalesFFunction extends FitnessFunction{
 	
 	public double calcPenalty(double[][] opera){
 		double resultado = 0.0;
-		//double wNeg = 1.0;
 		double wGlob = 3.0;
 
-		//double neg = chequeaNeg(opera);
-		//resultado+=(wNeg*neg);
-		 // restricciones globales que se deben cumplir
-		double g = chequeaGlobal(opera, tipoNodo, iter, restr, prob);
-		resultado+=(wGlob*g);
-			
+		// restricciones globales que se deben cumplir
+		int g = chequeaGlobal(opera, tipoNodo, iter, restr, prob);
+		resultado = (wGlob*g/9);
+		System.out.println("El castigo de violar " +g+ " es "+resultado);
 		return resultado;
 	}
 	
@@ -440,7 +452,7 @@ public class RestrLocalesFFunction extends FitnessFunction{
 		return cont;
 	}
 	
-	public double chequeaGlobal(double[][] data, int[] tipoNodo, int[] iter, double[] restr, double[] prob){ 
+	public int chequeaGlobal(double[][] data, int[] tipoNodo, int[] iter, double[] restr, double[] prob){ 
 		int g = 0;
 		double[] restricGlobal = new double[9];
 		restricGlobal[1]=1.0;
@@ -459,27 +471,46 @@ public class RestrLocalesFFunction extends FitnessFunction{
 			
 			switch(tipoNodo[i]){
 			case 1: // secuencia
+				
 				restricGlobal[0] += data[i][0];
+				//System.out.println("La restricción "+0+" quedó como "+restricGlobal[0]+" agregandole "+data[i][0] );
 				restricGlobal[1] *= data[i][1];
+				//System.out.println("La restricción "+1+" quedó como "+restricGlobal[1]+" agregandole "+data[i][1] );
 				restricGlobal[2] += data[i][2];
+				//System.out.println("La restricción "+2+" quedó como "+restricGlobal[2]+" agregandole "+data[i][2] );
 				restricGlobal[3] *= data[i][3];
+				//System.out.println("La restricción "+3+" quedó como "+restricGlobal[3]+" agregandole "+data[i][3] );
 				restricGlobal[4] *= data[i][4];
+				//System.out.println("La restricción "+4+" quedó como "+restricGlobal[4]+" agregandole "+data[i][4] );
 				restricGlobal[5] *= data[i][5];
+				//System.out.println("La restricción "+5+" quedó como "+restricGlobal[5]+" agregandole "+data[i][5] );
 				restricGlobal[6] *= data[i][6];
+				//System.out.println("La restricción "+6+" quedó como "+restricGlobal[6]+" agregandole "+data[i][6] );
 				restricGlobal[7] += data[i][7];
+				//System.out.println("La restricción "+7+" quedó como "+restricGlobal[7]+" agregandole "+data[i][7] );
 				restricGlobal[8] *= data[i][8];
+				//System.out.println("La restricción "+8+" quedó como "+restricGlobal[8]+" agregandole "+data[i][8] );
 				tipoAnt = 1;
 				break;
 			case 2: // sec con iter
 				restricGlobal[0] += iter[i]*data[i][0];
+				//System.out.println("La restricción "+0+" quedó como "+restricGlobal[0]+" agregandole "+data[i][0] );
 				restricGlobal[1] *= Math.pow(data[i][1],iter[i]);
+				//System.out.println("La restricción "+1+" quedó como "+restricGlobal[1]+" agregandole "+data[i][1] );
 				restricGlobal[2] += iter[i]*data[i][2];
+				//System.out.println("La restricción "+2+" quedó como "+restricGlobal[2]+" agregandole "+data[i][2] );
 				restricGlobal[3] *= Math.pow(data[i][3],iter[i]); 
+				//System.out.println("La restricción "+3+" quedó como "+restricGlobal[3]+" agregandole "+data[i][3] );
 				restricGlobal[4] *= Math.pow(data[i][4],iter[i]);
+				//System.out.println("La restricción "+4+" quedó como "+restricGlobal[4]+" agregandole "+data[i][4] );
 				restricGlobal[5] *= Math.pow(data[i][5],iter[i]);
+				//System.out.println("La restricción "+5+" quedó como "+restricGlobal[5]+" agregandole "+data[i][5] );
 				restricGlobal[6] *= Math.pow(data[i][6],iter[i]);
+				//System.out.println("La restricción "+6+" quedó como "+restricGlobal[6]+" agregandole "+data[i][6] );
 				restricGlobal[7] += iter[i]*data[i][7];
+				//System.out.println("La restricción "+7+" quedó como "+restricGlobal[7]+" agregandole "+data[i][7] );
 				restricGlobal[8] *= Math.pow(data[i][8],iter[i]);
+				//System.out.println("La restricción "+8+" quedó como "+restricGlobal[8]+" agregandole "+data[i][8] );
 				tipoAnt = 2;
 				break;
 			case 3: // paralelo
@@ -497,34 +528,58 @@ public class RestrLocalesFFunction extends FitnessFunction{
 				if(tipoNodo[i+1] == 3){ // si el siguiente es del mismo tipo, entonces no hago nada en los valores (0,3 y 5), porque se deberá compara
 					//restricGlobal[0] += data[i][0];
 					restricGlobal[1] *= data[i][1];
+					//System.out.println("La restricción "+1+" quedó como "+restricGlobal[1]+" agregandole "+data[i][2] );
 					//restricGlobal[2] += data[i][2];
 					restricGlobal[3] *= data[i][3];
+					//System.out.println("La restricción "+3+" quedó como "+restricGlobal[3]+" agregandole "+data[i][3] );
 					restricGlobal[4] *= data[i][4];
+					//System.out.println("La restricción "+4+" quedó como "+restricGlobal[4]+" agregandole "+data[i][4] );
 					restricGlobal[5] *= data[i][5];
+					//System.out.println("La restricción "+5+" quedó como "+restricGlobal[5]+" agregandole "+data[i][5] );
 					restricGlobal[6] *= data[i][6];
+					//System.out.println("La restricción "+6+" quedó como "+restricGlobal[6]+" agregandole "+data[i][6] );
 					//restricGlobal[7] += data[i][7];					
 					restricGlobal[8] *= data[i][8];
+					//System.out.println("La restricción "+8+" quedó como "+restricGlobal[8]+" agregandole "+data[i][8] );
 				}else{ // sino
 					restricGlobal[0] += maxTpo;
+					//System.out.println("La restricción "+0+" quedó como "+restricGlobal[0]+" agregandole "+maxTpo );
 					restricGlobal[1] *= data[i][1];
+					//System.out.println("La restricción "+1+" quedó como "+restricGlobal[1]+" agregandole "+data[i][1] );
 					restricGlobal[2] += minRend;
+					//System.out.println("La restricción "+2+" quedó como "+restricGlobal[2]+" agregandole "+minRend);
 					restricGlobal[3] *= data[i][3];
+					//System.out.println("La restricción "+3+" quedó como "+restricGlobal[3]+" agregandole "+data[i][3] );
 					restricGlobal[4] *= data[i][4];
+					//System.out.println("La restricción "+4+" quedó como "+restricGlobal[4]+" agregandole "+data[i][4] );
 					restricGlobal[5] *= data[i][5];
+					//System.out.println("La restricción "+5+" quedó como "+restricGlobal[5]+" agregandole "+data[i][5] );
 					restricGlobal[6] *= data[i][6];
+					//System.out.println("La restricción "+6+" quedó como "+restricGlobal[6]+" agregandole "+data[i][6] );
 					restricGlobal[7] += maxLat;
+					//System.out.println("La restricción "+7+" quedó como "+restricGlobal[7]+" agregandole "+maxLat );
 					restricGlobal[8] *= data[i][8];
+					//System.out.println("La restricción "+8+" quedó como "+restricGlobal[8]+" agregandole "+data[i][8] );
 				}
 				}else{
 					restricGlobal[0] += maxTpo;
+					//System.out.println("La restricción "+0+" quedó como "+restricGlobal[0]+" agregandole "+maxTpo );
 					restricGlobal[1] *= data[i][1];
+					//System.out.println("La restricción "+1+" quedó como "+restricGlobal[1]+" agregandole "+data[i][1] );
 					restricGlobal[2] += minRend;
+					//System.out.println("La restricción "+2+" quedó como "+restricGlobal[2]+" agregandole "+minRend );
 					restricGlobal[3] *= data[i][3];
+					//System.out.println("La restricción "+3+" quedó como "+restricGlobal[3]+" agregandole "+data[i][3] );
 					restricGlobal[4] *= data[i][4];
+					//System.out.println("La restricción "+4+" quedó como "+restricGlobal[4]+" agregandole "+data[i][4] );
 					restricGlobal[5] *= data[i][5];
+					//System.out.println("La restricción "+5+" quedó como "+restricGlobal[5]+" agregandole "+data[i][5] );
 					restricGlobal[6] *= data[i][6];
+					//System.out.println("La restricción "+6+" quedó como "+restricGlobal[6]+" agregandole "+data[i][6] );
 					restricGlobal[7] += maxLat;
+					//System.out.println("La restricción "+7+" quedó como "+restricGlobal[7]+" agregandole "+maxLat );
 					restricGlobal[8] *= data[i][8];
+					//System.out.println("La restricción "+8+" quedó como "+restricGlobal[8]+" agregandole "+data[i][8] );
 				}
 				
 				tipoAnt = 3;
@@ -534,40 +589,41 @@ public class RestrLocalesFFunction extends FitnessFunction{
 					inicio4 = i;
 				}
 				if((i+1)<5){
-				if(tipoNodo[i+1] != 4){// si es el último de tipo 4 en la serie...
-					double r1 = 0.0;
-					double r3 = 0.0;
-					double r4 = 0.0;
-					double r5 = 0.0;
-					double r6 = 0.0;
-					double r8 = 0.0;
-					for(int j = 0;j < (i - inicio4 + 1);j++){
-						restricGlobal[0] += prob[inicio4+j]*data[inicio4+j][0];
-						r1 *= prob[inicio4+j]*data[inicio4+j][1];
-						restricGlobal[2] += prob[inicio4+j]*data[inicio4+j][2];
-						r3 *= prob[inicio4+j]*data[inicio4+j][3];
-						r4 *= prob[inicio4+j]*data[inicio4+j][4];
-						r5 *= prob[inicio4+j]*data[inicio4+j][5];
-						r6 *= prob[inicio4+j]*data[inicio4+j][6];
-						restricGlobal[7] += prob[inicio4+j]*data[inicio4+j][7];
-						r8 *= prob[inicio4+j]*data[inicio4+j][8];
+					if(tipoNodo[i+1] != 4){// si es el último de tipo 4 en la serie...
+						double r1 = 1.0;
+						double r3 = 1.0;
+						double r4 = 1.0;
+						double r5 = 1.0;
+						double r6 = 1.0;
+						double r8 = 1.0;
+						for(int j = 0;j < (i - inicio4 + 1);j++){
+							restricGlobal[0] += prob[inicio4+j]*data[inicio4+j][0];
+							r1 *= prob[inicio4+j]*data[inicio4+j][1];
+							restricGlobal[2] += prob[inicio4+j]*data[inicio4+j][2];
+							r3 *= prob[inicio4+j]*data[inicio4+j][3];
+							r4 *= prob[inicio4+j]*data[inicio4+j][4];
+							r5 *= prob[inicio4+j]*data[inicio4+j][5];
+							r6 *= prob[inicio4+j]*data[inicio4+j][6];
+							restricGlobal[7] += prob[inicio4+j]*data[inicio4+j][7];
+							r8 *= prob[inicio4+j]*data[inicio4+j][8];
+						}
+						restricGlobal[1] *= r1;
+						restricGlobal[3] *= r3;
+						restricGlobal[4] *= r4;
+						restricGlobal[5] *= r5;
+						restricGlobal[6] *= r6;
+						restricGlobal[8] *= r8;
 					}
-					restricGlobal[1] *= r1;
-					restricGlobal[3] *= r3;
-					restricGlobal[4] *= r4;
-					restricGlobal[5] *= r5;
-					restricGlobal[6] *= r6;
-					restricGlobal[8] *= r8;
-				}
 				}else{//Si no hay i+1 entonces hago lo mismo
-					double r1 = 0.0;
-					double r3 = 0.0;
-					double r4 = 0.0;
-					double r5 = 0.0;
-					double r6 = 0.0;
-					double r8 = 0.0;
+					double r1 = 1.0;
+					double r3 = 1.0;
+					double r4 = 1.0;
+					double r5 = 1.0;
+					double r6 = 1.0;
+					double r8 = 1.0;
 					for(int j = 0;j < (i - inicio4 + 1);j++){
 						restricGlobal[0] += prob[inicio4+j]*data[inicio4+j][0];
+						
 						r1 *= prob[inicio4+j]*data[inicio4+j][1];
 						restricGlobal[2] += prob[inicio4+j]*data[inicio4+j][2];
 						r3 *= prob[inicio4+j]*data[inicio4+j][3];
@@ -587,20 +643,72 @@ public class RestrLocalesFFunction extends FitnessFunction{
 				tipoAnt = 4;
 				break;
 			}
-			
-				
+		/*	System.out.println("La restricción "+0+" quedó como "+restricGlobal[0] );
+		*	System.out.println("La restricción "+1+" quedó como "+restricGlobal[1] );
+		*	System.out.println("La restricción "+2+" quedó como "+restricGlobal[2] );
+		*	System.out.println("La restricción "+3+" quedó como "+restricGlobal[3] );
+		*	System.out.println("La restricción "+4+" quedó como "+restricGlobal[4] );
+		*	System.out.println("La restricción "+5+" quedó como "+restricGlobal[5] );
+		*	System.out.println("La restricción "+6+" quedó como "+restricGlobal[6] );
+		*	System.out.println("La restricción "+7+" quedó como "+restricGlobal[7] );
+		*	System.out.println("La restricción "+8+" quedó como "+restricGlobal[8] );
+		*/		
 		}
-		if(restricGlobal[0]<restr[0]){g++;}
-		if(restricGlobal[1]<restr[1]){g++;}
-		if(restricGlobal[2]<restr[2]){g++;}
-		if(restricGlobal[3]<restr[3]){g++;}
-		if(restricGlobal[4]<restr[4]){g++;}
-		if(restricGlobal[5]<restr[5]){g++;}
-		if(restricGlobal[6]<restr[6]){g++;}
-		if(restricGlobal[7]<restr[7]){g++;}
-		if(restricGlobal[8]<restr[8]){g++;}
 		
-		g /= 9;
+		//for(int i = 0;i < restricGlobal.length;i++){
+			
+			if(restricGlobal[0]<=restr[0]){
+				g++;
+				System.out.println("No cumple con la "+0+"a restricción");
+				System.out.println("agregado es "+ restricGlobal[0] + " la restricción es "+ restr[0]);
+			}
+			if(restricGlobal[1]>=restr[1]){
+				g++;
+				System.out.println("No cumple con la "+1+"a restricción");
+				System.out.println("agregado es "+ restricGlobal[1] + " la restricción es "+ restr[1]);
+			}
+			if(restricGlobal[2]<=restr[2]){
+				g++;
+				System.out.println("No cumple con la "+2+"a restricción");
+				System.out.println("agregado es "+ restricGlobal[2] + " la restricción es "+ restr[2]);
+			}
+			if(restricGlobal[3]>=restr[3]){
+				g++;
+				System.out.println("No cumple con la "+3+"a restricción");
+				System.out.println("agregado es "+ restricGlobal[3] + " la restricción es "+ restr[3]);
+			}
+			if(restricGlobal[4]>=restr[4]){
+				g++;
+				System.out.println("No cumple con la "+4+"a restricción");
+				System.out.println("agregado es "+ restricGlobal[4] + " la restricción es "+ restr[4]);
+			}
+			if(restricGlobal[5]>=restr[5]){
+				g++;
+				System.out.println("No cumple con la "+5+"a restricción");
+				System.out.println("agregado es "+ restricGlobal[5] + " la restricción es "+ restr[5]);
+			}
+			if(restricGlobal[6]>=restr[6]){
+				g++;
+				System.out.println("No cumple con la "+6+"a restricción");
+				System.out.println("agregado es "+ restricGlobal[6] + " la restricción es "+ restr[6]);
+			}
+			if(restricGlobal[7]<=restr[7]){
+				g++;
+				System.out.println("No cumple con la "+7+"a restricción");
+				System.out.println("agregado es "+ restricGlobal[7] + " la restricción es "+ restr[7]);
+			}
+			if(restricGlobal[8]>=restr[8]){
+				g++;
+				System.out.println("No cumple con la "+8+"a restricción");
+				System.out.println("agregado es "+ restricGlobal[8] + " la restricción es "+ restr[8]);
+			}
+			
+		//}
+				
+		System.out.println("Las restricciones violadas son "+g);
+		
+		//System.out.println("Retorno un castigo de "+g);
+		
 		return g;
 	}
 

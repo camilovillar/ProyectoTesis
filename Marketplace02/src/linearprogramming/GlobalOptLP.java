@@ -39,9 +39,11 @@ public class GlobalOptLP {
 		try{
 			GRBEnv env = new GRBEnv("GlobalOptLP.log");
 			GRBModel model = new GRBModel(env);
-			GRBVar[] x = new GRBVar[ofertas.length];
-			for(int i = 0;i < ofertas.length;i++){
-				x[i] = model.addVar(0, 1, 0, GRB.BINARY, "x"+i);
+			GRBVar[][] x = new GRBVar[ofertas.length][tipoNodo.length];
+			for(int i = 0;i < x.length;i++){
+				for(int j = 0;j < x[0].length;j++){
+					x[i][j] = model.addVar(0, 1, 0, GRB.BINARY, "x"+i);
+				}
 			}
 			
 			

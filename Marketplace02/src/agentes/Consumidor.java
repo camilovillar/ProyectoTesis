@@ -56,11 +56,14 @@ public class Consumidor extends Agent{
 		//recupero los argumentos entregados, indica el número de actividades en el proceso
 		Object[] args = getArguments();
 		int n=0;
+		int r = 1;
+		
 		if (args != null && args.length > 0) {
 			n = (int) args[0];
+			r = (int) args[1];
 		}
 		
-		double r = 0.3;
+		
 		
 		funcion = new FuncionUtilidad(1);
 		proceso = new Proceso(n, r); 

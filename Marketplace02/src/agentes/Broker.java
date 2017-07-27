@@ -1,7 +1,6 @@
 package agentes;
 
 import jade.core.Agent;
-import jade.core.LifeCycle;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.TickerBehaviour;
 
@@ -13,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Vector;
 
-import org.jgap.Chromosome;
 import org.jgap.IChromosome;
 import org.jgap.impl.CompositeGene;
 import org.jgap.Gene;
@@ -34,7 +32,6 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import linearprogramming.RestrLocalesLP;
-import test.Test;
 
 public class Broker extends Agent{
 	
@@ -46,20 +43,13 @@ public class Broker extends Agent{
 	// Cierra acuerdos con los proveedores
 	// Envia respuestas a consumidor
 	
-	
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -7419979154495603904L;
-	/**
-	 * 
-	 */
 	
 	private AID[] proveedores;
 	private AID consumidor;
 	private long tiempo_i;
 	private long tiempo_f;
-	private String[] servicios; // Listo
+	private String[] servicios; 
 	private String name = "";
 	private double[] rLocales;
 	private double[] parametros;
@@ -69,7 +59,6 @@ public class Broker extends Agent{
 	private double[] probab;
 	private int nServ;
 	//private int niveles = 50;
-	private ArrayList ofertas;
 	private AID[] ofertantes;
 	
 	
@@ -79,9 +68,18 @@ public class Broker extends Agent{
 		// Registro al broker en el DF
 		this.registrarEnDF();
 		
+		
 		addBehaviour(new TickerBehaviour(this, 300){
 			
+			//UID 
+			private static final long serialVersionUID = 1L;
+
 			public void onTick() {
+				Object[] args = getArguments();
+				int n=0;
+				if (args != null && args.length > 0) {
+					n = (int) args[0];
+				}
 				
 				MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
 				ACLMessage msg = myAgent.receive(mt);
@@ -96,27 +94,25 @@ public class Broker extends Agent{
 					tiempo_f = System.currentTimeMillis();
 					System.out.println("El broker obtuvo el proceso a los (milisegundos) "+ ( tiempo_f - tiempo_i ));
 					// Busco proveedores
-					buscarProveedores();		
-					tiempo_f = System.currentTimeMillis();
-					System.out.println("El broker encontró "+proveedores.length+" proveedores a los (milisegundos) "+ ( tiempo_f - tiempo_i ));
 					// Busco los servicios disponibles
+									
+					String[][] arregloServ = buscarProveedoresServiciosDisponibles(n);
+					System.out.println("Se encontraron "+proveedores.length);
+					System.out.println("Se encontraron "+arregloServ.length);
 					
-					
-					String[][] arregloServ = buscarServiciosDisponibles();
-					
+					tiempo_f = System.currentTimeMillis();
 					System.out.println("El broker buscó servicios disponibles a los "+ ( tiempo_f - tiempo_i ) +" milisegundos.");
-					// Debe terminar construyendo un archivo con las restricciones locales y los nodos del proceso.
-					// Numero de nodos, tipos de nodo, restricciones locales, actividades (servicios)
 					
 					
 					//Determino restricciones locales
 					rLocales = generarRestricciones(50, arregloServ); // niveles y arreglo de serv
-					/*for(int i =0;i<rLocales.length;i++){
+					for(int i =0;i<rLocales.length;i++){
 						System.out.println("La restricción "+i +" quedó con el valor "+ rLocales[i]);
-					}*/
+					}
 					tiempo_f = System.currentTimeMillis();
 					System.out.println("El broker generó las restricciones a los (milisegundos) "+ ( tiempo_f - tiempo_i ));
 					
+					// Numero de nodos, tipos de nodo, restricciones locales, actividades (servicios)
 					agregarRestrRequerimiento(rLocales, name);
 					tiempo_f = System.currentTimeMillis();
 					System.out.println("El broker agregó las restricciones al requerimiento a los (milisegundos) "+ ( tiempo_f - tiempo_i ));
@@ -162,8 +158,8 @@ public class Broker extends Agent{
 			JSONArray tipoObject = (JSONArray) jsonObject.get("Tipo");
 			JSONArray actividad = (JSONArray) jsonObject.get("Actividad");
 		
-			Iterator iterator2 = paramObject.iterator();
-			Iterator iterator3 = probabObject.iterator();
+			Iterator<Double> iterator2 = paramObject.iterator();
+			Iterator<Double> iterator3 = probabObject.iterator();
 			Iterator iterator4 = iterObject.iterator();
 			Iterator iterator5 = tipoObject.iterator();
 			Iterator<String> iterator = actividad.iterator();
@@ -182,10 +178,8 @@ public class Broker extends Agent{
 			
 			int cont2 = 0;
 			parametros = new double[9];
-			//while(cont2<parametros.length){
 			while(iterator2.hasNext()){
 				parametros[cont2]= (double) iterator2.next();
-				//parametros[cont2]=0.1;
 				cont2++;
 			}
 			int cont3 = 0;
@@ -226,7 +220,7 @@ public class Broker extends Agent{
 		DFAgentDescription template = new DFAgentDescription();
 		ServiceDescription sd = new ServiceDescription();
 		SearchConstraints getAll = new SearchConstraints();
-		getAll.setMaxResults(new Long(-1));
+		getAll.setMaxResults(new Long(1000));
 		sd.setType("proveedor");
 		template.addServices(sd);
 		DFAgentDescription[] result;
@@ -243,6 +237,88 @@ public class Broker extends Agent{
 			fe.printStackTrace();
 		}
 	}
+	
+	public ArrayList<AID> buscarProveedores2(int n){
+		ArrayList<AID> proveedores = new ArrayList<AID>();
+		System.out.println("Se encontraron los siguientes proveedores:");
+		for(int i = 0;i < n;i++){
+			String s = "Proveedor"+i;
+			DFAgentDescription template = new DFAgentDescription();
+			ServiceDescription sd = new ServiceDescription();
+			SearchConstraints getAll = new SearchConstraints();
+			getAll.setMaxResults(new Long(-1));
+			sd.setName(s);
+			sd.setType("proveedor");
+			template.addServices(sd);
+			
+			DFAgentDescription[] result;
+			try {
+				result = DFService.search(this, template, getAll); 
+				for (int j = 0; j < result.length; ++j) {
+					proveedores.add(result[j].getName());
+					int t = proveedores.size();
+					System.out.println(proveedores.get(t-1));
+				}
+			}catch(Exception e){
+				e.printStackTrace();
+			}
+		}	
+		return proveedores;
+	}
+	
+	public String[][] buscarProveedoresServiciosDisponibles(int n){
+		proveedores = new AID[n];
+		ArrayList<ArrayList> prop = new ArrayList<ArrayList>();
+		for(int i = 0;i< n;i++){
+			String s = "Proveedor"+i;
+			DFAgentDescription template2 = new DFAgentDescription();
+			//ArrayList<ArrayList> prop = new ArrayList<ArrayList>();
+			ServiceDescription sd1 = new ServiceDescription();
+			sd1.setName(s);
+			sd1.setType("proveedor");
+			template2.addServices(sd1);
+			try{
+				 DFAgentDescription[] result = DFService.search(this, template2);
+				 //System.out.println("Encontré "+result.length+ " proveedores.");
+				 for(int j = 0;j < result.length;j++){
+					 DFAgentDescription aux = result[j];
+					 proveedores[i]= aux.getName();
+		        	 //System.out.println("Encuentro al "+ proveedores[i].getLocalName());
+					 Iterator<ServiceDescription> iterServices = aux.getAllServices();
+		        	 while(iterServices.hasNext()){
+		        		 ServiceDescription aux2 = iterServices.next();
+		        		 //System.out.println("El servicio rescatado es " + aux2.getName());
+		        		 Iterator<Property> iterProp = aux2.getAllProperties();
+		        		 ArrayList propServ = new ArrayList();
+		        		 propServ.add(aux2.getName());
+		        		 while(iterProp.hasNext()){
+		        			 Property aux3 = iterProp.next();
+		        			 propServ.add(aux3.getValue());
+		        			 //System.out.println("La propiedad rescatada es " +aux3.getName()+" con el valor de "+aux3.getValue());
+		        		 }
+		        		 if(propServ.size()>9){
+		        			 //System.out.println("Agrego el servicio " + propServ.get(0));
+		        			 prop.add(propServ);
+		        		 }
+		        	 }
+		         } 	 
+			}catch(Exception e){
+				e.printStackTrace();
+			}
+		}
+		String[][] s = new String[prop.size()][10];
+		for(int i = 0;i < prop.size();i++){
+			ArrayList aux1 = prop.get(i);
+			//System.out.println("El arreglo de propiedades tiene un largo de "+aux1.size()+".");
+			for(int j = 0;j < aux1.size();j++){
+				//System.out.println("La propiedad a rescatar tiene el valor "+ aux1.get(j) +"." );
+				Object aux = aux1.get(j);
+				s[i][j] = aux.toString();	
+			}
+		}
+		return s;
+	}
+	
 	public String[][] buscarServiciosDisponibles(){
 		//System.out.println("Entro a buscar los servicios");
 		DFAgentDescription template2 = new DFAgentDescription();
@@ -303,11 +379,7 @@ public class Broker extends Agent{
 	public double[] generarRestricciones(int niveles, String[][] arregloServ){
 		double[] r = new double[nServ*9];
 		
-		/*for(int i = 0;i < nServ;i++){
-			r[i*9] = 1.0;
-			r[(i+1)*9-6] = 1.0;
-		}*/
-		
+		/*
 		RestrLocales re = new RestrLocales(nServ, arregloServ, parametros, tipos, iter, probab, rGlobales);
 		try {
 			IChromosome resultado = re.restrOptimas(niveles);// nro de niveles de calidad para un atributo
@@ -316,17 +388,17 @@ public class Broker extends Agent{
 			//System.out.println("Se recibe el resultado, el primer gen es "+genes[0].getAllele());
 			for(int i = 0;i < genes.length;i++){
 				//System.out.println("Se recibe el resultado, el primer gen es "+genes[0].getAllele());
-				r[i] = (double) genes[i].getAllele();	
+				r[i] = (double) genes[i].getApplicationData();	
 		    }
 			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}*/
 		
 		
-		/*
-		RestrLocalesLP rL = new RestrLocalesLP(30, nServ, arregloServ, parametros, tipos, iter, probab, rGlobales);
+		
+		RestrLocalesLP rL = new RestrLocalesLP(50, nServ, arregloServ, parametros, tipos, iter, probab, rGlobales);
 		
 		double[][][] r1 = rL.optimizar();
 
@@ -337,7 +409,7 @@ public class Broker extends Agent{
 				}
 			}
 		}
-		*/
+		
 		return r;
 	}
 	public void agregarRestrRequerimiento(double [] rLocales, String name){
@@ -355,8 +427,6 @@ public class Broker extends Agent{
 			file.write(jsonObject.toJSONString());
 			file.flush();
 			file.close();
-			
-			//System.out.println("Se guardó en archivo el requerimiento.");
 			
 		} catch (FileNotFoundException e) {
 			//manejo de error
@@ -386,19 +456,19 @@ public class Broker extends Agent{
 		private static final long serialVersionUID = 4141739597869771816L;
 		private MessageTemplate mt; 
 		//private int paso = 0;
-		double[] preciosBajos = new double[nServ];
+		public double[] preciosBajos = new double[nServ];
 		//int[] posBajos = new int[nServ];
 		
-		AID[] bestProveedores = new AID[nServ];
+		public AID[] bestProveedores = new AID[nServ];
 		
-		int[] bundling;
+		public int[] bundling;
 		@Override
 		public void action() {
 			ofertantes = new AID[proveedores.length]; // Arreglo para guardar proveedores que enviaron oferta	
 			
 			// Arreglo de ofertas
 			//ofertas = new String[proveedores.length][2];
-			ArrayList ofertas0 = new ArrayList<ArrayList>();
+			ArrayList<ArrayList> ofertas0 = new ArrayList<ArrayList>();
 			
 			for(int i = 0;i<nServ;i++){
 				preciosBajos[i] = 10.0;
@@ -428,7 +498,7 @@ public class Broker extends Agent{
 				//	System.out.println("La oferta "+i+ " es "+ofertas0.get(i));
 				//}
 				
-				elegirMejoresOfertas(ofertas0);
+				elegirMejoresOfertas(ofertas0, servicios);
 				//} Cierra if 
 				tiempo_f = System.currentTimeMillis();
 				System.out.println("El broker eligió las mejores ofertas a los "+ ( tiempo_f - tiempo_i ) +" milisegundos.");
@@ -529,9 +599,6 @@ public class Broker extends Agent{
 					}
 				}
 			}
-			//for(int i = 0;i < ofertasRecibidas.length;i++){
-				//System.out.println("Se recibió la oferta "+ofertasRecibidas[i]);
-			//}
 			System.out.println("Se recibieron "+ofertasRecibidas.length+" ofertas.");
 			return ofertasRecibidas;
 		}
@@ -541,12 +608,10 @@ public class Broker extends Agent{
 			//System.out.println("Se crea un arraylist." );
 			
 			bundling = new int[ofertasRecibidas.length];
-			int cont = 0;
 			for(int i = 0;i < ofertasRecibidas.length;i++){
 				
 				if(ofertasRecibidas[i].equals("NO PARTICIPO")){
 					System.out.println("Oferta vacía");
-					cont++;
 				}else{
 				JSONParser parser = new JSONParser();
 				try {			
@@ -558,13 +623,12 @@ public class Broker extends Agent{
 					//System.out.println("Abre el archivo "+  ofertasRecibidas[i]);
 					//int cont2 = 0;
 					
-					ArrayList ofer = new ArrayList();
-					
+					ArrayList ofer;
 					long n = (long) jsonOferta.get("n");
 					int n0 = (int) n; // rescato el número de servicios de la oferta
-					
 					bundling[i]=n0;
 					
+					//System.out.println("La oferta "+ofertasRecibidas[i]+" tiene " + bundling[i]+ " servicios" );
 					System.out.println("La oferta " + ofertasRecibidas[i] + " tiene "+ n0 + " servicios");
 					JSONArray ofert = (JSONArray) jsonOferta.get("serv"); // rescato los nombres de los servicios en la oferta
 					for(int j = 0;j < n0;j++){// por cada elemento en el archivo de la oferta
@@ -573,12 +637,13 @@ public class Broker extends Agent{
 						JSONArray atrib = (JSONArray) jsonOferta.get(nombre);
 						ofer = new ArrayList();
 						for(int k = 0;k < 13;k++){
-							//System.out.println("Se rescata el atributo "+k + " del servicio "+nombre+" cuyo valor es "+atrib.get(k));
+							System.out.println("Se rescata el atributo "+k + " del servicio "+nombre+" cuyo valor es "+atrib.get(k));
 							ofer.add(atrib.get(k));
-						// El orden es: atributos (0 a 8), nombreAgente (9), nombre (10), id (11), precio (12)
+						// El orden es: atributos (0 a 8), nombreAgente (9), nombre (10), id (11), precio (12), indicador de la oferta como (13)
 						}
+						System.out.println("La oferta "+ofertasRecibidas[i]+" tiene como id "+i);
 						ofer.add(i);
-						//agrego el indicador de la oferta
+						//agrego el indicador de la oferta como (13)
 						ofertas0.add(ofer);
 					}
 				
@@ -596,34 +661,41 @@ public class Broker extends Agent{
 			return ofertas0;
 		}
 	
+		public void elegirMejoresOfertas(ArrayList ofertas, String[] nombres){
 			
-	
-		public void elegirMejoresOfertas(ArrayList ofertas){
+			GlobalOpt opt = new GlobalOpt(parametros, tipos, rGlobales, iter, probab, ofertas, bundling, nombres);
 			
-			GlobalOpt opt = new GlobalOpt(parametros, tipos, rGlobales, iter, probab, ofertas, bundling);
-			String[] nombres = opt.obtenerNombre(ofertas);
+			String[] nombresProveedores = opt.obtenerNombre(ofertas);
+			
+			ArrayList ofertasOrdenadas = opt.obtenerOfertasOrdenadas();
+			
+			/*for(int i = 0;i < nombresProveedores.length;i++){
+			*	System.out.println("El nombre del proveedor del serv "+i+" es "+nombresProveedores[i]);
+			}*/
 			String[] id = new String[nServ];
+			int[] idOferta = new int[nServ];
 			try {
 				IChromosome resultado = opt.servOptimos();
+				String[][] ofertas2 = opt.setOfertas(ofertas);
 				
-				String[][] valores = new String[nServ][11];
+				String[][] valores = new String[nServ][14];
 				
  				Gene[] genes = new Gene[nServ];
 				genes = resultado.getGenes();
-				//CompositeGene compGene = new CompositeGene();
-				for(int i = 0;i < nServ;i++){
-					CompositeGene compGene = (CompositeGene) genes[i];
-					
-					Vector a = (Vector) compGene.getAllele();	//atrib, precio
-					//System.out.println("El largo de a es "+a.size());
-					for(int j =0;j < a.size();j++){
-						double aux = (double) a.get(j);
-						valores[i][j]= String.valueOf(aux);
+				for(int i = 0;i < genes.length;i++){
+					int aux = (int) genes[i].getAllele();
+					ArrayList aux0 = (ArrayList) ofertasOrdenadas.get(i);
+					//System.out.println(aux0);
+					int posicion = (int) aux0.get(aux);
+					for(int j =0;j < valores[0].length;j++){
+						valores[i][j]= ofertas2[posicion][j];
 						//System.out.println(valores[i][j]);
 						
 					}
-					preciosBajos[i]= (double) a.get(9); // rescato el precio del servicio
-					id[i]=(String) compGene.getApplicationData();
+					// El orden es: atributos (0 a 8), nombreAgente (9), nombre (10), id (11), precio (12), indicador de la oferta como (13)
+					idOferta[i]= Integer.parseInt(ofertas2[posicion][13]);
+					preciosBajos[i]= Double.parseDouble(ofertas2[posicion][12]); // rescato el precio del servicio
+					id[i]=ofertas2[posicion][9]+"_"+ofertas2[posicion][10]+"_"+ofertas2[posicion][11]+"_"+ofertas2[posicion][13];
 				}
 				
 			} catch (Exception e) {
@@ -642,34 +714,6 @@ public class Broker extends Agent{
 				System.out.println("El proveedor es "+ id1[0]+" se setea el mejor ofertante como " + bestProveedores[i].getName());
 			}
 			
-			// dejar registro de mejores ofertas del requerimiento, enviar nombre a consumidor
-			
-			
-			
-			//String s = id1[]
-			/*
-			for(int j = 0;j < ofertas.size();j++){
-				//ArrayList k = (ArrayList) ofertas.get(j);
-				String s = ofertas[j][0];
-				String[] n = s.split("v");
-				// n[1] es el número de servicio
-				int p = Integer.parseInt(n[1]);
-				double aux = Double.parseDouble(ofertas[j][1]);
-				//System.out.println("El precio de la oferta "+ j + " para la actividad "+ n[1] +" es "+ aux);
-				if(preciosBajos[p] > aux){
-					posBajos[p] =j;
-					preciosBajos[p]= aux;
-					continue;
-				}
-			}
-			if(posBajos[nServ-1] >= 0){
-				for (int i = 0; i < nServ; ++i) {
-					bestProveedores[i] = ofertantes[posBajos[i]];
-					//System.out.println("El mejor proveedor para la actividad "+i+" es :");
-					//System.out.println(bestProveedores[i].getName());
-				}
-				//paso = 2;
-			}*/
 		}
 		public boolean enviarAccept(AID[] bestProveedores){
 			ACLMessage order = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
