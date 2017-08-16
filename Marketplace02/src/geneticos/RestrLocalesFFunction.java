@@ -61,7 +61,7 @@ public class RestrLocalesFFunction extends FitnessFunction{
 		for(int i = 0;i < opera.length;i++){
 			for(int j = 0;j < opera[0].length;j++){
 				//System.out.println(i*9+j);
-				opera[i][j] = arregloNiveles[i][j][alelos[i]];
+				opera[i][j] = arregloNiveles[i][j][alelos[i*9+j]];
 			}
 		}
 		
@@ -139,8 +139,6 @@ public class RestrLocalesFFunction extends FitnessFunction{
 				
 			}
 		}
-		
-		
 		return umax;
 	}
 	
@@ -167,14 +165,33 @@ public class RestrLocalesFFunction extends FitnessFunction{
 	
 	public int getNoRestringidos(int pos, String serv, double alelo){ // nro de servicios que cumplen con la restricción.
 		int noRestr = 0;
-		for(int i =0;i<atrib.length;i++){ //reviso todos los servicios en atrib		
-			if(tipo[i].equals(serv) && Double.parseDouble(atrib[i][pos])<alelo){
-				//System.out.println("Se revisa si el "+ tipo[i]+" es igual a " +serv+ " y "+atrib[i][pos]+" cumple con la restriccion "+ alelo + " para el atributo "+ pos );
-				noRestr++;
+		for(int i =0;i<atrib.length;i++){ //reviso todos los servicios en atrib
+			if(tipo[i].equals(serv) && Double.parseDouble(atrib[i][pos])<=alelo){
+					//System.out.println("Se revisa si el "+ tipo[i]+" es igual a " +serv+ " y "+atrib[i][pos]+" cumple con la restriccion "+ alelo + " para el atributo "+ pos );
+					noRestr++;
 			}
+			/*else{
+			*	if(tipo[i].equals(serv) && Double.parseDouble(atrib[i][pos])>=alelo){
+			*		//System.out.println("Se revisa si el "+ tipo[i]+" es igual a " +serv+ " y "+atrib[i][pos]+" cumple con la restriccion "+ alelo + " para el atributo "+ pos );
+			*		noRestr++;
+			*	}
+			*}
+			*/
 		}
 		//if(noRestr == 0) noRestr =1;
 		return noRestr;
+	}
+	public double[][] getNoRestringidos2(int pos, String serv, double alelo){
+		int n = 0;
+		for(int i = 0;i < atrib.length;i++){
+			
+			if(tipo[i].equals(serv)){
+				if(pos ==0){
+					
+				}
+			}
+		}
+		return new double[0][0];
 	}
 	
 	public double[][] getProbabilidad(double[][] opera){
@@ -183,10 +200,62 @@ public class RestrLocalesFFunction extends FitnessFunction{
 			String s = "serv"+i;
 			for(int j = 0;j < opera[0].length;j++){
 				prob[i][j] = getNoRestringidos(j, s, opera[i][j]);
+				System.out.println("no restringidos para el "+s+" y el atributo "+j+" con la restricción "+opera[i][j]);
 				prob[i][j] /= getNServ(s);
+				System.out.println("la probabilidad para el "+s+" y el atributo "+j+" con la restricción "+opera[i][j]);
 			}
 		}
+		
 		return prob;
+	}
+	public int getNoRestringidos(int serv, double[] alelo){ // serv indica el número del servicio que se está revisando
+		int n = 0;
+		for(int i  = 0;i < atrib.length;i++){
+			String actividad = "serv"+serv;
+			if(tipo[i].equals(actividad)){
+				if(Double.parseDouble(atrib[i][0])<alelo[serv*9+0]){
+				if(Double.parseDouble(atrib[i][1])<alelo[serv*9+1]){
+				if(Double.parseDouble(atrib[i][2])<alelo[serv*9+2]){
+				if(Double.parseDouble(atrib[i][3])<alelo[serv*9+3]){
+				if(Double.parseDouble(atrib[i][4])<alelo[serv*9+4]){
+				if(Double.parseDouble(atrib[i][5])<alelo[serv*9+5]){
+				if(Double.parseDouble(atrib[i][6])<alelo[serv*9+6]){
+				if(Double.parseDouble(atrib[i][7])<alelo[serv*9+7]){
+				if(Double.parseDouble(atrib[i][8])<alelo[serv*9+8]){
+					n++;			// si pasa todas las restricciones, entonces se suma 1 a los serv no restringidos
+				}
+				}
+				}
+				}
+				}
+				}
+				}
+				}
+				}
+			}
+		}
+		return n;
+	}
+	public void saveNServ(){
+		nServN = new int[nServ];
+		for(int j = 0;j < nServN.length;j++){
+			String serv = "serv"+j;
+			int n = 0;
+			for(int i = 0;i<tipo.length;i++){
+				if(tipo[i].equals(serv)){
+					n++;
+				}
+			}
+			nServN[j] = n;
+		}
+	}
+	public int getNServ(String serv){
+		String[] s = serv.split("v");
+		int n = Integer.parseInt(s[1]);
+		
+		//System.out.println("El número de servicios es :"+nServN[n]);
+		if(nServN[n] == 0) nServN[n] =1;
+		return nServN[n];
 	}
 	
 	public double[][] getPuntaje(double[][] opera, double[][] probabilidad){
@@ -300,12 +369,12 @@ public class RestrLocalesFFunction extends FitnessFunction{
 				}
 				if((i+1)<5){
 				if(tipoNodo[i+1] != 4){// si es el último de tipo 4 en la serie...
-					double r1 = 0.0;
-					double r3 = 0.0;
-					double r4 = 0.0;
-					double r5 = 0.0;
-					double r6 = 0.0;
-					double r8 = 0.0;
+					double r1 = 1.0;
+					double r3 = 1.0;
+					double r4 = 1.0;
+					double r5 = 1.0;
+					double r6 = 1.0;
+					double r8 = 1.0;
 					for(int j = 0;j < (i - inicio4 + 1);j++){
 						restricGlobal[0] += prob[inicio4+j]*puntaje[inicio4+j][0];
 						r1 *= prob[inicio4+j]*puntaje[inicio4+j][1];
@@ -325,12 +394,12 @@ public class RestrLocalesFFunction extends FitnessFunction{
 					restricGlobal[8] *= r8;
 				}
 				}else{//Si no hay i+1 entonces hago lo mismo
-					double r1 = 0.0;
-					double r3 = 0.0;
-					double r4 = 0.0;
-					double r5 = 0.0;
-					double r6 = 0.0;
-					double r8 = 0.0;
+					double r1 = 1.0;
+					double r3 = 1.0;
+					double r4 = 1.0;
+					double r5 = 1.0;
+					double r6 = 1.0;
+					double r8 = 1.0;
 					for(int j = 0;j < (i - inicio4 + 1);j++){
 						restricGlobal[0] += prob[inicio4+j]*puntaje[inicio4+j][0];
 						r1 *= prob[inicio4+j]*puntaje[inicio4+j][1];
@@ -356,55 +425,6 @@ public class RestrLocalesFFunction extends FitnessFunction{
 		return restricGlobal;
 	}
 	
-	public int getNoRestringidos(int serv, double[] alelo){ // serv indica el número del servicio que se está revisando
-		int n = 0;
-		for(int i  = 0;i < atrib.length;i++){
-			if(tipo[i].equals(serv)){
-				if(Double.parseDouble(atrib[i][0])<alelo[serv*9+0]){
-				if(Double.parseDouble(atrib[i][1])<alelo[serv*9+1]){
-				if(Double.parseDouble(atrib[i][2])<alelo[serv*9+2]){
-				if(Double.parseDouble(atrib[i][3])<alelo[serv*9+3]){
-				if(Double.parseDouble(atrib[i][4])<alelo[serv*9+4]){
-				if(Double.parseDouble(atrib[i][5])<alelo[serv*9+5]){
-				if(Double.parseDouble(atrib[i][6])<alelo[serv*9+6]){
-				if(Double.parseDouble(atrib[i][7])<alelo[serv*9+7]){
-				if(Double.parseDouble(atrib[i][8])<alelo[serv*9+8]){
-					n++;			// si pasa todas las restricciones, entonces se suma 1 a los serv no restringidos
-				}
-				}
-				}
-				}
-				}
-				}
-				}
-				}
-				}
-			}
-		}
-		return n;
-	}
-	public void saveNServ(){
-		nServN = new int[nServ];
-		for(int j = 0;j < nServN.length;j++){
-			String serv = "serv"+j;
-			int n = 0;
-			for(int i = 0;i<tipo.length;i++){
-				if(tipo[i].equals(serv)){
-					n++;
-				}
-			}
-			nServN[j] = n;
-		}
-	}
-	public int getNServ(String serv){
-		String[] s = serv.split("v");
-		int n = Integer.parseInt(s[1]);
-		
-		//System.out.println("El número de servicios es :"+nServN[n]);
-		if(nServN[n] == 0) nServN[n] =1;
-		return nServN[n];
-	}
-	
 	public void setAtrib(String[][] atributos){
 		atrib = new String[atributos.length][atributos[0].length-1];
 		tipo = new String[atributos.length];
@@ -427,7 +447,7 @@ public class RestrLocalesFFunction extends FitnessFunction{
 	
 	public double calcPenalty(double[][] opera){
 		double resultado = 0.0;
-		double wGlob = 3.0;
+		double wGlob = 1.0;
 
 		// restricciones globales que se deben cumplir
 		int g = chequeaGlobal(opera, tipoNodo, iter, restr, prob);
@@ -588,7 +608,7 @@ public class RestrLocalesFFunction extends FitnessFunction{
 				if(tipoAnt != 4){// el primero de tipo 4 marca el inicio de los nodos en branch
 					inicio4 = i;
 				}
-				if((i+1)<5){
+				if((i+1)<nServ){
 					if(tipoNodo[i+1] != 4){// si es el último de tipo 4 en la serie...
 						double r1 = 1.0;
 						double r3 = 1.0;
@@ -623,7 +643,6 @@ public class RestrLocalesFFunction extends FitnessFunction{
 					double r8 = 1.0;
 					for(int j = 0;j < (i - inicio4 + 1);j++){
 						restricGlobal[0] += prob[inicio4+j]*data[inicio4+j][0];
-						
 						r1 *= prob[inicio4+j]*data[inicio4+j][1];
 						restricGlobal[2] += prob[inicio4+j]*data[inicio4+j][2];
 						r3 *= prob[inicio4+j]*data[inicio4+j][3];
@@ -643,61 +662,63 @@ public class RestrLocalesFFunction extends FitnessFunction{
 				tipoAnt = 4;
 				break;
 			}
-		/*	System.out.println("La restricción "+0+" quedó como "+restricGlobal[0] );
-		*	System.out.println("La restricción "+1+" quedó como "+restricGlobal[1] );
-		*	System.out.println("La restricción "+2+" quedó como "+restricGlobal[2] );
-		*	System.out.println("La restricción "+3+" quedó como "+restricGlobal[3] );
-		*	System.out.println("La restricción "+4+" quedó como "+restricGlobal[4] );
-		*	System.out.println("La restricción "+5+" quedó como "+restricGlobal[5] );
-		*	System.out.println("La restricción "+6+" quedó como "+restricGlobal[6] );
-		*	System.out.println("La restricción "+7+" quedó como "+restricGlobal[7] );
-		*	System.out.println("La restricción "+8+" quedó como "+restricGlobal[8] );
-		*/		
+
+				
 		}
 		
 		//for(int i = 0;i < restricGlobal.length;i++){
+		
+		System.out.println("La restricción "+0+" quedó como "+restricGlobal[0] );
+		System.out.println("La restricción "+1+" quedó como "+restricGlobal[1] );
+		System.out.println("La restricción "+2+" quedó como "+restricGlobal[2] );
+		System.out.println("La restricción "+3+" quedó como "+restricGlobal[3] );
+		System.out.println("La restricción "+4+" quedó como "+restricGlobal[4] );
+		System.out.println("La restricción "+5+" quedó como "+restricGlobal[5] );
+		System.out.println("La restricción "+6+" quedó como "+restricGlobal[6] );
+		System.out.println("La restricción "+7+" quedó como "+restricGlobal[7] );
+		System.out.println("La restricción "+8+" quedó como "+restricGlobal[8] );
 			
-			if(restricGlobal[0]<=restr[0]){
+			if(restricGlobal[0]<restr[0]){
 				g++;
 				System.out.println("No cumple con la "+0+"a restricción");
 				System.out.println("agregado es "+ restricGlobal[0] + " la restricción es "+ restr[0]);
 			}
-			if(restricGlobal[1]>=restr[1]){
+			if(restricGlobal[1]<restr[1]){
 				g++;
 				System.out.println("No cumple con la "+1+"a restricción");
 				System.out.println("agregado es "+ restricGlobal[1] + " la restricción es "+ restr[1]);
 			}
-			if(restricGlobal[2]<=restr[2]){
+			if(restricGlobal[2]<restr[2]){
 				g++;
 				System.out.println("No cumple con la "+2+"a restricción");
 				System.out.println("agregado es "+ restricGlobal[2] + " la restricción es "+ restr[2]);
 			}
-			if(restricGlobal[3]>=restr[3]){
+			if(restricGlobal[3]<restr[3]){
 				g++;
 				System.out.println("No cumple con la "+3+"a restricción");
 				System.out.println("agregado es "+ restricGlobal[3] + " la restricción es "+ restr[3]);
 			}
-			if(restricGlobal[4]>=restr[4]){
+			if(restricGlobal[4]<restr[4]){
 				g++;
 				System.out.println("No cumple con la "+4+"a restricción");
 				System.out.println("agregado es "+ restricGlobal[4] + " la restricción es "+ restr[4]);
 			}
-			if(restricGlobal[5]>=restr[5]){
+			if(restricGlobal[5]<restr[5]){
 				g++;
 				System.out.println("No cumple con la "+5+"a restricción");
 				System.out.println("agregado es "+ restricGlobal[5] + " la restricción es "+ restr[5]);
 			}
-			if(restricGlobal[6]>=restr[6]){
+			if(restricGlobal[6]<restr[6]){
 				g++;
 				System.out.println("No cumple con la "+6+"a restricción");
 				System.out.println("agregado es "+ restricGlobal[6] + " la restricción es "+ restr[6]);
 			}
-			if(restricGlobal[7]<=restr[7]){
+			if(restricGlobal[7]<restr[7]){
 				g++;
 				System.out.println("No cumple con la "+7+"a restricción");
 				System.out.println("agregado es "+ restricGlobal[7] + " la restricción es "+ restr[7]);
 			}
-			if(restricGlobal[8]>=restr[8]){
+			if(restricGlobal[8]<restr[8]){
 				g++;
 				System.out.println("No cumple con la "+8+"a restricción");
 				System.out.println("agregado es "+ restricGlobal[8] + " la restricción es "+ restr[8]);

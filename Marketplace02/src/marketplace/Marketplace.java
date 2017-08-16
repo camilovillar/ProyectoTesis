@@ -2,9 +2,11 @@ package marketplace;
 
 import jade.core.Profile;
 import jade.core.ProfileImpl;
+import jade.domain.JADEAgentManagement.ShutdownPlatform;
 import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
+import parametros.Parametros;
 import servicios.Servicios;
 
 public class Marketplace {
@@ -13,7 +15,8 @@ public class Marketplace {
 	ContainerController cc = jade.core.Runtime.instance().createMainContainer(p);
 	AgentController ac0;
 	
-	public Marketplace(int i, int j, boolean k, int l, int m) throws StaleProxyException{ // i actividades, j proveedores, k = true si se distribuyen de nuevo los servicios, false si no; l servicios totales
+	
+	public Marketplace(int i, int j, boolean k, int l, int m, Parametros p) throws StaleProxyException{ // i actividades, j proveedores, k = true si se distribuyen de nuevo los servicios, false si no; l servicios totales
 		if(k){
 			Servicios s = new Servicios();
 			s.creaArchivoServicios();
@@ -22,11 +25,25 @@ public class Marketplace {
 		}
 		//Argumento para el consumidor, indica el número de actividades del proceso
 		Object[] arg = new Object[2];
+		Object[] arg0 = new Object[12];
 		arg[0]=i;
 		arg[1]=m;
+		
+		
 		//Argumento para el broker, indica el número de proveedores en el mercado
-		Object[] arg0 = new Object[1];
 		arg0[0]=j;
+		arg0[1]= (int) p.niveles;
+		arg0[2] = (int) p.evolucionesLocal;
+		arg0[3] = (int) p.mutacionLocal;
+		arg0[4] = (double) p.crossoverLocal;
+		arg0[5] = (int) p.poblacionInicialLocal;
+		arg0[6] = (int) p.evolucionesGlobal;
+		arg0[7] = (double) p.crossoverGlobal;
+		arg0[8] = (int) p.mutacionGlobal;
+		arg0[9] = (int) p.poblacionInicialGlobal;
+		arg0[10] = (int) p.geneticosGlobal;
+		arg0[11] = (int) p.geneticosLocal;
+				
 		
 		while(j<=1000){
 		AgentController ac2 = cc.createNewAgent("Proveedor0", "agentes.Proveedor", null);
@@ -2108,7 +2125,9 @@ public class Marketplace {
 	}
 	public void detenerMarket() throws StaleProxyException{
 		cc.kill();
+		new ShutdownPlatform();
 		jade.core.Runtime.instance().shutDown();
+		
 	}
 	
 

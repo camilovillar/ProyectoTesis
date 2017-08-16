@@ -7,12 +7,12 @@ public class NivelesServicio {
 	int nServ;
 	
 	public NivelesServicio(String[][] atrib, int nServ){
-		/*System.out.println("Atrib tiene las siguientes dimensiones: "+atrib.length + " y "+atrib[0].length);
+		System.out.println("Atrib tiene las siguientes dimensiones: "+atrib.length + " y "+atrib[0].length);
 		for(int y = 0;y < atrib.length;y++){
 			for(int z = 0;z < atrib[0].length;z++){
 				System.out.println("Atrib "+atrib[y][z]);
 			}
-		}*/
+		}
 		/*System.out.println("Se recibe atrib: " + atrib[0][0]);
 		System.out.println("Se recibe atrib: " + atrib[1][0]);
 		System.out.println("Se recibe atrib: " + atrib[0][1]);*/
@@ -36,7 +36,7 @@ public class NivelesServicio {
 				minimo=atributos[i][pos];
 			}
 		}
-		return minimo;
+		return 0.0001d;
 	}
 	
 	public double calcMaximo(String serv, int pos){
@@ -46,12 +46,16 @@ public class NivelesServicio {
 				maximo=atributos[i][pos];
 			}
 		}
-		return maximo;	
+		return 0.9999d;	
 	}
 	
 	public double[][][] getNiveles(int niveles){
 		
 		double[][][] arreglo = new double[nServ][atributos[0].length][niveles]; // numero de servicios x atributos x niveles
+		System.out.println("la matriz es de tamaño "+arreglo.length);
+		System.out.println("la matriz es de tamaño "+arreglo[0].length);
+		System.out.println("la matriz es de tamaño "+arreglo[0][0].length);
+		
 		
 		double[][] maximos = new double[nServ][atributos[0].length];
 		double[][] minimos = new double[nServ][atributos[0].length];
@@ -61,19 +65,19 @@ public class NivelesServicio {
 			String act1 = "serv"+(i);
 			for(int j = 0;j<atributos[0].length;j++){
 				maximos[i][j] = calcMaximo(act1, j);
-				//System.out.println("Se setea el máximo del "+act1+" atributo "+j+" en "+maximos[i][j]);
+				System.out.println("Se setea el máximo del "+act1+" atributo "+j+" en "+maximos[i][j]);
 				minimos[i][j] = calcMinimo(act1, j);
-				//System.out.println("Se setea el mínimo del "+act1+" atributo "+j+" en "+minimos[i][j]);
+				System.out.println("Se setea el mínimo del "+act1+" atributo "+j+" en "+minimos[i][j]);
 				delta[i][j] = (maximos[i][j]-minimos[i][j])/niveles;
 				
 				
 				for(int k = 0;k < niveles;k++){
 					if(k < 1){
 						arreglo[i][j][k]=minimos[i][j];
-						System.out.println("El valor del arreglo es para "+i+", "+j+", "+0+" es: "+arreglo[i][j][0]);
+						//System.out.println("El valor del arreglo es para "+i+", "+j+", "+0+" es: "+arreglo[i][j][0]);
 					}else{
 						arreglo[i][j][k] = arreglo[i][j][k-1] + delta[i][j];
-						System.out.println("El valor del arreglo es para "+i+", "+j+", "+k+" es: "+arreglo[i][j][k]);
+						//System.out.println("El valor del arreglo es para "+i+", "+j+", "+k+" es: "+arreglo[i][j][k]);
 					}
 				}
 			}
@@ -84,6 +88,7 @@ public class NivelesServicio {
 	public double[][][] asignarAleatorio(int niveles){
 		double[][][] arreglo = getNiveles(niveles); 
 		double[][][] num = new double[arreglo.length][arreglo[0].length][2]; // numero de servicios x atributos
+		
 		for(int i =0;i < arreglo.length;i++){
 			for(int j =0;j < arreglo[0].length;j++){
 				int aleatorio = (int) Math.floor(Math.random() * niveles);
@@ -94,7 +99,4 @@ public class NivelesServicio {
 		}
 		return num;
 	}
-	
-	
-
 }

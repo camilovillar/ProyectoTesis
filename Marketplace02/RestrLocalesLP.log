@@ -70,3 +70,580 @@ Gurobi 7.0.2 (win64, Java) logging started 07/26/17 17:36:55
 
 Gurobi 7.0.2 (win64, Java) logging started 07/26/17 18:17:58
 
+
+Gurobi 7.0.2 (win64, Java) logging started 08/01/17 11:25:08
+
+
+Gurobi 7.0.2 (win64, Java) logging started 08/01/17 11:37:05
+
+
+Gurobi 7.0.2 (win64, Java) logging started 08/01/17 11:41:36
+
+
+Gurobi 7.0.2 (win64, Java) logging started 08/01/17 11:47:36
+
+
+Gurobi 7.0.2 (win64, Java) logging started 08/01/17 14:08:29
+
+
+Gurobi 7.0.2 (win64, Java) logging started 08/01/17 14:11:08
+
+
+Gurobi 7.0.2 (win64, Java) logging started 08/01/17 14:13:09
+
+
+Gurobi 7.0.2 (win64, Java) logging started 08/01/17 14:16:40
+
+
+Gurobi 7.0.2 (win64, Java) logging started 08/01/17 14:18:39
+
+
+Gurobi 7.0.2 (win64, Java) logging started 08/01/17 14:22:51
+
+
+Gurobi 7.0.2 (win64, Java) logging started 08/01/17 14:27:52
+
+
+Gurobi 7.0.2 (win64, Java) logging started 08/01/17 14:48:32
+
+
+Gurobi 7.0.2 (win64, Java) logging started 08/01/17 14:54:18
+
+
+Gurobi 7.0.2 (win64, Java) logging started 08/01/17 14:57:00
+
+
+Gurobi 7.0.2 (win64, Java) logging started 08/01/17 15:02:25
+
+
+Gurobi 7.0.2 (win64, Java) logging started 08/01/17 15:17:56
+
+
+Gurobi 7.0.2 (win64, Java) logging started 08/01/17 15:26:06
+
+
+Gurobi 7.0.2 (win64, Java) logging started 08/01/17 15:34:29
+
+
+Gurobi 7.0.2 (win64, Java) logging started 08/01/17 17:17:34
+
+
+Gurobi 7.0.2 (win64, Java) logging started 08/01/17 17:19:03
+
+Optimize a model with 0 rows, 2250 columns and 0 nonzeros
+Variable types: 0 continuous, 2250 integer (2250 binary)
+Coefficient statistics:
+  Matrix range     [0e+00, 0e+00]
+  Objective range  [2e-03, 1e+100]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [0e+00, 0e+00]
+Warning: Model contains large objective coefficients
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+Found heuristic solution: objective -0
+
+Explored 0 nodes (0 simplex iterations) in 0.05 seconds
+Thread count was 1 (of 4 available processors)
+
+Solution count 1: -0 
+Pool objective bound -0
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective -0.000000000000e+00, best bound -0.000000000000e+00, gap 0.0000%
+
+Gurobi 7.0.2 (win64, Java) logging started 08/01/17 17:46:38
+
+Optimize a model with 0 rows, 2250 columns and 0 nonzeros
+Variable types: 0 continuous, 2250 integer (2250 binary)
+Coefficient statistics:
+  Matrix range     [0e+00, 0e+00]
+  Objective range  [2e-03, 1e+100]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [0e+00, 0e+00]
+Warning: Model contains large objective coefficients
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+Found heuristic solution: objective -0
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 4 available processors)
+
+Solution count 1: -0 
+Pool objective bound -0
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective -0.000000000000e+00, best bound -0.000000000000e+00, gap 0.0000%
+
+Gurobi 7.0.2 (win64, Java) logging started 08/01/17 17:52:06
+
+Optimize a model with 0 rows, 2250 columns and 0 nonzeros
+Variable types: 0 continuous, 2250 integer (2250 binary)
+Coefficient statistics:
+  Matrix range     [0e+00, 0e+00]
+  Objective range  [2e-03, 1e+100]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [0e+00, 0e+00]
+Warning: Model contains large objective coefficients
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+Found heuristic solution: objective -0
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 4 available processors)
+
+Solution count 1: -0 
+Pool objective bound -0
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective -0.000000000000e+00, best bound -0.000000000000e+00, gap 0.0000%
+
+Gurobi 7.0.2 (win64, Java) logging started 08/01/17 17:56:21
+
+Optimize a model with 0 rows, 2250 columns and 0 nonzeros
+Variable types: 0 continuous, 2250 integer (2250 binary)
+Coefficient statistics:
+  Matrix range     [0e+00, 0e+00]
+  Objective range  [2e-03, 1e+100]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [0e+00, 0e+00]
+Warning: Model contains large objective coefficients
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+Found heuristic solution: objective -0
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 4 available processors)
+
+Solution count 1: -0 
+Pool objective bound -0
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective -0.000000000000e+00, best bound -0.000000000000e+00, gap 0.0000%
+
+Gurobi 7.0.2 (win64, Java) logging started 08/01/17 18:01:15
+
+Optimize a model with 0 rows, 2250 columns and 0 nonzeros
+Variable types: 0 continuous, 2250 integer (2250 binary)
+Coefficient statistics:
+  Matrix range     [0e+00, 0e+00]
+  Objective range  [2e-03, 1e+100]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [0e+00, 0e+00]
+Warning: Model contains large objective coefficients
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+Found heuristic solution: objective -0
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 4 available processors)
+
+Solution count 1: -0 
+Pool objective bound -0
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective -0.000000000000e+00, best bound -0.000000000000e+00, gap 0.0000%
+
+Gurobi 7.0.2 (win64, Java) logging started 08/01/17 18:05:08
+
+Optimize a model with 0 rows, 2250 columns and 0 nonzeros
+Variable types: 0 continuous, 2250 integer (2250 binary)
+Coefficient statistics:
+  Matrix range     [0e+00, 0e+00]
+  Objective range  [2e-03, 1e+100]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [0e+00, 0e+00]
+Warning: Model contains large objective coefficients
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+Found heuristic solution: objective -0
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 4 available processors)
+
+Solution count 1: -0 
+Pool objective bound -0
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective -0.000000000000e+00, best bound -0.000000000000e+00, gap 0.0000%
+
+Gurobi 7.0.2 (win64, Java) logging started 08/01/17 18:15:38
+
+
+Gurobi 7.0.2 (win64, Java) logging started 08/02/17 11:01:09
+
+
+Gurobi 7.0.2 (win64, Java) logging started 08/02/17 11:04:17
+
+Optimize a model with 45 rows, 2250 columns and 45 nonzeros
+Variable types: 0 continuous, 2250 integer (2250 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [2e-03, 1e+100]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 1e+00]
+Warning: Model contains large objective coefficients
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+Presolve removed 45 rows and 2250 columns
+Presolve time: 0.08s
+Presolve: All rows and columns removed
+
+Explored 0 nodes (0 simplex iterations) in 0.10 seconds
+Thread count was 1 (of 4 available processors)
+
+Solution count 0
+Pool objective bound 1e+100
+
+Model objective exceeds cutoff
+Best objective -, best bound -, gap -
+
+Gurobi 7.0.2 (win64, Java) logging started 08/02/17 11:28:52
+
+Optimize a model with 45 rows, 2250 columns and 45 nonzeros
+Variable types: 0 continuous, 2250 integer (2250 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [2e-03, 1e+100]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 1e+00]
+Warning: Model contains large objective coefficients
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+Presolve removed 45 rows and 2250 columns
+Presolve time: 0.00s
+Presolve: All rows and columns removed
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 4 available processors)
+
+Solution count 0
+Pool objective bound 1e+100
+
+Model objective exceeds cutoff
+Best objective -, best bound -, gap -
+
+Gurobi 7.0.2 (win64, Java) logging started 08/02/17 11:41:14
+
+Optimize a model with 45 rows, 2250 columns and 45 nonzeros
+Variable types: 0 continuous, 2250 integer (2250 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [2e-03, 1e+100]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 1e+00]
+Warning: Model contains large objective coefficients
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+Presolve removed 45 rows and 2250 columns
+Presolve time: 0.00s
+Presolve: All rows and columns removed
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 4 available processors)
+
+Solution count 0
+Pool objective bound 1e+100
+
+Model objective exceeds cutoff
+Best objective -, best bound -, gap -
+
+Gurobi 7.0.2 (win64, Java) logging started 08/02/17 11:49:04
+
+Optimize a model with 45 rows, 2250 columns and 45 nonzeros
+Variable types: 0 continuous, 2250 integer (2250 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [2e-03, 1e+100]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 1e+00]
+Warning: Model contains large objective coefficients
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+Presolve removed 45 rows and 2250 columns
+Presolve time: 0.00s
+Presolve: All rows and columns removed
+
+Explored 0 nodes (0 simplex iterations) in 0.01 seconds
+Thread count was 1 (of 4 available processors)
+
+Solution count 0
+Pool objective bound 1e+100
+
+Model objective exceeds cutoff
+Best objective -, best bound -, gap -
+
+Gurobi 7.0.2 (win64, Java) logging started 08/02/17 12:13:43
+
+
+Gurobi 7.0.2 (win64, Java) logging started 08/02/17 12:15:40
+
+Optimize a model with 46 rows, 2250 columns and 46 nonzeros
+Variable types: 0 continuous, 2250 integer (2250 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [2e-03, 1e+100]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 3e+00]
+Warning: Model contains large objective coefficients
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+Presolve removed 44 rows and 2249 columns
+Presolve time: 0.05s
+
+Explored 0 nodes (0 simplex iterations) in 0.06 seconds
+Thread count was 1 (of 4 available processors)
+
+Solution count 0
+
+Model is infeasible
+Best objective -, best bound -, gap -
+
+Gurobi 7.0.2 (win64, Java) logging started 08/02/17 12:22:31
+
+Optimize a model with 46 rows, 2250 columns and 46 nonzeros
+Variable types: 0 continuous, 2250 integer (2250 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [2e-03, 1e+100]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 1e+00]
+Warning: Model contains large objective coefficients
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+Presolve removed 46 rows and 2250 columns
+Presolve time: 0.00s
+Presolve: All rows and columns removed
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 4 available processors)
+
+Solution count 0
+Pool objective bound 1e+100
+
+Model objective exceeds cutoff
+Best objective -, best bound -, gap -
+
+Gurobi 7.0.2 (win64, Java) logging started 08/02/17 12:34:04
+
+Optimize a model with 53 rows, 2250 columns and 53 nonzeros
+Variable types: 0 continuous, 2250 integer (2250 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [2e-03, 1e+100]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [4e-01, 3e+00]
+Warning: Model contains large objective coefficients
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+Presolve removed 53 rows and 2250 columns
+Presolve time: 0.00s
+Presolve: All rows and columns removed
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 4 available processors)
+
+Solution count 0
+Pool objective bound 1e+100
+
+Model objective exceeds cutoff
+Best objective -, best bound -, gap -
+
+Gurobi 7.0.2 (win64, Java) logging started 08/02/17 12:45:16
+
+Optimize a model with 53 rows, 2250 columns and 53 nonzeros
+Variable types: 0 continuous, 2250 integer (2250 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [2e-03, 1e+100]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e-01, 3e+00]
+Warning: Model contains large objective coefficients
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+Presolve removed 53 rows and 2250 columns
+Presolve time: 0.00s
+Presolve: All rows and columns removed
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 4 available processors)
+
+Solution count 0
+Pool objective bound 1e+100
+
+Model objective exceeds cutoff
+Best objective -, best bound -, gap -
+
+Gurobi 7.0.2 (win64, Java) logging started 08/02/17 13:03:31
+
+Optimize a model with 53 rows, 2250 columns and 53 nonzeros
+Variable types: 0 continuous, 2250 integer (2250 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [2e-03, 1e+100]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [3e-01, 4e+00]
+Warning: Model contains large objective coefficients
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+Presolve removed 53 rows and 2250 columns
+Presolve time: 0.00s
+Presolve: All rows and columns removed
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 4 available processors)
+
+Solution count 0
+Pool objective bound 1e+100
+
+Model objective exceeds cutoff
+Best objective -, best bound -, gap -
+
+Gurobi 7.0.2 (win64, Java) logging started 08/02/17 13:05:31
+
+Optimize a model with 53 rows, 2250 columns and 53 nonzeros
+Variable types: 0 continuous, 2250 integer (2250 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [2e-03, 1e+100]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [6e-01, 5e+00]
+Warning: Model contains large objective coefficients
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+Presolve removed 53 rows and 2250 columns
+Presolve time: 0.00s
+Presolve: All rows and columns removed
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 4 available processors)
+
+Solution count 0
+Pool objective bound 1e+100
+
+Model objective exceeds cutoff
+Best objective -, best bound -, gap -
+
+Gurobi 7.0.2 (win64, Java) logging started 08/02/17 13:09:33
+
+Optimize a model with 53 rows, 2250 columns and 53 nonzeros
+Variable types: 0 continuous, 2250 integer (2250 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [2e-03, 1e+100]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [5e-02, 1e+00]
+Warning: Model contains large objective coefficients
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+Presolve removed 53 rows and 2250 columns
+Presolve time: 0.00s
+Presolve: All rows and columns removed
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 4 available processors)
+
+Solution count 0
+Pool objective bound 1e+100
+
+Model objective exceeds cutoff
+Best objective -, best bound -, gap -
+
+Gurobi 7.0.2 (win64, Java) logging started 08/02/17 14:46:39
+
+Optimize a model with 51 rows, 2250 columns and 51 nonzeros
+Variable types: 0 continuous, 2250 integer (2250 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [2e-03, 1e+100]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [4e-01, 3e+00]
+Warning: Model contains large objective coefficients
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+Presolve removed 51 rows and 2250 columns
+Presolve time: 0.00s
+Presolve: All rows and columns removed
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 4 available processors)
+
+Solution count 0
+Pool objective bound 1e+100
+
+Model objective exceeds cutoff
+Best objective -, best bound -, gap -
+
+Gurobi 7.0.2 (win64, Java) logging started 08/04/17 16:10:33
+
+Optimize a model with 51 rows, 2250 columns and 3750 nonzeros
+Variable types: 0 continuous, 2250 integer (2250 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [2e-03, 1e+100]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e-01, 6e+00]
+Warning: Model contains large objective coefficients
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+Presolve removed 51 rows and 2250 columns
+Presolve time: 0.01s
+Presolve: All rows and columns removed
+
+Explored 0 nodes (0 simplex iterations) in 0.03 seconds
+Thread count was 1 (of 4 available processors)
+
+Solution count 1: -0.0658662 
+Pool objective bound -0.0658662
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective -6.586619702928e-02, best bound -6.586619702928e-02, gap 0.0000%
+
+Gurobi 7.0.2 (win64, Java) logging started 08/04/17 16:19:21
+
+Optimize a model with 51 rows, 2250 columns and 3750 nonzeros
+Variable types: 0 continuous, 2250 integer (2250 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [2e-03, 1e+100]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [5e-02, 1e+00]
+Warning: Model contains large objective coefficients
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+Presolve removed 51 rows and 2250 columns
+Presolve time: 0.00s
+Presolve: All rows and columns removed
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 4 available processors)
+
+Solution count 1: -0.0650824 
+Pool objective bound -0.0650824
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective -6.508238935726e-02, best bound -6.508238935726e-02, gap 0.0000%
+
+Gurobi 7.0.2 (win64, Java) logging started 08/07/17 13:12:56
+
+Optimize a model with 51 rows, 2250 columns and 3750 nonzeros
+Variable types: 0 continuous, 2250 integer (2250 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [2e-03, 1e+100]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e-01, 2e+00]
+Warning: Model contains large objective coefficients
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+Presolve removed 51 rows and 2250 columns
+Presolve time: 0.00s
+Presolve: All rows and columns removed
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 4 available processors)
+
+Solution count 1: -0.0656065 
+Pool objective bound -0.0656065
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective -6.560654464381e-02, best bound -6.560654464381e-02, gap 0.0000%

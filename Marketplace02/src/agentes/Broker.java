@@ -31,7 +31,9 @@ import jade.domain.FIPAAgentManagement.SearchConstraints;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+import linearprogramming.GlobalOptLP;
 import linearprogramming.RestrLocalesLP;
+import parametros.Parametros;
 
 public class Broker extends Agent{
 	
@@ -60,7 +62,12 @@ public class Broker extends Agent{
 	private int nServ;
 	//private int niveles = 50;
 	private AID[] ofertantes;
-	
+	private int niveles; 
+	private int evolucionesGlobal;
+	private double crossoverGlobal;
+	private int mutacionGlobal;
+	private int poblacionGlobal;
+	private int geneticosGlobal;
 	
 	protected void setup(){
 		tiempo_i = System.currentTimeMillis();
@@ -77,8 +84,31 @@ public class Broker extends Agent{
 			public void onTick() {
 				Object[] args = getArguments();
 				int n=0;
+				int evolucionesLocal = 0;
+				int mutacionLocal = 0;
+				double crossoverLocal = 0.0d;
+				int poblacionInicialLocal = 0;
+				int geneticosLocal = 2;
+				evolucionesGlobal = 0;
+				crossoverGlobal = 0.0d;
+				mutacionGlobal = 0;
+				poblacionGlobal = 0;
+				geneticosGlobal = 1;
+				
 				if (args != null && args.length > 0) {
 					n = (int) args[0];
+					niveles = (int) args[1];
+					evolucionesLocal = (int) args[2];
+					mutacionLocal = (int) args[3];
+					crossoverLocal = (double) args[4];
+					poblacionInicialLocal = (int) args[5];
+					evolucionesGlobal = (int) args[6];
+					crossoverGlobal = (double) args[7];
+					mutacionGlobal = (int) args[8];
+					poblacionGlobal = (int) args[9];
+					geneticosGlobal = (int) args[10];
+					geneticosLocal = (int) args[11];
+					
 				}
 				
 				MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
@@ -103,9 +133,10 @@ public class Broker extends Agent{
 					tiempo_f = System.currentTimeMillis();
 					System.out.println("El broker buscó servicios disponibles a los "+ ( tiempo_f - tiempo_i ) +" milisegundos.");
 					
+					Parametros p = new Parametros(niveles, poblacionInicialLocal, mutacionLocal,crossoverLocal, evolucionesLocal, geneticosLocal);
 					
 					//Determino restricciones locales
-					rLocales = generarRestricciones(50, arregloServ); // niveles y arreglo de serv
+					rLocales = generarRestricciones(niveles, arregloServ, geneticosLocal, p); // niveles y arreglo de serv
 					for(int i =0;i<rLocales.length;i++){
 						System.out.println("La restricción "+i +" quedó con el valor "+ rLocales[i]);
 					}
@@ -376,39 +407,54 @@ public class Broker extends Agent{
 		}
 		return s;
 	}
-	public double[] generarRestricciones(int niveles, String[][] arregloServ){
+	public double[] generarRestricciones(int niveles, String[][] arregloServ, int geneticos, Parametros p){
+		// geneticos indica si se prefiere el método de resolución mediante algoritmos genéticos ( =1) 
+		// o el método lineal (=0)
+		
 		double[] r = new double[nServ*9];
 		
-		/*
-		RestrLocales re = new RestrLocales(nServ, arregloServ, parametros, tipos, iter, probab, rGlobales);
-		try {
-			IChromosome resultado = re.restrOptimas(niveles);// nro de niveles de calidad para un atributo
-			Gene[] genes = new Gene[nServ*9];
-			genes = resultado.getGenes();
-			//System.out.println("Se recibe el resultado, el primer gen es "+genes[0].getAllele());
-			for(int i = 0;i < genes.length;i++){
-				//System.out.println("Se recibe el resultado, el primer gen es "+genes[0].getAllele());
-				r[i] = (double) genes[i].getApplicationData();	
-		    }
-			
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/
 		
-		
-		
-		RestrLocalesLP rL = new RestrLocalesLP(50, nServ, arregloServ, parametros, tipos, iter, probab, rGlobales);
-		
-		double[][][] r1 = rL.optimizar();
-
-		for(int i = 0;i < r1.length;i++){
-			for(int j = 0;j < r1[0].length;j++){
-				for(int k = 0;k < r1[0][0].length;k++){
-					System.out.println(r1[i][j][k]);
-				}
-			}
+		for(int i =0;i<r.length;i++){
+			r[i] = 1.0d;
 		}
+		
+		
+		if(geneticos ==1){
+			RestrLocales re = new RestrLocales(nServ, arregloServ, parametros, tipos, iter, probab, rGlobales, p);
+			try {
+				IChromosome resultado = re.restrOptimas(niveles);// nro de niveles de calidad para un atributo
+				Gene[] genes = new Gene[nServ*9];
+				double[][][] arregloNiveles = re.getArregloNiveles();
+				genes = resultado.getGenes();
+				//System.out.println("Se recibe el resultado, el primer gen es "+genes[0].getAllele());
+				for(int i = 0;i < arregloNiveles.length;i++){
+					for(int j =0;j < arregloNiveles[0].length;j++){
+					int aux = i*9+j;
+						System.out.println("Se recibe el resultado, el gen "+aux+" es "+genes[aux].getAllele());
+						r[aux] = (double) arregloNiveles[i][j][(int) genes[aux].getAllele()];
+					}
+		    	}
+			
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}else if(geneticos == 0){
+			System.out.println("Entra a la programación lineal");
+			RestrLocalesLP rL = new RestrLocalesLP(50, nServ, arregloServ, parametros, tipos, iter, probab, rGlobales);
+		
+			double[][] r1 = rL.optimizar();
+
+			for(int i = 0;i < r1.length;i++){
+				for(int j = 0;j < r1[0].length;j++){
+					System.out.println("la restricción queda con el valor "+r1[i][j]);
+					r[i*9+j] = r1[i][j];
+				}
+				
+			}
+			
+		}
+		
 		
 		return r;
 	}
@@ -462,6 +508,7 @@ public class Broker extends Agent{
 		public AID[] bestProveedores = new AID[nServ];
 		
 		public int[] bundling;
+		public int[] bundling2;
 		@Override
 		public void action() {
 			ofertantes = new AID[proveedores.length]; // Arreglo para guardar proveedores que enviaron oferta	
@@ -498,7 +545,9 @@ public class Broker extends Agent{
 				//	System.out.println("La oferta "+i+ " es "+ofertas0.get(i));
 				//}
 				
-				elegirMejoresOfertas(ofertas0, servicios);
+				Parametros pGlobal = new Parametros(poblacionGlobal,mutacionGlobal, crossoverGlobal, evolucionesGlobal, geneticosGlobal);
+				
+				elegirMejoresOfertas(ofertas0, servicios, geneticosGlobal , pGlobal);
 				//} Cierra if 
 				tiempo_f = System.currentTimeMillis();
 				System.out.println("El broker eligió las mejores ofertas a los "+ ( tiempo_f - tiempo_i ) +" milisegundos.");
@@ -608,6 +657,7 @@ public class Broker extends Agent{
 			//System.out.println("Se crea un arraylist." );
 			
 			bundling = new int[ofertasRecibidas.length];
+			bundling2 = new int[ofertasRecibidas.length];
 			for(int i = 0;i < ofertasRecibidas.length;i++){
 				
 				if(ofertasRecibidas[i].equals("NO PARTICIPO")){
@@ -637,12 +687,13 @@ public class Broker extends Agent{
 						JSONArray atrib = (JSONArray) jsonOferta.get(nombre);
 						ofer = new ArrayList();
 						for(int k = 0;k < 13;k++){
-							System.out.println("Se rescata el atributo "+k + " del servicio "+nombre+" cuyo valor es "+atrib.get(k));
+							//System.out.println("Se rescata el atributo "+k + " del servicio "+nombre+" cuyo valor es "+atrib.get(k));
 							ofer.add(atrib.get(k));
 						// El orden es: atributos (0 a 8), nombreAgente (9), nombre (10), id (11), precio (12), indicador de la oferta como (13)
 						}
 						System.out.println("La oferta "+ofertasRecibidas[i]+" tiene como id "+i);
 						ofer.add(i);
+						bundling2[i]=i;
 						//agrego el indicador de la oferta como (13)
 						ofertas0.add(ofer);
 					}
@@ -661,17 +712,66 @@ public class Broker extends Agent{
 			return ofertas0;
 		}
 	
-		public void elegirMejoresOfertas(ArrayList ofertas, String[] nombres){
+		public void elegirMejoresOfertas(ArrayList ofertas, String[] nombres, int geneticos, Parametros p){
 			
-			GlobalOpt opt = new GlobalOpt(parametros, tipos, rGlobales, iter, probab, ofertas, bundling, nombres);
+			if(geneticos == 0){
+				GlobalOptLP opt = new GlobalOptLP(parametros, tipos, rGlobales, iter, probab, ofertas, bundling2, nombres);
+				int[] mejores = new int[ofertas.size()];
+				mejores = opt.optimizar();
+				
+				int suma = 0;
+				for(int i = 0;i < mejores.length;i++){
+					suma+=mejores[i];
+				}
+				System.out.println("elegí los mejores "+ suma+ " servicios.");
+				
+				int[] posicionMejores = new int[nServ];
+				int cont = 0;
+				System.out.println("Los mejores servicios son:");
+				for(int i = 0;i < mejores.length;i++){
+					if(mejores[i] != 0){
+						System.out.println(ofertas.get(i));
+						posicionMejores[cont] = i;
+						cont++;
+					}
+				}
+				
+				double sumaPrecios = 0;
+				for(int i = 0;i <ofertas.size();i++){
+					if(mejores[i]!=0){
+						ArrayList aux = (ArrayList) ofertas.get(i);
+						for(int j = 0;j < ofertantes.length;j++){
+							String[] nombreAgente = ofertantes[j].getName().split("@");
+							boolean b = nombreAgente[0].equals((String) aux.get(9));
+							for(int k = 0;k < posicionMejores.length; k++){
+								if(b){
+									bestProveedores[k]= ofertantes[j];
+									System.out.println("Se guardo como mejor proveedor a "+bestProveedores[k]);
+								}
+							}
+						}
+					}				
+				}
+				for(int i = 0;i < posicionMejores.length;i++){
+					ArrayList aux = (ArrayList) ofertas.get(posicionMejores[i]);
+					sumaPrecios += (double) aux.get(12);
+					System.out.println("El proveedor es "+ aux.get(9)+" se setea el mejor ofertante como " + bestProveedores[i].getName());
+					System.out.println("Para el servicio "+aux.get(10)+" a un precio de "+aux.get(12));
+				}
+			}			
 			
-			String[] nombresProveedores = opt.obtenerNombre(ofertas);
+			if(geneticos == 1){
+			
+			GlobalOpt opt = new GlobalOpt(parametros, tipos, rGlobales, iter, probab, ofertas, bundling, nombres, p);
+			
+			//String[] nombresProveedores = opt.obtenerNombre(ofertas);
 			
 			ArrayList ofertasOrdenadas = opt.obtenerOfertasOrdenadas();
 			
 			/*for(int i = 0;i < nombresProveedores.length;i++){
 			*	System.out.println("El nombre del proveedor del serv "+i+" es "+nombresProveedores[i]);
-			}*/
+			*}
+			*/
 			String[] id = new String[nServ];
 			int[] idOferta = new int[nServ];
 			try {
@@ -690,7 +790,6 @@ public class Broker extends Agent{
 					for(int j =0;j < valores[0].length;j++){
 						valores[i][j]= ofertas2[posicion][j];
 						//System.out.println(valores[i][j]);
-						
 					}
 					// El orden es: atributos (0 a 8), nombreAgente (9), nombre (10), id (11), precio (12), indicador de la oferta como (13)
 					idOferta[i]= Integer.parseInt(ofertas2[posicion][13]);
@@ -712,6 +811,7 @@ public class Broker extends Agent{
 					if(b){bestProveedores[i]= ofertantes[j];}
 				}
 				System.out.println("El proveedor es "+ id1[0]+" se setea el mejor ofertante como " + bestProveedores[i].getName());
+			}
 			}
 			
 		}

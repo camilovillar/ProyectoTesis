@@ -25,12 +25,13 @@ import org.jgap.impl.MutationOperator;
 import org.jgap.impl.StockRandomGenerator;
 
 import ofertas.Ofertas;
+import parametros.Parametros;
 
 public class GlobalOpt {
 	
 	private Configuration m_config;
-	private int maxEvolution = 50;
-	private int populationSize = 20; 
+	private int maxEvolution;
+	private int populationSize; 
 	private int serv;
 	private double[] param;
 	private int[] tipoNodo;
@@ -42,9 +43,10 @@ public class GlobalOpt {
 	private String[] nombresActividades;
 	private ArrayList<ArrayList> ofertasOrdenadas;
 	private Ofertas ordenarOfertas;
+	private Parametros parametros;
 	private long ti;
 	
-	public GlobalOpt(double[] param, int[] tipoNodo, double[] restr, int[] iter, double[] prob, ArrayList<ArrayList> ofertas, int[] bundling, String[] nombres){
+	public GlobalOpt(double[] param, int[] tipoNodo, double[] restr, int[] iter, double[] prob, ArrayList<ArrayList> ofertas, int[] bundling, String[] nombres, Parametros p){
 		this.setIter(iter);
 		this.setParam(param);
 		this.setProb(prob);
@@ -56,6 +58,9 @@ public class GlobalOpt {
 		this.nombresActividades = nombres;
 		ordenarOfertas = new Ofertas(this.ofertas, serv);
 		ofertasOrdenadas = ordenarOfertas.buscarOfertas(nombresActividades);
+		this.parametros = p;
+		this.maxEvolution = (int) parametros.evolucionesGlobal;
+		this.populationSize = (int) parametros.poblacionInicialGlobal;
 	}
 	
 	public FitnessFunction createFitnessFunction() { 
@@ -76,8 +81,8 @@ public class GlobalOpt {
 	    config.setKeepPopulationSizeConstant(true);
 	    config.setFitnessEvaluator(new DefaultFitnessEvaluator());
 	    config.setChromosomePool(new ChromosomePool());
-	    config.addGeneticOperator(new MutationOperator(config, 2)); // rate es 1/numero
-		config.addGeneticOperator(new CrossoverOperator(config, 0.9)); // xover double para porcentaje
+	    config.addGeneticOperator(new MutationOperator(config, (int) parametros.mutacionGlobal)); // rate es 1/numero
+		config.addGeneticOperator(new CrossoverOperator(config, (double) parametros.crossoverGlobal)); // xover double para porcentaje
 		
 	    return config;
 	}
@@ -89,8 +94,8 @@ public class GlobalOpt {
 		m_config.setFitnessFunction(ff);
 		m_config.setPreservFittestIndividual(true); // Determina si mantener o no a los mejores individuos, Creo que también se llama elitismo	    
 		m_config.setPopulationSize(populationSize);
-		List geneticOp = m_config.getGeneticOperators();
-		Iterator it = geneticOp.iterator();
+		//List geneticOp = m_config.getGeneticOperators();
+		//Iterator it = geneticOp.iterator();
 		/*while(it.hasNext()){
 		*	System.out.println(it.next());
 		}*/

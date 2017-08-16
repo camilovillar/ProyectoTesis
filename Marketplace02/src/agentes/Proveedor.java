@@ -202,8 +202,8 @@ public class Proveedor extends Agent{
 	}
 	
 	protected void takeDown(){
-		
-		/*try {
+		/*
+		try {
 			DFService.deregister(this);
 		}
 		catch (FIPAException fe) {
@@ -291,11 +291,11 @@ public class Proveedor extends Agent{
 				
 				int mejorOferta[] = elegirMejorOferta(cumple); // Evalúo los servicios que valoro más (es más probable que el consumidor igual los valores)
 				
-				/*int suma = 0;
+				int suma = 0;
 				for(int i = 0;i < mejorOferta.length;i++){
 					suma+=mejorOferta[i];
-				}*/
-				//System.out.println("La oferta del "+nombreAgente[0]+" debe tener "+suma+ " elementos.");
+				}
+				System.out.println("La oferta del "+nombreAgente[0]+" debe tener "+suma+ " elementos.");
 				// Genero la oferta y la envío en JSON
 				tiempo_f = System.currentTimeMillis();
 				
@@ -317,7 +317,7 @@ public class Proveedor extends Agent{
 				String cont = msg.getContent();
 				if(cont.equals("refuse")){
 					System.out.println("Al cabo que ni quería");
-					doDelete();
+					takeDown();
 				}
 			}
 		}
@@ -338,11 +338,12 @@ public class Proveedor extends Agent{
 					reply.setPerformative(ACLMessage.INFORM);
 					reply.setContent("ok");
 					//System.out.println("Orden aceptada recibida.");
-					doDelete();
+					takeDown();
 				}else {
 					reply.setPerformative(ACLMessage.FAILURE);
 					reply.setContent("No quiero vender");
 					System.out.println("Al cabo que ni quería.");
+					takeDown();
 				}
 				reply.addReceiver(aux);
 				myAgent.send(reply);
@@ -355,23 +356,36 @@ public class Proveedor extends Agent{
 	public int[] cumpleRestr(double[][] restricciones){
 		int cumple[] = new int[nServProv];
 		//System.out.println("El "+nombreAgente[0]+" tiene "+ nServProv +" servicios.");
-		for(int i = 0;i < cumple.length;i++){
-			for(int j = 0;j < nServ;j++){
+		
+		for(int j = 0;j < nServ;j++){
 			String nombre = "serv"+j;
+			for(int i = 0;i < cumple.length;i++){
 				if(serv[i][10].equals(nombre)){ // comparo el nombre del servicio
-					//System.out.println(nombreAgente[0]+" compara el atributo "+atrib[j][0]+" con la restricción "+restricciones[i][0]);
-					for(int k = 0;k < restricciones[0].length;k++){
-						if(i == 0 || i==2 || i== 7){
-							if(atrib[i][k]<=restricciones[j][k]){
-								cumple[i] = 1;
-							}else{
-								cumple[i] = 0;
-							}
-						}else{
-							if(atrib[i][k]>=restricciones[j][k]){
-								cumple[i] = 1;
-							}else{
-								cumple[i] = 0;
+					//System.out.println(nombreAgente[0]+" compara el atributo "+0+ " de "+i+" "+atrib[i][0]+" con la restricción "+0+" de "+j+" "+restricciones[j][0]);
+					if(atrib[i][0]<=restricciones[j][0]){
+						//System.out.println(nombreAgente[0]+" compara el atributo "+1+ " de "+i+" "+atrib[i][1]+" con la restricción "+1+" de "+j+" "+restricciones[j][1]);
+						if(atrib[i][1]<=restricciones[j][1]){
+							//System.out.println(nombreAgente[0]+" compara el atributo "+2+ " de "+i+" "+atrib[i][2]+" con la restricción "+2+" de "+j+" "+restricciones[j][2]);
+							if(atrib[i][2]<=restricciones[j][2]){
+								//System.out.println(nombreAgente[0]+" compara el atributo "+3+ " de "+i+" "+atrib[i][3]+" con la restricción "+3+" de "+j+" "+restricciones[j][3]);
+								if(atrib[i][3]<=restricciones[j][3]){
+									//System.out.println(nombreAgente[0]+" compara el atributo "+4+ " de "+i+" "+atrib[i][4]+" con la restricción "+4+" de "+j+" "+restricciones[j][4]);
+									if(atrib[i][4]<=restricciones[j][4]){
+										//System.out.println(nombreAgente[0]+" compara el atributo "+5+ " de "+i+" "+atrib[i][5]+" con la restricción "+5+" de "+j+" "+restricciones[j][5]);
+										if(atrib[i][5]<=restricciones[j][5]){
+											//System.out.println(nombreAgente[0]+" compara el atributo "+6+ " de "+i+" "+atrib[i][6]+" con la restricción "+6+" de "+j+" "+restricciones[j][6]);
+											if(atrib[i][6]<=restricciones[j][6]){
+												//System.out.println(nombreAgente[0]+" compara el atributo "+7+ " de "+i+" "+atrib[i][7]+" con la restricción "+7+" de "+j+" "+restricciones[j][7]);
+												if(atrib[i][7]<=restricciones[j][7]){
+													//System.out.println(nombreAgente[0]+" compara el atributo "+8+ " de "+i+" "+atrib[i][8]+" con la restricción "+8+" de "+j+" "+restricciones[j][8]);
+													if(atrib[i][8]<=restricciones[j][8]){
+														cumple[i] = 1;
+													}
+												}
+											}
+										}
+									}
+								}
 							}
 						}
 					}

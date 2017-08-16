@@ -269,47 +269,47 @@ public class GlobalOptFitnessFunction extends FitnessFunction{
 		int g = 0;
 		
 		//for(int i = 0;i < restricGlobal.length;i++){
-			if(restricGlobal[0]<=restr[0]){
+			if(restricGlobal[0]<restr[0]){
 				g++;
 				System.out.println("No se cumple la "+0+"esima restricción");
 				System.out.println("agregado es "+ restricGlobal[0] + " la restricción es "+ restr[0]);
 			}
-			if(restricGlobal[1]>=restr[1]){
+			if(restricGlobal[1]<restr[1]){
 				g++;
 				System.out.println("No se cumple la "+1+"esima restricción");
 				System.out.println("agregado es "+ restricGlobal[1] + " la restricción es "+ restr[1]);
 			}
-			if(restricGlobal[2]<=restr[2]){
+			if(restricGlobal[2]<restr[2]){
 				g++;
 				System.out.println("No se cumple la "+2+"esima restricción");
 				System.out.println("agregado es "+ restricGlobal[2] + " la restricción es "+ restr[2]);
 			}
-			if(restricGlobal[3]>=restr[3]){
+			if(restricGlobal[3]<restr[3]){
 				g++;
 				System.out.println("No se cumple la "+3+"esima restricción");
 				System.out.println("agregado es "+ restricGlobal[3] + " la restricción es "+ restr[3]);
 			}
-			if(restricGlobal[4]>=restr[4]){
+			if(restricGlobal[4]<restr[4]){
 				g++;
 				System.out.println("No se cumple la "+4+"esima restricción");
 				System.out.println("agregado es "+ restricGlobal[4] + " la restricción es "+ restr[4]);
 			}
-			if(restricGlobal[5]>=restr[5]){
+			if(restricGlobal[5]<restr[5]){
 				g++;
 				System.out.println("No se cumple la "+5+"esima restricción");
 				System.out.println("agregado es "+ restricGlobal[5] + " la restricción es "+ restr[5]);
 			}
-			if(restricGlobal[6]>=restr[6]){
+			if(restricGlobal[6]<restr[6]){
 				g++;
 				System.out.println("No se cumple la "+6+"esima restricción");
 				System.out.println("agregado es "+ restricGlobal[6] + " la restricción es "+ restr[6]);
 			}
-			if(restricGlobal[7]<=restr[7]){
+			if(restricGlobal[7]<restr[7]){
 				g++;
 				System.out.println("No se cumple la "+7+"esima restricción");
 				System.out.println("agregado es "+ restricGlobal[7] + " la restricción es "+ restr[7]);
 			}
-			if(restricGlobal[8]>=restr[8]){
+			if(restricGlobal[8]<restr[8]){
 				g++;
 				System.out.println("No se cumple la "+8+"esima restricción");
 				System.out.println("agregado es "+ restricGlobal[8] + " la restricción es "+ restr[8]);
@@ -391,7 +391,7 @@ public class GlobalOptFitnessFunction extends FitnessFunction{
 		int[] sumaBundling2 = new int[bundling.length];
 		int total = 0;
 		for(int i = 0;i < datos.length;i++){
-			System.out.println("El serv "+ i +" corresponde a la oferta "+datos[i]);
+			//System.out.println("El serv "+ i +" corresponde a la oferta "+datos[i]);
 			sumaBundling2[datos[i]]++;
 			total++;
 			//revisado
@@ -400,11 +400,11 @@ public class GlobalOptFitnessFunction extends FitnessFunction{
 		int no = 0;
 		//Chequeo que estén completos los bundlings
 		for(int j = 0;j < bundling.length;j++){
-			System.out.println("sumabundling2 de " +j+" es "+sumaBundling2[j]);
+			//System.out.println("sumabundling2 de " +j+" es "+sumaBundling2[j]);
 			if(sumaBundling2[j] != 0){ //Si tengo algun servicio de la oferta i	
 				if(sumaBundling2[j] != bundling[j]){
-					System.out.println("bundling "+j+" es "+bundling[j]);
-					no+=1;
+					//System.out.println("bundling "+j+" es "+bundling[j]);
+					no++;
 				}else{
 					//System.out.println("sumabundling2 de " +j+" es "+sumaBundling2[j]);
 					System.out.println("bundling es "+bundling[j] +" son iguales!");
@@ -413,7 +413,7 @@ public class GlobalOptFitnessFunction extends FitnessFunction{
 		}
 		System.out.println("No es igual a "+no+ " y total es "+total);
 		
-		System.out.println("El castigo por bundling retornado es "+(no/total));
+		//System.out.println("El castigo por bundling retornado es "+(no/total));
 		
 		resultado = no;
 		resultado /= total;
@@ -442,20 +442,20 @@ public class GlobalOptFitnessFunction extends FitnessFunction{
 	protected double calPenalty(String[][] valores, double[] restricGlobal, String[] datos, int[] bundling){
 		double penalty = 0.0;
 		double w1 = 1.0;
-		double w2 = 2.0;		
+		//double w2 = 2.0;		
 		double w3 = serv*2;
 		int a = 0;
-		double b = 0.0;
+		//double b = 0.0;
 		double c = 0.0;
 		
 		a = this.chequeaPresupuesto(restricGlobal);
 
-		b = this.chequeaRestricciones(restricGlobal);
+		//b = this.chequeaRestricciones(restricGlobal);
 		
 		c = this.chequeaBundling(valores, bundling, datos);
 		
-		
-		penalty = w1*a + w2*b/9 + w3*c;
+		// + w2*b/9
+		penalty = w1*a  + w3*c;
 		
 		return penalty;
 		

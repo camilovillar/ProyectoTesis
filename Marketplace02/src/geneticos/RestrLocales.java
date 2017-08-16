@@ -14,12 +14,13 @@ import org.jgap.impl.NumberGene;
 import org.jgap.impl.StockRandomGenerator;
 
 import nivelescalidad.NivelesServicio;
+import parametros.Parametros;
 
 public class RestrLocales{
 	
 	private Configuration m_config;
-	private int maxEvolution = 50;
-	private int populationSize = 20;
+	private int maxEvolution;
+	private int populationSize;
 	private int serv;
 	private String[][] arregloServ;
 	private double[] param;
@@ -30,9 +31,11 @@ public class RestrLocales{
 	private int[] iter; 
 	private double[] prob; 
 	private double[] restr;
+	private double[][][] arregloNiveles;
+	private Parametros parametros;
 	
 	
-	public RestrLocales(int n, String[][] arregloServ, double[] param, int[] tipoNodo, int[] iter, double[] prob, double[] restr){
+	public RestrLocales(int n, String[][] arregloServ, double[] param, int[] tipoNodo, int[] iter, double[] prob, double[] restr, Parametros p){
 		tiempo_i = System.currentTimeMillis();
 		
 		this.arregloServ = arregloServ;
@@ -52,6 +55,9 @@ public class RestrLocales{
 		this.iter = iter;
 		this.prob = prob;
 		this.restr = restr;
+		this.parametros = p;
+		this.maxEvolution = (int) parametros.evolucionesLocal;
+		this.populationSize = (int) parametros.poblacionInicialLocal;
 	}
 	
 	public FitnessFunction createFitnessFunction(int n, double[][][] arregloNiveles) { // n número de actividades/servicios
@@ -72,8 +78,8 @@ public class RestrLocales{
 	    config.setKeepPopulationSizeConstant(true);
 	    config.setFitnessEvaluator(new DefaultFitnessEvaluator());
 	    config.setChromosomePool(new ChromosomePool());
-	    config.addGeneticOperator(new MutationOperator(config, 2)); // rate es 1/numero
-		config.addGeneticOperator(new CrossoverOperator(config, 0.9)); // xover double para porcentaje
+	    config.addGeneticOperator(new MutationOperator(config, (int) parametros.mutacionGlobal)); // rate es 1/numero
+		config.addGeneticOperator(new CrossoverOperator(config, (double) parametros.crossoverLocal)); // xover double para porcentaje
 		return config;
 		
 	}
@@ -111,7 +117,7 @@ public class RestrLocales{
 		tiempo_i = System.currentTimeMillis();
 		
 		NivelesServicio nivel = new NivelesServicio( arregloServ , serv);
-		double[][][] arregloNiveles = nivel.getNiveles(niveles);
+		arregloNiveles = nivel.getNiveles(niveles);
 		
 		
 		//System.out.println("recibe el arreglo en algoritmo genético 1");
@@ -187,6 +193,8 @@ public class RestrLocales{
 	    return best;
 		
 	}
-	
+	public double[][][] getArregloNiveles (){
+		return arregloNiveles;
+	}
 
 }// Cierra clase

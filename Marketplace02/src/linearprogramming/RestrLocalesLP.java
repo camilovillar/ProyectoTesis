@@ -1,6 +1,7 @@
 package linearprogramming;
 import gurobi.*;
 import nivelescalidad.NivelesServicio;
+import parametros.Parametros;
 
 
 public class RestrLocalesLP {
@@ -13,6 +14,7 @@ public class RestrLocalesLP {
 	private double[] restr;
 	private int niveles;
 	private String[] tipo;
+	private Parametros parametros;
 	
 	
 	public RestrLocalesLP(int niveles, int n, String[][] arregloServ, double[] param, int[] tipoNodo, int[] iter, double[] prob, double[] restr){
@@ -23,9 +25,10 @@ public class RestrLocalesLP {
 		this.iter = iter;
 		this.prob = prob;
 		this.restr = restr;
-		for(int i = 0;i < restr.length;i++){
-			System.out.println(this.restr[i]);
-		}
+	/*	for(int i = 0;i < restr.length;i++){
+	*		System.out.println(this.restr[i]);
+	*	}
+	*/
 		this.niveles = niveles;
 		this.setTipo(arregloServ);
 	}
@@ -34,23 +37,29 @@ public class RestrLocalesLP {
 		
 		//double[][][] puntaje = new double[serv][arregloServ[0].length][niveles]; // matriz serv*atributos*niveles
 		
-		double[][][] puntaje = calcularFuncionH(matriz, arregloServ);
+		int[][][] puntaje = calcularFuncionH(matriz, arregloServ);
 		double[][][] puntaje2 = new double[puntaje.length][puntaje[0].length][puntaje[0][0].length];
 		int[] nServ = contarServicios(tipo);
 		
 		for(int i = 0;i<puntaje.length;i++){
 			for(int j = 0;j < puntaje[0].length;j++){
 				for(int k = 0;k < puntaje[0][0].length;k++){
-					System.out.println("El puntaje "+i+","+j+","+k+" es "+ puntaje[i][j][k]);
-					System.out.println("El número de servicios de tipo "+i+ " es "+nServ[i]);
+					//System.out.println("El puntaje "+i+","+j+","+k+" es "+ puntaje[i][j][k]);
+					//System.out.println("El número de servicios de tipo "+i+ " es "+nServ[i]);
 					puntaje2[i][j][k] = puntaje[i][j][k];
 					puntaje2[i][j][k] /= nServ[i];
-					System.out.println("El puntaje "+i+","+j+","+k+" es "+ puntaje2[i][j][k] );
+					//System.out.println("El puntaje2 "+i+","+j+","+k+" es "+ puntaje2[i][j][k]);
 				}
 			}
 		}
 		double[][][] logPuntaje = calcularLog(puntaje2);
-		System.out.println("El logaritmo del puntaje "+0+","+0+","+0+" es "+logPuntaje[0][0][0]);
+		for(int i = 0;i<logPuntaje.length;i++){
+			for(int j = 0;j < logPuntaje[0].length;j++){
+				for(int k = 0;k < logPuntaje[0][0].length;k++){	
+					//System.out.println("El logaritmo del puntaje "+i+","+j+","+k+" es "+logPuntaje[i][j][k]);
+				}
+			}
+		}
 		
 		return logPuntaje;
 	}
@@ -60,34 +69,36 @@ public class RestrLocalesLP {
 		for(int i = 0;i < puntaje.length;i++){
 			for(int j = 0;j < puntaje[0].length;j++){
 				for(int k = 0;k < puntaje[0][0].length;k++){
-					logPuntaje[i][j][k] = Math.log10(puntaje[i][j][k]);					
+					logPuntaje[i][j][k] = Math.log(puntaje[i][j][k]);					
 				}
 			}
 		}
 		return logPuntaje;		
 	}
 	
-	public double[][][] calcularFuncionH(double[][][] matriz, String[][] servicios){
+	public int[][][] calcularFuncionH(double[][][] matriz, String[][] servicios){
 		//Cuento el número de servicios que cumple con las restricción en ese nivel de servicio
-		//Entrega una matriz double[][][]
+		//Entrega una matriz int[][][]
 		
-		double[][][] resultado = new double[serv][matriz[0].length][niveles];
+		int[][][] resultado = new int[serv][matriz[0].length][niveles];
+		
 		
 		for(int i = 0;i < resultado.length;i++){
 			String serv = "serv"+i;
-			for(int j = 0; j< resultado[0].length;j++){
-				for(int k = 0;k < resultado[0][0].length;k++){
-					if(j == 0 || j==2 || j == 7){
-						if(tipo[i].equals(serv) && Double.parseDouble(servicios[i][j+1])<matriz[i][j][k]){
-							resultado[i][j][k]+=1;
-						}						
-					}else{
-						if(tipo[i].equals(serv) && Double.parseDouble(servicios[i][j+1])>matriz[i][j][k]){
-							resultado[i][j][k]+=1;
+			for(int j = 0; j< servicios.length;j++){
+				//System.out.println("Si el tipo "+tipo[j]+" de servicio es "+serv);
+				if(tipo[j].equals(serv)){
+				for(int k = 0;k < (servicios[0].length-1);k++){
+					//System.out.println(i+","+j+","+k);
+					for(int l = 0;l < resultado[0][0].length;l++){
+						//System.out.println("Si el tipo "+tipo[j]+" de servicio es "+serv+" y "+servicios[j][k+1]+" es mayor que "+matriz[i][k][l]);
+						if(Double.parseDouble(servicios[j][k+1])>matriz[i][k][l]){
+							//System.out.println("Entro a sumar en resultado "+i+","+k+","+l);
+							resultado[i][k][l]++;
 						}
 					}
-					
 				}
+				}		
 			}
 		}
 		
@@ -116,9 +127,209 @@ public class RestrLocalesLP {
 		tipo = new String[servicios.length];
 		for(int i = 0;i < servicios.length;i++){
 			tipo[i]=servicios[i][0];
+		//	System.out.println("Se setea tipo "+i+" como tipo "+tipo[i]);
 		}
+		
 	}
 	
+	public double[][] optimizar(){
+		long ti = System.currentTimeMillis();
+		NivelesServicio nivel = new NivelesServicio( arregloServ , serv);
+		double[][][] matriz = nivel.getNiveles(niveles);
+		/*
+		 * for(int i = 0; i < matriz.length;i++){
+		*	for(int j = 0;j < matriz[0].length;j++){
+		*		for(int k = 0;k < matriz[0][0].length;k++){
+		*			System.out.println("matriz "+i+","+j+","+ k+" es "+matriz[i][j][k]);
+		*		}
+		*	}
+		}
+		*/
+		
+		
+		double[][][] logPuntaje = calcularLogPuntaje(matriz);
+		double[][][] resultado=new double[matriz.length][matriz[0].length][matriz[0][0].length];
+		
+			
+		try{
+			GRBEnv env = new GRBEnv("RestrLocalesLP.log");
+			GRBModel model = new GRBModel(env);
+			
+			//Variables
+			GRBVar[][][] x = new GRBVar[matriz.length][matriz[0].length][matriz[0][0].length];
+			for(int i = 0;i < matriz.length;i++){
+				for(int j = 0;j < matriz[0].length;j++){
+					for(int k = 0;k < matriz[0][0].length;k++){
+						x[i][j][k] = model.addVar(0, 1, 0, GRB.BINARY, "x"+i+j+k);
+					}
+				}
+			}
+			model.update();
+			
+			System.out.println("Crea las variables");
+			
+			//Objetivo es maximizar
+			model.set(GRB.IntAttr.ModelSense, GRB.MAXIMIZE);
+			
+			model.set("NumericFocus", "0");
+			
+			GRBLinExpr obj = new GRBLinExpr();
+			
+			System.out.println("Seteo la función objetivo");
+			
+			//Restricciones de calidad
+			GRBLinExpr[] r = new GRBLinExpr[restr.length];
+			
+			System.out.println("Crea el espacio para las restricciones");
+			
+			//Lado derecho se setea directo
+			/*for(int i = 0;i < restr.length;i++){
+			*	System.out.println("Entra a crear lado derecho con la restrcción " +restr[i]);
+			*	r[i].addConstant(restr[i]);
+			}*/
+			//Lado izquierdo
+			
+			//Vector de expresiones lineales para el lado izquierdo de las restricciones
+			GRBLinExpr[] lhs = new GRBLinExpr[restr.length];
+			
+			
+			GRBLinExpr[][][] lhs2= new GRBLinExpr[matriz.length][matriz[0].length][matriz[0][0].length];
+			GRBLinExpr[][] lhs3 = new GRBLinExpr[matriz.length][matriz[0].length];
+			for(int i = 0;i < lhs2.length;i++){
+				for(int j = 0;j < lhs2[0].length;j++){
+					lhs3[i][j]=new GRBLinExpr();
+					lhs[j]=new GRBLinExpr();
+				}
+			}
+			
+			System.out.println("Creo el espacio para el lado izquierdo");
+			System.out.println("Agrego expresiones a la función objetivo");
+			for(int i = 0;i < lhs2.length;i++){
+				for(int j = 0;j < lhs2[0].length;j++){
+					for(int k = 0;k < lhs2[0][0].length;k++){
+						
+						GRBLinExpr add = new GRBLinExpr();
+						//Agrego el logaritmo del puntaje x X a la función objetivo
+						//System.out.println("Comienzo con el atributo "+logPuntaje[i][j][k]);
+						add.addTerm(logPuntaje[i][j][k], x[i][j][k]);
+						obj.multAdd(1,add);
+						
+						//System.out.println("Para el lado izquierdo comienzo con el atributo "+logPuntaje[i][j][k]+" y "+x[i][j][k]);
+						
+						lhs3[i][j].addTerm(1.0d,x[i][j][k]);
+						
+						//lhs3[i][j].multAdd(1, lhs2[i][j][k]);
+						
+						lhs[j].addTerm(1, x[i][j][k]);
+						
+						
+					}
+					
+					model.addConstr(lhs3[i][j],GRB.EQUAL,1,"r"+i+"-"+j);
+				}
+			}
+			
+			//model.addConstr(lhs[0], GRB.GREATER_EQUAL, restr[0], "ra"+0);
+			model.addConstr(lhs[1], GRB.GREATER_EQUAL, Math.log(restr[1]), "ra"+1);
+			model.addConstr(lhs[2], GRB.GREATER_EQUAL, Math.log(restr[2]), "ra"+2);
+			model.addConstr(lhs[3], GRB.GREATER_EQUAL, Math.log(restr[3]), "ra"+3);
+			model.addConstr(lhs[4], GRB.GREATER_EQUAL, Math.log(restr[4]), "ra"+4);
+			model.addConstr(lhs[5], GRB.GREATER_EQUAL, Math.log(restr[5]), "ra"+5);
+			model.addConstr(lhs[6], GRB.GREATER_EQUAL, Math.log(restr[6]), "ra"+6);
+			//Bmodel.addConstr(lhs[7], GRB.GREATER_EQUAL, Math.log10(restr[7]), "ra"+7);
+			
+			
+			model.update();
+			/*
+			double[][] datos = new double[matriz.length][matriz[0].length];
+			
+			for(int i = 0;i < datos.length;i++){
+				for(int j = 0;j < datos[0].length;j++){
+					datos[i][j]=lhs3[i][j].getValue();					
+				}
+			}
+			
+			lhs[0].addConstant(calcularFATiempo(datos, 0));
+			lhs[1].addConstant(calcularFAPorcentaje(datos, 1));
+			lhs[2].addConstant(calcularFARendimiento(datos));
+			lhs[3].addConstant(calcularFAPorcentaje(datos, 3));
+			lhs[4].addConstant(calcularFAPorcentaje(datos, 4));
+			lhs[5].addConstant(calcularFAPorcentaje(datos, 5));
+			lhs[6].addConstant(calcularFAPorcentaje(datos, 6));
+			lhs[7].addConstant(calcularFATiempo(datos, 7));
+			lhs[8].addConstant(calcularFAPorcentaje(datos, 8));
+			
+			for(int i = 0;i < r.length;i++){
+				model.addConstr(lhs[i], GRB.LESS_EQUAL, restr[i], "r"+i);
+			}
+			*/
+			model.update();
+			
+			model.setObjective(obj);
+			
+			model.optimize();
+			
+			GRBVar[][][] vars;
+			//double[][][] resultado=new double[matriz.length][matriz[0].length][matriz[0][0].length];
+			if (model.get(GRB.IntAttr.Status) == GRB.Status.OPTIMAL) {
+				for(int i = 0;i < x.length;i++) {
+					for(int j = 0;j < x[0].length;j++) {
+						for(int k = 0;k < x[0][0].length;k++){
+							if (x[i][j][k].get(GRB.DoubleAttr.X) > 0.0001) {
+								System.out.println("x "+i+","+j+","+k+" es "+x[i][j][k].get(GRB.DoubleAttr.X));
+								resultado[i][j][k] = x[i][j][k].get(GRB.DoubleAttr.X);
+							}
+						}
+					}
+				}
+			}
+			
+		} catch (GRBException e) {
+			System.out.println("Error code: " + e.getErrorCode() + ". " +
+			e.getMessage());
+		}
+		
+		double[][] restricciones = new double[resultado.length][resultado[0].length];
+		for(int i = 0;i < resultado.length;i++) {
+			for(int j = 0;j < resultado[0].length;j++) {
+				for(int k = 0;k < resultado[0][0].length;k++){
+					resultado[i][j][k] *= matriz[i][j][k];
+					if(resultado[i][j][k]!=0){
+						restricciones[i][j]=resultado[i][j][k];
+					}
+				}
+			}
+		}
+		long tf = System.currentTimeMillis();
+		System.out.println("La optimización demoró "+(tf-ti));
+		
+		return restricciones;
+	}
+	
+	
+	/*
+	public void calcularUtilidad(String[][] servicios, double[] param){
+		//Calculo la utilidad de los servicios disponibles
+		//Entrega un vector del largo de los servicios disponibles
+		
+		
+	}
+	
+	public void calcularMaximo(){
+		//Calculo el máximo de las utilidades para los tipo de servicio servicio
+		//genera un arreglo de tipo de servicio*niveles
+		
+		
+	}
+	
+	public void calcularUtilidadNivel(){ 
+		//Corresponde a la función u, que es la utilidad máxima que se obtiene considerando los servicios de la función H
+		//entrega una matriz serv*atributos*niveles
+		
+		
+	}
+	*
+	*/
 	public double calcularFATiempo(double[][] data, int a){//a puede ser 0 (cero, para el tiempode ejecución o 7 (siete, para la latencia)
 		/*double[][] data = new double[datos.length][datos[0].length];
 		for(int i = 0;i < datos.length;i++){
@@ -319,169 +530,6 @@ public class RestrLocalesLP {
 		}
 		return agregado2;
 	}
-	
-	public double[][][] optimizar(){
-		
-		NivelesServicio nivel = new NivelesServicio( arregloServ , serv);
-		double[][][] matriz = nivel.getNiveles(niveles);
-		System.out.println("matriz 0,0,0 es "+matriz[0][0][0]);
-		
-		double[][][] logPuntaje = calcularLogPuntaje(matriz);
-		double[][][] resultado=new double[matriz.length][matriz[0].length][matriz[0][0].length];
-		
-			
-		try{
-			GRBEnv env = new GRBEnv("RestrLocalesLP.log");
-			GRBModel model = new GRBModel(env);
-			
-			//Variables
-			GRBVar[][][] x = new GRBVar[matriz.length][matriz[0].length][matriz[0][0].length];
-			for(int i = 0;i < matriz.length;i++){
-				for(int j = 0;j < matriz[0].length;j++){
-					for(int k = 0;k < matriz[0][0].length;k++){
-						x[i][j][k] = model.addVar(0, 1, 0, GRB.BINARY, "x"+i+j+k);
-					}
-				}
-			}
-			model.update();
-			
-			System.out.println("Crea las variables");
-			
-			//Objetivo es maximizar
-			model.set(GRB.IntAttr.ModelSense, GRB.MAXIMIZE);
-			GRBLinExpr obj = new GRBLinExpr();
-			
-			System.out.println("Seteo la función objetivo");
-			
-			//Restricciones de calidad
-			GRBLinExpr[] r = new GRBLinExpr[restr.length];
-			
-			System.out.println("Crea el espacio para las restricciones");
-			
-			//Lado derecho se setea directo
-			/*for(int i = 0;i < restr.length;i++){
-			*	System.out.println("Entra a crear lado derecho con la restrcción " +restr[i]);
-			*	r[i].addConstant(restr[i]);
-			}*/
-			//Lado izquierdo
-			
-			//Vector de expresiones lineales para el lado izquierdo de las restricciones
-			GRBLinExpr[] lhs = new GRBLinExpr[restr.length];
-			
-			
-			GRBLinExpr[][][] lhs2= new GRBLinExpr[matriz.length][matriz[0].length][matriz[0][0].length];
-			GRBLinExpr[][] lhs3 = new GRBLinExpr[matriz.length][matriz[0].length];
-			
-			System.out.println("Creo el espacio para el lado izquierdo");
-			System.out.println("Agrego expresiones a la función objetivo");
-			for(int i = 0;i < lhs2.length;i++){
-				for(int j = 0;j < lhs2[0].length;j++){
-					for(int k = 0;k < lhs2[0][0].length;k++){
-						
-						//Agrego el logaritmo del puntaje x X a la función objetivo
-						System.out.println("Comienzo con el atributo "+logPuntaje[i][j][k]);
-						obj.addTerm(logPuntaje[i][j][k], x[i][j][k]);
-						
-						System.out.println("Para el lado izquierdo comienzo con el atributo "+matriz[i][j][k]);
-						lhs2[i][j][k].addTerm(matriz[i][j][k], x[i][j][k]);
-						
-						lhs3[i][j].multAdd(1, lhs2[i][j][k]);
-						
-						
-					}
-				}
-			}
-			model.update();
-			double[][] datos = new double[matriz.length][matriz[0].length];
-			for(int i = 0;i < datos.length;i++){
-				for(int j = 0;j < datos[0].length;j++){
-					datos[i][j]=lhs3[i][j].getValue();					
-				}
-			}
-			
-			lhs[0].addConstant(calcularFATiempo(datos, 0));
-			lhs[1].addConstant(calcularFAPorcentaje(datos, 1));
-			lhs[2].addConstant(calcularFARendimiento(datos));
-			lhs[3].addConstant(calcularFAPorcentaje(datos, 3));
-			lhs[4].addConstant(calcularFAPorcentaje(datos, 4));
-			lhs[5].addConstant(calcularFAPorcentaje(datos, 5));
-			lhs[6].addConstant(calcularFAPorcentaje(datos, 6));
-			lhs[7].addConstant(calcularFATiempo(datos, 7));
-			lhs[8].addConstant(calcularFAPorcentaje(datos, 8));
-			
-			for(int i = 0;i < r.length;i++){
-				model.addConstr(lhs[i], GRB.LESS_EQUAL, restr[i], "r"+i);
-			}
-			model.update();
-			
-			model.setObjective(obj);
-			
-			model.optimize();
-			
-			GRBVar[][][] vars;
-			//double[][][] resultado=new double[matriz.length][matriz[0].length][matriz[0][0].length];
-			if (model.get(GRB.IntAttr.Status) == GRB.Status.OPTIMAL) {
-				for(int i = 0;i < x.length;i++) {
-					for(int j = 0;j < x[0].length;j++) {
-						for(int k = 0;k < x[0][0].length;k++){
-							if (x[i][j][k].get(GRB.DoubleAttr.X) > 0.0001) {
-								System.out.println(x[i][j][k].get(GRB.DoubleAttr.X));
-								resultado[i][j][k] = x[i][j][k].get(GRB.DoubleAttr.X);
-							}
-						}
-					}
-				}
-			}
-			
-			
-			/*double[] vars2 = new double[vars.length];
-			for(int i = 0;i < vars2.length;i++){
-				vars2[i]= vars[i].get
-			}*/
-			//printSolution(model, x);
-			// Optimizar
-			//int status = solveAndPrint(model, x, arregloServ.length);
-			/*if (status != GRB.Status.OPTIMAL ) {
-				return;
-			}*/
-			
-		} catch (GRBException e) {
-			System.out.println("Error code: " + e.getErrorCode() + ". " +
-			e.getMessage());
-		}
-		
-		for(int i = 0;i < resultado.length;i++) {
-			for(int j = 0;j < resultado[0].length;j++) {
-				for(int k = 0;k < resultado[0][0].length;k++){
-					resultado[i][j][k] *= matriz[i][j][k];
-				}
-			}
-		}
-		
-		return resultado;
-	}
-	
-	
-	/*
-	public void calcularUtilidad(String[][] servicios, double[] param){
-		//Calculo la utilidad de los servicios disponibles
-		//Entrega un vector del largo de los servicios disponibles
-		
-		
-	}
-	
-	public void calcularMaximo(){
-		//Calculo el máximo de las utilidades para los tipo de servicio servicio
-		//genera un arreglo de tipo de servicio*niveles
-		
-		
-	}
-	
-	public void calcularUtilidadNivel(){ 
-		//Corresponde a la función u, que es la utilidad máxima que se obtiene considerando los servicios de la función H
-		//entrega una matriz serv*atributos*niveles
-		
-		
-	}
-	*/
 }
+
+

@@ -273,23 +273,23 @@ public class Proceso extends Agregacion{
 	public void setRestriccion(int n){
 		if(n==1){
 			restricciones[0][0]="tiempo";
-			restricciones[0][1]="0.5";
+			restricciones[0][1]="0.65";
 			restricciones[1][0]="dispo";
-			restricciones[1][1]="0.5";
+			restricciones[1][1]="0.6";
 			restricciones[2][0]="through";
-			restricciones[2][1]="0.1";
+			restricciones[2][1]="0.3";
 			restricciones[3][0]="exito";
-			restricciones[3][1]="0.55";
+			restricciones[3][1]="0.6";
 			restricciones[4][0]="confiab";
-			restricciones[4][1]="0.55";
+			restricciones[4][1]="0.7";
 			restricciones[5][0]="confor";
-			restricciones[5][1]="0.65";
+			restricciones[5][1]="0.7";
 			restricciones[6][0]="mejorespr";
 			restricciones[6][1]="0.4";
 			restricciones[7][0]="latencia";
-			restricciones[7][1]="0.4";
+			restricciones[7][1]="0.65";
 			restricciones[8][0]="documentacion";
-			restricciones[8][1]="0.3";
+			restricciones[8][1]="0.03";
 			restricciones[9][0]="presupuesto";
 		}
 		
@@ -486,21 +486,18 @@ public class Proceso extends Agregacion{
 				boolean check = true;
 				
 				while(check){
-					// sumo uno al contador 2 y al 1
+					// sumo uno al contador 2 y al 1, es decir
 					cont2++;
-					cont++;
+					
 					int suma = cont+cont2;
-					if(suma>tipoNodo.length){
+					if(suma>tipoNodo.length){ //reviso si 
 						check = false;
-						cont++;
 					}else{
 						if(suma>=act){
 							check = false;	
-							cont++;
 						}else{
 							 if(tipoNodo[suma]!=3){
 								 check = false;
-								 cont++;
 							 }
 						}
 					}
@@ -515,8 +512,7 @@ public class Proceso extends Agregacion{
 				restricGlobal[6]*=(Math.pow(Double.parseDouble(restric[6][1]), cont2+1));
 				restricGlobal[7]+=(Double.parseDouble(restric[7][1])); // maximo
 				restricGlobal[8]*=(Math.pow(Double.parseDouble(restric[8][1]), cont2+1));
-				
-				
+				cont++;
 				break;
 			case 4:
 				
